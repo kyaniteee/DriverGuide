@@ -1,6 +1,6 @@
-﻿using DriverGuide.Data.Configurations;
-using DriverGuide.Domain.Entities;
+﻿using DriverGuide.Domain.Entities;
 using DriverGuide.Domain.Identity;
+using DriverGuide.Infrastructure.Configurations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
