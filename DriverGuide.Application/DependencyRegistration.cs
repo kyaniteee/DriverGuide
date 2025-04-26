@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace DriverGuide.Application
 {
-    public static class ApplicationServiceRegistration
+    public static class DependencyRegistration
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
