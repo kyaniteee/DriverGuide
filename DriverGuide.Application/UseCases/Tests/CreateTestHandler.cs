@@ -1,22 +1,13 @@
 ﻿using DriverGuide.Domain.Entities;
 using DriverGuide.Domain.Interfaces.Repositories;
 
-namespace DriverGuide.Application.UseCases.Tests
+namespace DriverGuide.Application.UseCases
 {
-    public class CreateTestHandler
+    public class CreateTestHandler(ITestRepository testRepo, IUserRepository userRepo)
     {
-        private readonly ITestRepository _testRepository;
-        private readonly IUserRepository _userRepository;
-
-        public CreateTestHandler(ITestRepository testRepo, IUserRepository userRepo)
-        {
-            _testRepository = testRepo;
-            _userRepository = userRepo;
-        }
-
         public async Task<Guid> HandleAsync(CreateTestCommand command)
         {
-            var user = await _userRepository.GetByIdAsync(Guid.Parse(command.UserId));
+            var user = await userRepo.GetByIdAsync(Guid.Parse(command.UserId!));
             if (user == null)
                 throw new Exception("User not found");
 
@@ -27,7 +18,7 @@ namespace DriverGuide.Application.UseCases.Tests
                 Id = Guid.NewGuid().ToString(),
             };
 
-            await _testRepository.CreateAsync(newTest);
+            await testRepo.CreateAsync(newTest);
 
             return Guid.Parse(newTest.Id);
         }

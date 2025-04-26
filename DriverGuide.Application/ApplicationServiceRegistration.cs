@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using DriverGuide.Application.Services;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -11,6 +12,8 @@ namespace DriverGuide.Application
             // Rejestracja wszystkich walidatorów z assembly
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
+            //Rejestracja uwieżytelnienia jwt
+            services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
             return services;
         }

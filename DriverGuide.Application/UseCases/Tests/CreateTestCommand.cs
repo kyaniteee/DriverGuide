@@ -1,4 +1,4 @@
-﻿namespace DriverGuide.Application.UseCases.Tests
+﻿namespace DriverGuide.Application.UseCases
 {
     public class CreateTestCommand
     {

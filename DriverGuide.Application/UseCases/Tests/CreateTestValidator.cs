@@ -1,7 +1,6 @@
-﻿using DriverGuide.Application.UseCases.Tests;
-using FluentValidation;
+﻿using FluentValidation;
 
-namespace DriverGuide.Application.Validators
+namespace DriverGuide.Application.UseCases
 {
     public class CreateTestValidator : AbstractValidator<CreateTestCommand>
     {

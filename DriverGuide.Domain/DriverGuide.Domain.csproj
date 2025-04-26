@@ -11,8 +11,4 @@
     <PackageReference Include="Microsoft.VisualStudio.Services.Client" Version="19.225.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Interfaces\Token\" />
-  </ItemGroup>
-
 </Project>
