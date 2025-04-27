@@ -1,12 +1,11 @@
 ﻿using AutoMapper;
 
-namespace DriverGuide.Infrastructure.Mapping
+namespace DriverGuide.Infrastructure.Mapping;
+
+public class RoleProfile : Profile
 {
-    public class RoleProfile : Profile
+    public RoleProfile()
     {
-        public RoleProfile()
-        {
-            //CreateMap<Role, RoleDTO>();
-        }
+        //CreateMap<Role, RoleDTO>();
     }
 }

@@ -2,8 +2,8 @@
 
 public abstract class RepositoryBase
 {
-    protected AppDbContext Context { get; private set; }
-    protected RepositoryBase(AppDbContext context)
+    protected DriverGuideDbContext Context { get; private set; }
+    protected RepositoryBase(DriverGuideDbContext context)
     {
         Context = context;
     }

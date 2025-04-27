@@ -6,6 +6,6 @@ public class CreateTestValidator : AbstractValidator<CreateTestCommand>
 {
     public CreateTestValidator()
     {
-        RuleFor(x => x.UserId).NotEmpty();
+        //RuleFor(x => x.UserId).NotEmpty();
     }
 }

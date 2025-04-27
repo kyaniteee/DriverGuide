@@ -2,10 +2,10 @@
 
 namespace DriverGuide.Infrastructure.Mapping;
 
-public class TestProfile : Profile
+public class QuestionAnswerProfile : Profile
 {
-    public TestProfile()
+    public QuestionAnswerProfile()
     {
-        
+
     }
 }

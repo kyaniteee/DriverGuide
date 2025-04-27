@@ -1,12 +1,12 @@
-﻿using DriverGuide.Domain.Identity;
-using DriverGuide.Domain.Interfaces.Repositories;
+﻿using DriverGuide.Domain.Interfaces;
+using DriverGuide.Domain.Models;
 using System.Linq.Expressions;
 
 namespace DriverGuide.Infrastructure.Database;
 
 public class UserSqlRepository : RepositoryBase, IUserRepository
 {
-    public UserSqlRepository(AppDbContext context) : base(context) { }
+    public UserSqlRepository(DriverGuideDbContext context) : base(context) { }
 
     public Task<User> CreateAsync(User dbRecord)
     {

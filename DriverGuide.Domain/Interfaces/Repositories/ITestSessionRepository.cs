@@ -2,6 +2,6 @@
 
 namespace DriverGuide.Domain.Interfaces;
 
-public interface IUserRepository : IRepositoryBase<User>
+public interface ITestSessionRepository : IRepositoryBase<TestSession>
 {
 }

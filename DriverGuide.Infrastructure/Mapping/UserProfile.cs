@@ -1,13 +1,12 @@
 ﻿using AutoMapper;
 
-namespace DriverGuide.Infrastructure.Mapping
+namespace DriverGuide.Infrastructure.Mapping;
+
+public class UserProfile : Profile
 {
-    public class UserProfile : Profile
+    public UserProfile()
     {
-        public UserProfile()
-        {
-            //CreateMap<User, UserDTO>();
-            //CreateMap<User, UserUpdateDTO>();
-        }
+        //CreateMap<User, UserDTO>();
+        //CreateMap<User, UserUpdateDTO>();
     }
 }

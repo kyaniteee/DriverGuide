@@ -1,38 +1,38 @@
-﻿using DriverGuide.Domain.Entities;
-using DriverGuide.Domain.Interfaces.Repositories;
+﻿using DriverGuide.Domain.Models;
+using DriverGuide.Domain.Interfaces;
 using System.Linq.Expressions;
 
 namespace DriverGuide.Infrastructure.Database;
-public class TestSqlRepository : RepositoryBase, ITestRepository
+public class TestSqlRepository : RepositoryBase, ITestSessionRepository
 {
-    public TestSqlRepository(AppDbContext context) : base(context) { }
+    public TestSqlRepository(DriverGuideDbContext context) : base(context) { }
 
-    public Task<Test> CreateAsync(Test dbRecord)
+    public Task<TestSession> CreateAsync(TestSession dbRecord)
     {
         throw new NotImplementedException();
     }
 
-    public Task<bool> DeleteAsync(Test dbRecord)
+    public Task<bool> DeleteAsync(TestSession dbRecord)
     {
         throw new NotImplementedException();
     }
 
-    public Task<ICollection<Test>> GetAllAsync()
+    public Task<ICollection<TestSession>> GetAllAsync()
     {
         throw new NotImplementedException();
     }
 
-    public Task<Test> GetAsync(Expression<Func<Test, bool>> filter, bool useNoTracking = false)
+    public Task<TestSession> GetAsync(Expression<Func<TestSession, bool>> filter, bool useNoTracking = false)
     {
         throw new NotImplementedException();
     }
 
-    public Task<Test> GetByIdAsync(Guid id)
+    public Task<TestSession> GetByIdAsync(Guid id)
     {
         throw new NotImplementedException();
     }
 
-    public Task<Test> UpdateAsync(Test dbRecord)
+    public Task<TestSession> UpdateAsync(TestSession dbRecord)
     {
         throw new NotImplementedException();
     }
