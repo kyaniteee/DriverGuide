@@ -30,7 +30,5 @@ app.UseHttpsRedirection();
 app.UseAuthentication(); // wa¿na jest kolejnoœæ - najpierw Authentication
 app.UseAuthorization();  // potem Authorization
 
-app.MapGet("/", () => "Hello World!").RequireAuthorization(); //todo: test
-
 app.MapControllers();
 app.Run();

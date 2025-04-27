@@ -7,7 +7,7 @@ public class CreateTestHandler(ITestSessionRepository testRepository, IUserRepos
 {
     public async Task<Guid> HandleAsync(CreateTestCommand command)
     {
-        var user = await userRepository.GetByIdAsync(Guid.Parse(command.UserId!));
+        var user = await userRepository.GetByGuidAsync(Guid.Parse(command.UserId!));
         if (user == null)
             throw new Exception("User not found");
 

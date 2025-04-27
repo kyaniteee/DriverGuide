@@ -4,7 +4,8 @@ namespace DriverGuide.Domain.Interfaces;
 
 public interface IRepositoryBase<T>
 {
-    Task<T> GetByIdAsync(Guid id);
+    Task<T> GetByGuidAsync(Guid guid);
+    Task<T> GetByIdAsync(int id);
     Task<ICollection<T>> GetAllAsync();
     Task<T> GetAsync(Expression<Func<T, bool>> filter, bool useNoTracking = false);
     Task<T> CreateAsync(T dbRecord);

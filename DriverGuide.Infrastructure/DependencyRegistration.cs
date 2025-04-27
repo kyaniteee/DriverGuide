@@ -15,10 +15,10 @@ public static class DependencyRegistration
         services.AddDbContext<DriverGuideDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
         // Rejestracja repozytoriów
-        services.AddScoped<IUserRepository, UserSqlRepository>();
-        services.AddScoped<ITestSessionRepository, TestSqlRepository>();
-        services.AddScoped<IQuestionRepository, QuestionSqlRepository>();
-        services.AddScoped<IQuestionAnswerRepository, QuestionAnswerSqlRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ITestSessionRepository, TestSessionRepository>();
+        services.AddScoped<IQuestionRepository, QuestionRepository>();
+        services.AddScoped<IQuestionAnswerRepository, QuestionAnswerRepository>();
 
         // Rejestracja mapperów
         services.AddAutoMapper(typeof(UserProfile).Assembly);
