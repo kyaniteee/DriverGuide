@@ -19,10 +19,10 @@ public class QuestionAnswerConfiguration : IEntityTypeConfiguration<QuestionAnsw
         builder.Property(qa => qa.QuestionId)
             .HasColumnName(nameof(QuestionAnswer.QuestionId));
 
-        builder.Property(qa => qa.QuestionCategory) // Konfiguracja dla DrivingLicenseCategory
+        builder.Property(qa => qa.QuestionCategory) 
             .HasColumnName(nameof(QuestionAnswer.QuestionCategory))
             .IsRequired()
-            .HasConversion<int>(); // Przechowuj jako int
+            .HasConversion<int>();
 
         builder.Property(qa => qa.Question)
             .HasColumnName(nameof(QuestionAnswer.Question));

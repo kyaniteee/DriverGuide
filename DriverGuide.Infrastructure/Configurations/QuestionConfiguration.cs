@@ -18,7 +18,6 @@ public class QuestionConfiguration : IEntityTypeConfiguration<Question>
             .HasColumnName(nameof(Question.DataDodania));
 
         builder.Property(q => q.Lp)
-            .IsRequired(false)
             .HasColumnName(nameof(Question.Lp));
 
         builder.Property(q => q.NumerPytania)
