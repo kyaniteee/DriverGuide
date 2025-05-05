@@ -191,24 +191,24 @@ namespace DriverGuide.Infrastructure.Migrations
 
             modelBuilder.Entity("DriverGuide.Domain.Models.QuestionFile", b =>
                 {
-                    b.Property<string>("QuestionAttachmentId")
+                    b.Property<string>("QuestionFileId")
                         .HasColumnType("nvarchar(450)")
-                        .HasColumnName("QuestionAttachmentId");
+                        .HasColumnName("QuestionFileId");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("ContentType");
 
                     b.Property<byte[]>("File")
                         .IsRequired()
                         .HasColumnType("varbinary(max)")
                         .HasColumnName("File");
 
-                    b.Property<string>("FileMimeType")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("FileMimeType");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("FileName");
+                        .HasColumnName("Name");
 
                     b.Property<DateOnly>("UploadDate")
                         .ValueGeneratedOnAdd()
@@ -216,7 +216,7 @@ namespace DriverGuide.Infrastructure.Migrations
                         .HasDefaultValue(new DateOnly(2025, 5, 5))
                         .HasColumnName("UploadDate");
 
-                    b.HasKey("QuestionAttachmentId");
+                    b.HasKey("QuestionFileId");
 
                     b.ToTable("QuestionFiles", (string)null);
                 });

@@ -11,29 +11,28 @@ namespace DriverGuide.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
-                name: "DataDodania",
+                name: "FileName",
                 table: "QuestionFiles",
-                newName: "UploadDate");
+                newName: "Name");
 
-            migrationBuilder.AddColumn<string>(
+            migrationBuilder.RenameColumn(
                 name: "FileMimeType",
                 table: "QuestionFiles",
-                type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "");
+                newName: "ContentType");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "FileMimeType",
-                table: "QuestionFiles");
+            migrationBuilder.RenameColumn(
+                name: "Name",
+                table: "QuestionFiles",
+                newName: "FileName");
 
             migrationBuilder.RenameColumn(
-                name: "UploadDate",
+                name: "ContentType",
                 table: "QuestionFiles",
-                newName: "DataDodania");
+                newName: "FileMimeType");
         }
     }
 }

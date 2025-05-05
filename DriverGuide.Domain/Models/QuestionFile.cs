@@ -8,12 +8,12 @@ public class QuestionFile
     /// <summary>
     /// Unikalny identyfikator załącznika.
     /// </summary>
-    public string? QuestionAttachmentId { get; set; }
+    public string? QuestionFileId { get; set; }
 
     /// <summary>
     /// Pozwala przeglądarce lub aplikacji wiedzieć, jakiego rodzaju dane zawiera plik.
     /// </summary>
-    public string? FileMimeType { get; set; }
+    public string? ContentType { get; set; }
 
     /// <summary>
     /// Data dodania załącznika.
@@ -23,7 +23,7 @@ public class QuestionFile
     /// <summary>
     /// Nazwa pliku załącznika.
     /// </summary>
-    public string? FileName { get; set; }
+    public string? Name { get; set; }
 
     /// <summary>
     /// Zawartość pliku załącznika.

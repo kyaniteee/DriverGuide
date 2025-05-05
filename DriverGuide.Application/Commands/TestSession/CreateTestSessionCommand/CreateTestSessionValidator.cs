@@ -2,9 +2,9 @@
 
 namespace DriverGuide.Application.Commands;
 
-public class CreateTestValidator : AbstractValidator<CreateTestCommand>
+public class CreateTestSessionValidator : AbstractValidator<CreateTestSessionCommand>
 {
-    public CreateTestValidator()
+    public CreateTestSessionValidator()
     {
         //RuleFor(x => x.UserId).NotEmpty();
     }

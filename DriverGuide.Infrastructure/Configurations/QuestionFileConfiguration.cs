@@ -9,20 +9,20 @@ public class QuestionFileConfiguration : IEntityTypeConfiguration<QuestionFile>
     public void Configure(EntityTypeBuilder<QuestionFile> builder)
     {
         builder.ToTable("QuestionFiles");
-        builder.HasKey(t => t.QuestionAttachmentId);
-        builder.Property(t => t.QuestionAttachmentId)
-            .HasColumnName(nameof(QuestionFile.QuestionAttachmentId));
+        builder.HasKey(t => t.QuestionFileId);
+        builder.Property(t => t.QuestionFileId)
+            .HasColumnName(nameof(QuestionFile.QuestionFileId));
 
         builder.Property(t => t.UploadDate)
             .HasColumnName(nameof(QuestionFile.UploadDate))
             .HasDefaultValue(DateOnly.FromDateTime(DateTime.Now));
 
-        builder.Property(t => t.FileMimeType)
-           .HasColumnName(nameof(QuestionFile.FileMimeType))
+        builder.Property(t => t.ContentType)
+           .HasColumnName(nameof(QuestionFile.ContentType))
            .IsRequired(true);
 
-        builder.Property(t => t.FileName)
-            .HasColumnName(nameof(QuestionFile.FileName))
+        builder.Property(t => t.Name)
+            .HasColumnName(nameof(QuestionFile.Name))
             .IsRequired(true);
 
         builder.Property(t => t.File)
