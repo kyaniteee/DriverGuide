@@ -16,8 +16,9 @@ public static class DependencyRegistration
 
         // Rejestracja repozytoriów
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<ITestSessionRepository, TestSessionRepository>();
         services.AddScoped<IQuestionRepository, QuestionRepository>();
+        services.AddScoped<ITestSessionRepository, TestSessionRepository>();
+        services.AddScoped<IQuestionFileRepository, QuestionFileRepository>();
         services.AddScoped<IQuestionAnswerRepository, QuestionAnswerRepository>();
 
         // Rejestracja mapperów
@@ -25,6 +26,7 @@ public static class DependencyRegistration
         services.AddAutoMapper(typeof(RoleProfile).Assembly);
         services.AddAutoMapper(typeof(TestProfile).Assembly);
         services.AddAutoMapper(typeof(QuestionProfile).Assembly);
+        services.AddAutoMapper(typeof(QuestionFileProfile).Assembly);
         services.AddAutoMapper(typeof(QuestionAnswerProfile).Assembly);
 
         return services;

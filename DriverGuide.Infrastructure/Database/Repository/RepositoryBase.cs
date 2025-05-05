@@ -62,5 +62,4 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
         await Context.SaveChangesAsync();
         return true;
     }
-
 }

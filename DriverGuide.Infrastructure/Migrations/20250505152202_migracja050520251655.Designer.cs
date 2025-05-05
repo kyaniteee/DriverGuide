@@ -4,6 +4,7 @@ using DriverGuide.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DriverGuide.Infrastructure.Migrations
 {
     [DbContext(typeof(DriverGuideDbContext))]
-    partial class DriverGuideDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250505152202_migracja050520251655")]
+    partial class migracja050520251655
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

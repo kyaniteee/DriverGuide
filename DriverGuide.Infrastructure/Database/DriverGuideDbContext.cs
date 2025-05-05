@@ -14,7 +14,8 @@ namespace DriverGuide.Infrastructure.Database
 
         public DbSet<Question>? Questions { get; set; }
         public DbSet<QuestionAnswer>? QuestionAnswers { get; set; }
-        public DbSet<TestSession>? Tests { get; set; }
+        public DbSet<TestSession>? TestSessions { get; set; }
+        public DbSet<QuestionFile>? QuestionFiles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -33,8 +34,9 @@ namespace DriverGuide.Infrastructure.Database
                 Id = Guid.Parse("00000000-0000-0000-0000-000000000002").ToString(),
             });
 
-            builder.ApplyConfiguration(new TestSessionConfiguration());
             builder.ApplyConfiguration(new QuestionConfiguration());
+            builder.ApplyConfiguration(new TestSessionConfiguration());
+            builder.ApplyConfiguration(new QuestionFileConfiguration());
             builder.ApplyConfiguration(new QuestionAnswerConfiguration());
 
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
