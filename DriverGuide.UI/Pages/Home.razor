@@ -1,7 +1,46 @@
 ﻿@page "/"
+@using System.ComponentModel
+@using System.ComponentModel.DataAnnotations
+@using DriverGuide.UI.Domain
 
-<PageTitle>Home</PageTitle>
+<PageTitle>DriverGuide</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1 class="text-center mt-5" style="color:lightgrey">Witamy w aplikacji DriverGuide</h1>
+<p class="text-center" style="color:lightgrey">Nasz system umożliwi Ci przegląd bazy pytań oraz symulacje egzaminu w dowolnym miejscu i czasie jeżeli masz tylko dostęp do internetu.</p>
 
-Welcome to your new app.
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            @* <label for="categorySelect" class="form-label">Wybierz kategorię:</label> *@
+            <select class="form-select" id="categorySelect" @bind="SelectedCategory">
+                @foreach (var category in Categories)
+                {
+                    <option value="@category">@GetDisplayName(category)</option>
+                }
+            </select>
+            <div class="d-grid mt-3">
+                <button class="btn btn-primary" @onclick="StartTest">Rozpocznij Test</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private DrivingLicenseCategory SelectedCategory { get; set; } = DrivingLicenseCategory.B;
+    private IEnumerable<DrivingLicenseCategory> Categories => Enum.GetValues<DrivingLicenseCategory>();
+
+    private void StartTest()
+    {
+        // Przejście do strony z testem (np. z parametrem kategorii)
+        NavigationManager.NavigateTo($"/test?category={SelectedCategory}");
+    }
+
+    [Inject] NavigationManager NavigationManager { get; set; } = default!;
+
+    private string GetDisplayName(DrivingLicenseCategory category)
+    {
+        var field = category.GetType().GetField(category.ToString());
+        var attr = field?.GetCustomAttributes(typeof(DisplayAttribute), false).FirstOrDefault() as DisplayAttribute;
+        return attr?.Name ?? category.ToString();
+    }
+}

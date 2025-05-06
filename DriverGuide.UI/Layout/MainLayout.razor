@@ -1,16 +1,67 @@
 ﻿@inherits LayoutComponentBase
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+<div class="main-layout">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand d-flex align-items-center" href="/">
+                    <img src="images/steering-wheel.svg" width="30" height="30" class="me-2" />
+                    DriverGuide
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                    <ul class="navbar-nav me-3">
+                        <li class="nav-item"><NavLink class="nav-link" href="">Strona główna</NavLink></li>
+                        <li class="nav-item"><NavLink class="nav-link" href="test">Test</NavLink></li>
+
+                        <li class="nav-item"><NavLink class="nav-link" href="wyniki">Wyniki</NavLink></li>
+
+                    </ul>
+                    <div class="d-flex">
+                        <NavLink class="btn btn-outline-light me-2" href="login">Zaloguj się</NavLink>
+                        <NavLink class="btn btn-warning" href="register">Zarejestruj się</NavLink>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    @* <div class="hero-banner text-white text-center d-flex align-items-center justify-content-center">
+        <div>
+            <h1 class="display-4">Witamy w DriverGuide</h1>
+            <p class="lead">Przygotuj się do egzaminu teoretycznego na prawo jazdy!</p>
         </div>
+    </div> *@
 
-        <article class="content px-4">
-            @Body
-        </article>
+    <main class="container">
+        @Body
     </main>
 </div>
+
+<style>
+    .main-layout {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background-image: url('images/header.jpg');
+        background-size: cover;
+        background-position: center;
+    }
+
+    main.container {
+        flex: 1;
+    }
+
+    .hero-banner {
+        background-image: url('images/header.jpg');
+        background-size: cover;
+        background-position: center;
+        height: 100%;
+        width: 100%;
+        margin-bottom: 2rem;
+        box-shadow: inset 0 0 0 500px rgba(0,0,0,0.4);
+    }
+</style>
