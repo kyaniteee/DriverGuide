@@ -9,32 +9,35 @@ public class QuestionRepository : RepositoryBase<Question>, IQuestionRepository
 {
     public QuestionRepository(DriverGuideDbContext context) : base(context) { }
 
+    private string GetQuizQuestionsCommand(int quantity, bool isGeneral, int points, string categories)
+        => $"select top {quantity} * from dbo.Questions where IsGeneral = {(isGeneral ? 1 : 0)} and Points = {points} and exists(select value from string_split(Kategorie, ',') where value in ({categories})) order by NEWID();";
+
     public async Task<ICollection<Question>> GetQuizQuestions(LicenseCategory category)
     {
         var categories = string.Join(",", category.ToString().Split('_').Select(x => $"'{x.ToUpper()}'"));
 
         var general3 = await DBSet
-            .FromSqlRaw($"select top 10 * from dbo.Questions where IsGeneral = 1 and Points = 3 and exists(select value from string_split(Kategorie, ',') where value in ({categories})) order by NEWID();")
+            .FromSqlRaw(GetQuizQuestionsCommand(10, true, 3, categories))
             .ToListAsync();
 
         var general2 = await DBSet
-            .FromSqlRaw($"select top 6 * from dbo.Questions where IsGeneral = 1 and Points = 2 and exists(select value from string_split(Kategorie, ',') where value in ({categories})) order by NEWID();")
+            .FromSqlRaw(GetQuizQuestionsCommand(6, true, 2, categories))
             .ToListAsync();
 
         var general1 = await DBSet
-            .FromSqlRaw($"select top 4 * from dbo.Questions where IsGeneral = 1 and Points = 1 and exists(select value from string_split(Kategorie, ',') where value in ({categories})) order by NEWID();")
+            .FromSqlRaw(GetQuizQuestionsCommand(4, true, 1, categories))
             .ToListAsync();
 
         var special3 = await DBSet
-            .FromSqlRaw($"select top 6 * from dbo.Questions where IsGeneral = 0 and Points = 3 and exists(select value from string_split(Kategorie, ',') where value in ({categories})) order by NEWID();")
+            .FromSqlRaw(GetQuizQuestionsCommand(6, false, 3, categories))
             .ToListAsync();
 
         var special2 = await DBSet
-            .FromSqlRaw($"select top 4 * from dbo.Questions where IsGeneral = 0 and Points = 2 and exists(select value from string_split(Kategorie, ',') where value in ({categories})) order by NEWID();")
+            .FromSqlRaw(GetQuizQuestionsCommand(4, false, 2, categories))
             .ToListAsync();
 
         var special1 = await DBSet
-            .FromSqlRaw($"select top 2 * from dbo.Questions where IsGeneral = 0 and Points = 1 and exists(select value from string_split(Kategorie, ',') where value in ({categories})) order by NEWID();")
+            .FromSqlRaw(GetQuizQuestionsCommand(2, false, 1, categories))
             .ToListAsync();
 
         var allQuestions = general3
