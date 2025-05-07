@@ -11,6 +11,25 @@ public class Question
     public int QuestionId { get; set; }
 
     /// <summary>
+    /// Liczba punktów, które można uzyskać za poprawną odpowiedź na pytanie.
+    /// Może przyjmować wartość 1, 2 lub 3 w zależności od trudności pytania.
+    /// </summary>
+    public int Points { get; set; }
+
+    /// <summary>
+    /// Czas (w sekundach), jaki użytkownik ma na udzielenie odpowiedzi na pytanie.
+    /// Najczęściej: 15 sekund (trudne pytania), 20 sekund (średnie), 30 sekund (łatwe).
+    /// </summary>
+    public int TimeToAnswerSeconds { get; set; }
+
+    /// <summary>
+    /// Określa, czy pytanie należy do części ogólnej egzaminu teoretycznego.
+    /// True – pytanie ogólne (dla wszystkich kategorii prawa jazdy).
+    /// False – pytanie specjalistyczne (dla wybranych kategorii, np. B, C).
+    /// </summary>
+    public bool IsGeneral { get; set; }
+
+    /// <summary>
     /// Data dodania pytania do bazy danych
     /// </summary>
     public DateOnly DataDodania { get; set; }

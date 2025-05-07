@@ -30,14 +30,14 @@ public class QuestionController(IQuestionRepository questionRepository, ILogger<
         return Ok(result);
     }
 
-    [HttpGet(nameof(GetQuestionsByCategories), Name = nameof(GetQuestionsByCategories))]
-    public async Task<ActionResult<IEnumerable<Question>>> GetQuestionsByCategories(int quantity, [FromQuery] string[] categories)
+    [HttpGet(nameof(GetQuizQuestions), Name = nameof(GetQuizQuestions))]
+    public async Task<ActionResult<IEnumerable<Question>>> GetQuizQuestions([FromQuery] string category)
     {
-        if (categories is null || !categories.Any())
-            return BadRequest();
+        if (string.IsNullOrWhiteSpace(category))
+            return BadRequest("Nie podano kategorii prawa jazdy!");
 
-        var cat = categories.Select(x => Enum.Parse<LicenseCategory>(x, true)).ToArray();
-        var result = await questionRepository.GetRandomQuestionsQuantityByCategories(quantity, cat);
+        var cat = Enum.Parse<LicenseCategory>(category, true);
+        var result = await questionRepository.GetQuizQuestions(cat);
         if (result == null)
             return NotFound();
 

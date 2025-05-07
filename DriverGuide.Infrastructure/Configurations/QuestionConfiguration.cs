@@ -14,6 +14,18 @@ public class QuestionConfiguration : IEntityTypeConfiguration<Question>
         builder.Property(q => q.QuestionId)
             .HasColumnName(nameof(Question.QuestionId));
 
+        builder.Property(q => q.Points)
+            .HasColumnName(nameof(Question.Points))
+            .HasDefaultValue(1);
+
+        builder.Property(q => q.TimeToAnswerSeconds)
+            .HasColumnName(nameof(Question.TimeToAnswerSeconds))
+            .HasDefaultValue(30);
+
+        builder.Property(q => q.IsGeneral)
+            .HasColumnName(nameof(Question.IsGeneral))
+            .HasDefaultValue(true);
+
         builder.Property(q => q.DataDodania)
             .HasColumnName(nameof(Question.DataDodania));
 
