@@ -19,7 +19,7 @@ public class QuestionAnswer
     /// <summary>
     /// Określa kategorie pytania
     /// </summary>
-    public DrivingLicenseCategory QuestionCategory { get; set; }
+    public LicenseCategory QuestionCategory { get; set; }
     /// <summary>
     /// Zapytanie
     /// </summary>

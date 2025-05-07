@@ -7,7 +7,7 @@ namespace DriverGuide.Domain.Enums;
 /// Reprezentuje kategorie prawa jazdy.
 /// </summary>
 [Flags]
-public enum DrivingLicenseCategory
+public enum LicenseCategory
 {
     /// <summary>
     /// Uprawnienia dla motorowerów, czterokołowców lekkich i zespołów pojazdów. Wymagany wiek: 14 lat.
@@ -124,7 +124,7 @@ public enum DrivingLicenseCategory
     /// <summary>
     /// Uprawnienia dla tramwajów. Wymagany wiek: 21 lat.
     /// </summary>
-    [Display(Name = "Tramwaj")]
-    [Description("Tramwaj")]
-    Tramwaj = 1 << 16 // 65536
+    [Display(Name = "PT - Tramwaj")]
+    [Description("PT - Tramwaj")]
+    PT = 1 << 16 // 65536
 }

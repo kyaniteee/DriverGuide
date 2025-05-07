@@ -7,44 +7,44 @@ namespace DriverGuide.Infrastructure.Database;
 public class RepositoryBase<T> : IRepositoryBase<T> where T : class
 {
     protected readonly DriverGuideDbContext Context;
-    private readonly DbSet<T> _dbSet;
+    protected readonly DbSet<T> DBSet;
 
     public RepositoryBase(DriverGuideDbContext context)
     {
         Context = context;
-        _dbSet = Context.Set<T>();
+        DBSet = Context.Set<T>();
     }
 
     public virtual async Task<T> GetByIdAsync(int id)
     {
-        return await _dbSet.FindAsync(id);
+        return await DBSet.FindAsync(id);
     }
 
     public virtual async Task<T> GetByGuidAsync(Guid guid)
     {
-        return await _dbSet.FindAsync(guid);
+        return await DBSet.FindAsync(guid);
     }
 
     public virtual async Task<ICollection<T>> GetAllAsync()
     {
-        return await _dbSet.ToListAsync();
+        return await DBSet.ToListAsync();
     }
 
     public virtual async Task<T> GetAsync(Expression<Func<T, bool>> filter, bool useNoTracking = false)
     {
         if (useNoTracking)
         {
-            return await _dbSet.AsNoTracking().FirstOrDefaultAsync(filter);
+            return await DBSet.AsNoTracking().FirstOrDefaultAsync(filter);
         }
         else
         {
-            return await _dbSet.FirstOrDefaultAsync(filter);
+            return await DBSet.FirstOrDefaultAsync(filter);
         }
     }
 
     public virtual async Task<T> CreateAsync(T entity)
     {
-        await _dbSet.AddAsync(entity);
+        await DBSet.AddAsync(entity);
         await Context.SaveChangesAsync();
         return entity;
     }
@@ -58,7 +58,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
 
     public virtual async Task<bool> DeleteAsync(T entity)
     {
-        _dbSet.Remove(entity);
+        DBSet.Remove(entity);
         await Context.SaveChangesAsync();
         return true;
     }

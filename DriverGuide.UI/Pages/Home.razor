@@ -1,7 +1,7 @@
 ﻿@page "/"
 @using System.ComponentModel
 @using System.ComponentModel.DataAnnotations
-@using DriverGuide.UI.Domain
+@using DriverGuide.Domain.Enums
 
 <PageTitle>DriverGuide</PageTitle>
 
@@ -19,15 +19,15 @@
                 }
             </select>
             <div class="d-grid mt-3">
-                <button class="btn btn-primary" @onclick="StartTest">Rozpocznij Test</button>
+                <button class="btn btn-primary" @onclick="StartTest">ROZWIĄŻ DARMOWY TEST NA PRAWO JAZDY</button>
             </div>
         </div>
     </div>
 </div>
 
 @code {
-    private DrivingLicenseCategory SelectedCategory { get; set; } = DrivingLicenseCategory.B;
-    private IEnumerable<DrivingLicenseCategory> Categories => Enum.GetValues<DrivingLicenseCategory>();
+    private LicenseCategory SelectedCategory { get; set; } = LicenseCategory.B;
+    private IEnumerable<LicenseCategory> Categories => Enum.GetValues<LicenseCategory>();
 
     private void StartTest()
     {
@@ -37,7 +37,7 @@
 
     [Inject] NavigationManager NavigationManager { get; set; } = default!;
 
-    private string GetDisplayName(DrivingLicenseCategory category)
+    private string GetDisplayName(LicenseCategory category)
     {
         var field = category.GetType().GetField(category.ToString());
         var attr = field?.GetCustomAttributes(typeof(DisplayAttribute), false).FirstOrDefault() as DisplayAttribute;
