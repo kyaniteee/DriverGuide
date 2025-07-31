@@ -16,6 +16,15 @@ builder.Services.AddInfrastructure(builder.Configuration)
                 .AddJwt(builder.Configuration)
                 .AddSwagger();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()//.WithOrigins("https://localhost:7181") 
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.
@@ -26,6 +35,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors();
 
 app.UseAuthentication(); // wa¿na jest kolejnoœæ - najpierw Authentication
 app.UseAuthorization();  // potem Authorization
