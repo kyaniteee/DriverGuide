@@ -31,8 +31,7 @@
 
     private void StartTest()
     {
-        // Przejście do strony z testem (np. z parametrem kategorii)
-        NavigationManager.NavigateTo($"/test?category={SelectedCategory}");
+        NavigationManager.NavigateTo($"/quiz/{SelectedCategory}");
     }
 
     [Inject] NavigationManager NavigationManager { get; set; } = default!;

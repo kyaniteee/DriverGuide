@@ -1,0 +1,319 @@
+﻿@page "/quiz/{Category}"
+@using System.ComponentModel.DataAnnotations
+@inject IJSRuntime JS
+
+
+<div class="quiz-container">
+
+    <h3>Test na prawo jazdy kategorii @Category</h3>
+
+    <div class="progress-container">
+        <div class="progress-bar" style="width:@ProgressPercent%"></div>
+    </div>
+
+    <p class="progress-text">Pytanie @(currentIndex + 1) z @questions.Count</p>
+
+
+    @if (currentQuestion != null)
+    {
+        <div class="quiz-question">
+            @if (!string.IsNullOrEmpty(currentQuestion.ImageUrl))
+            {
+                <img src="@currentQuestion.ImageUrl" alt="Question image" class="question-image" />
+            }
+            <p class="question-text">@currentQuestion.Text</p>
+            <div class="video-buttons">
+                @if (!string.IsNullOrEmpty(currentQuestion.VideoUrl))
+                {
+                    <button class="btn btn-secondary" @onclick="() => PlayVideo(currentQuestion.VideoUrl)">Pokaż wideo</button>
+                }
+                @if (!string.IsNullOrEmpty(currentQuestion.SignLanguageVideoUrl))
+                {
+                    <button class="btn btn-secondary" @onclick="() => PlayVideo(currentQuestion.SignLanguageVideoUrl)">Pokaż nagranie w języku migowym</button>
+                }
+            </div>
+            <div class="answers-list">
+                @foreach (var answer in currentQuestion.Answers)
+                {
+                    <div class="answer-option">
+                        <input type="radio" id="@answer" name="answer" value="@answer" @onchange="() => selectedAnswer = answer" checked="@(selectedAnswer == answer)" />
+                        <label for="@answer">@answer</label>
+                    </div>
+                }
+            </div>
+            <div class="submit-section">
+                <button class="btn btn-primary" @onclick="SubmitAnswer" disabled="@(!CanSubmit)">Zapisz i przejdź dalej</button>
+            </div>
+            @if (showResult)
+            {
+                <div class="result-section">
+                    @if (isCorrect == true)
+                    {
+                        <span class="result-correct">Correct!</span>
+                    }
+                    else
+                    {
+                        <span class="result-incorrect">Incorrect. The correct answer is: <strong>@currentQuestion.CorrectAnswer</strong></span>
+                    }
+                    <div class="next-section">
+                        <button class="btn btn-primary" @onclick="NextQuestion">Next Question</button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p>Loading quiz...</p>
+    }
+</div>
+
+<style>
+    :root {
+        --primary: #2d6cdf;
+        --primary-dark: #1b417a;
+        --accent: #f7b32b;
+        --background: #f4f7fa;
+        --surface: #fff;
+        --text: #222;
+        --text-light: #fff;
+        --danger: #e74c3c;
+        --success: #27ae60;
+    }
+
+    body {
+        background: var(--background);
+        color: var(--text);
+        font-family: 'Segoe UI', Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
+    .navbar {
+        background: var(--primary);
+        color: var(--text-light);
+        padding: 0.5rem 0;
+        box-shadow: 0 2px 8px rgba(44, 108, 223, 0.08);
+        margin-bottom: 2rem;
+    }
+
+
+    .quiz-container {
+        max-width: 500px;
+        margin: 2rem auto;
+        background: var(--surface);
+        border-radius: 12px;
+        box-shadow: 0 2px 16px rgba(44, 108, 223, 0.08);
+        padding: 2rem 2.5rem 2.5rem 2.5rem;
+    }
+
+    .quiz-question {
+        margin-top: 1.5rem;
+    }
+
+    .question-text {
+        font-size: 1.15rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
+    }
+
+    .question-image {
+        max-width: 100%;
+        border-radius: 8px;
+        margin-bottom: 1em;
+        border: 1px solid #e0e0e0;
+    }
+
+    .video-buttons {
+        margin-bottom: 1em;
+    }
+
+    .btn {
+        padding: 0.5em 1.2em;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-right: 0.5em;
+        margin-bottom: 0.5em;
+        transition: background 0.2s;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: var(--text-light);
+    }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+    .btn-secondary {
+        background: var(--accent);
+        color: var(--text);
+    }
+
+        .btn-secondary:hover {
+            background: #e6a21a;
+        }
+
+    .btn:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+    }
+
+    .answers-list {
+        margin-top: 1em;
+        margin-bottom: 1em;
+    }
+
+    .answer-option {
+        margin-bottom: 0.5em;
+        display: flex;
+        align-items: center;
+    }
+
+        .answer-option input[type="radio"] {
+            accent-color: var(--primary);
+            margin-right: 0.5em;
+        }
+
+    .submit-section {
+        margin-top: 1em;
+    }
+
+    .result-section {
+        margin-top: 1.5em;
+    }
+
+    .result-correct {
+        color: var(--success);
+        font-weight: 600;
+        font-size: 1.1em;
+    }
+
+    .result-incorrect {
+        color: var(--danger);
+        font-weight: 600;
+        font-size: 1.1em;
+    }
+
+    .next-section {
+        margin-top: 1em;
+    }
+
+    .progress-container {
+        width: 100%;
+        background-color: #ddd;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 10px;
+        height: 10px;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background-color: cornflowerblue;
+        transition: width 0.3s ease;
+    }
+
+    .progress-text {
+        font-size: 0.9em;
+        color: #555;
+        text-align: right;
+        margin-bottom: 20px;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public string? Category { get; set; }
+    private double ProgressPercent => ((double)(currentIndex + 1) / questions.Count) * 100;
+    private QuizQuestion? currentQuestion;
+    private int currentIndex = 0;
+    private string? selectedAnswer;
+    private bool showResult = false;
+    private bool? isCorrect = null;
+
+    private List<QuizQuestion> questions = new()
+    {
+        new QuizQuestion
+        {
+            Text = "What does this road sign mean?",
+            ImageUrl = "images/road-sign-stop.png",
+            VideoUrl = "videos/stop-sign.mp4",
+            SignLanguageVideoUrl = "videos/stop-sign-signlang.mp4",
+            Answers = new List<string> { "Stop", "Yield", "No entry" },
+            CorrectAnswer = "Stop"
+        },
+        new QuizQuestion
+        {
+            Text = "What should you do at a yellow traffic light?",
+            ImageUrl = null,
+            VideoUrl = "videos/yellow-light.mp4",
+            SignLanguageVideoUrl = "videos/yellow-light-signlang.mp4",
+            Answers = new List<string> { "Speed up", "Stop if safe", "Ignore" },
+            CorrectAnswer = "Stop if safe"
+        }
+    };
+
+    protected override void OnInitialized()
+    {
+        LoadQuestion();
+    }
+
+    private void LoadQuestion()
+    {
+        if (currentIndex < questions.Count)
+        {
+            currentQuestion = questions[currentIndex];
+            selectedAnswer = null;
+            showResult = false;
+            isCorrect = null;
+        }
+    }
+
+    private void SubmitAnswer()
+    {
+        if (selectedAnswer != null && currentQuestion != null)
+        {
+            isCorrect = selectedAnswer == currentQuestion.CorrectAnswer;
+            showResult = true;
+        }
+    }
+
+    private void NextQuestion()
+    {
+        currentIndex++;
+        if (currentIndex < questions.Count)
+        {
+            LoadQuestion();
+        }
+        else
+        {
+            // End of quiz, reset or show summary page
+            currentIndex = 0; // Reset for now
+            LoadQuestion();
+        }
+    }
+
+    private bool CanSubmit => !showResult && !string.IsNullOrEmpty(selectedAnswer);
+
+    private void PlayVideo(string? url)
+    {
+        if (!string.IsNullOrEmpty(url))
+        {
+            JS.InvokeVoidAsync("open", url, "_blank");
+        }
+    }
+
+    public class QuizQuestion
+    {
+        public string Text { get; set; } = "";
+        public string? ImageUrl { get; set; }
+        public string? VideoUrl { get; set; }
+        public string? SignLanguageVideoUrl { get; set; }
+        public List<string> Answers { get; set; } = new();
+        public string CorrectAnswer { get; set; } = "";
+    }
+}
