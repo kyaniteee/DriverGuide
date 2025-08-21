@@ -1,74 +1,201 @@
 ﻿@page "/quiz/{Category}"
 @using System.ComponentModel.DataAnnotations
+@using DriverGuide.Domain.Models
+@using DriverGuide.UI.Utils
+@inject HttpClient Http
 @inject IJSRuntime JS
 
 
 <div class="quiz-container">
-
-    <h3>Test na prawo jazdy kategorii @Category</h3>
-
-    <div class="progress-container">
-        <div class="progress-bar" style="width:@ProgressPercent%"></div>
-    </div>
-
-    <p class="progress-text">Pytanie @(currentIndex + 1) z @questions.Count</p>
-
-
-    @if (currentQuestion != null)
+    @if (currentQuestion is null)
     {
-        <div class="quiz-question">
-            @if (!string.IsNullOrEmpty(currentQuestion.ImageUrl))
-            {
-                <img src="@currentQuestion.ImageUrl" alt="Question image" class="question-image" />
-            }
-            <p class="question-text">@currentQuestion.Text</p>
-            <div class="video-buttons">
-                @if (!string.IsNullOrEmpty(currentQuestion.VideoUrl))
-                {
-                    <button class="btn btn-secondary" @onclick="() => PlayVideo(currentQuestion.VideoUrl)">Pokaż wideo</button>
-                }
-                @if (!string.IsNullOrEmpty(currentQuestion.SignLanguageVideoUrl))
-                {
-                    <button class="btn btn-secondary" @onclick="() => PlayVideo(currentQuestion.SignLanguageVideoUrl)">Pokaż nagranie w języku migowym</button>
-                }
-            </div>
-            <div class="answers-list">
-                @foreach (var answer in currentQuestion.Answers)
-                {
-                    <div class="answer-option">
-                        <input type="radio" id="@answer" name="answer" value="@answer" @onchange="() => selectedAnswer = answer" checked="@(selectedAnswer == answer)" />
-                        <label for="@answer">@answer</label>
-                    </div>
-                }
-            </div>
-            <div class="submit-section">
-                <button class="btn btn-primary" @onclick="SubmitAnswer" disabled="@(!CanSubmit)">Zapisz i przejdź dalej</button>
-            </div>
-            @if (showResult)
-            {
-                <div class="result-section">
-                    @if (isCorrect == true)
-                    {
-                        <span class="result-correct">Correct!</span>
-                    }
-                    else
-                    {
-                        <span class="result-incorrect">Incorrect. The correct answer is: <strong>@currentQuestion.CorrectAnswer</strong></span>
-                    }
-                    <div class="next-section">
-                        <button class="btn btn-primary" @onclick="NextQuestion">Next Question</button>
-                    </div>
-                </div>
-            }
+        <div class="quiz-loading">
+            <div class="spinner"></div>
+            <p style="text-align: center; font-size: 2rem; font-weight: bold; margin-top: 1.5rem;">
+                Trwa przygotowanie pytań testowych dla kategorii @Category ...
+            </p>
         </div>
     }
     else
     {
-        <p>Loading quiz...</p>
+        <p style="text-align: center; font-size: 2rem; font-weight: bold;">Test na prawo jazdy kategorii @Category</p>
+
+        <p class="progress-text">Pytanie @(currentIndex + 1) z @questionsCount</p>
+        <div class="progress-container">
+            <div class="progress-bar" style="width:@ProgressPercent%"></div>
+        </div>
+
+        <div class="quiz-question">
+
+            @if (!string.IsNullOrEmpty(currentQuestion.Media))
+            {
+                if (currentQuestionHasVideo)
+                {
+                    <video controls class="question-image" style="display: block; margin-left: auto; margin-right: auto; width: 1000px; height: 400px; object-fit: contain;">
+                        @if (!string.IsNullOrEmpty(videoUrl))
+                        {
+                            <source src="@videoUrl" type="@Utils.ExtensionUtils.GetMimeType(currentQuestion.Media)" />
+                        }
+                        else if (!string.IsNullOrEmpty(currentQuestion.Media))
+                        {
+                            <source src="@currentQuestion.Media" type="@Utils.ExtensionUtils.GetMimeType(currentQuestion.Media)" />
+                        }
+                        Nieobsługiwany typ.
+                    </video>
+                }
+                else
+                {
+                    <img src="@currentQuestion.Media" alt="Question image" class="question-image" style="display: block; margin-left: auto; margin-right: auto; width: 1000px; height: 400px; object-fit: contain;" />
+                }
+            }
+
+            <p class="question-text" style="text-align: center; font-size: 1.5rem; font-weight: bold;">@currentQuestion.Pytanie</p>
+
+            <div class="answers-list">
+                @foreach (var answer in GetCurrentQuestionAnswers())
+                {
+                    <div class="answer-option">
+                        <input type="radio" id="@answer" name="answer" value="@answer" @onchange="() => selectedAnswer = answer" checked="@(selectedAnswer == answer)" />
+                        <label style="font-size: 0.5rem" for="@answer">@answer</label>
+                    </div>
+                }
+            </div>
+
+            <div class="submit-section">
+                <div class="submit-section-right" style="margin: 0;">
+                    <button class="btn btn-primary" @onclick="SubmitAnswer" disabled="@(string.IsNullOrWhiteSpace(selectedAnswer))">
+                        @if (currentIndex == questionsCount)
+                        {
+                            <b>Zakończ test</b>
+                        }
+                        else
+                        {
+                            <b>Następne pytanie</b>
+                        }
+                    </button>
+                </div>
+            </div>
+
+        </div>
     }
 </div>
 
+@code {
+    [Parameter]
+    public string? Category { get; set; }
+
+    private double questionsCount => questions?.Count ?? 32;
+    private double ProgressPercent => ((double)(currentIndex + 1) / questionsCount) * 100;
+
+    private string? videoUrl;
+    private int currentIndex = 0;
+    private string? selectedAnswer;
+    private bool currentQuestionHasVideo;
+
+    private Question? currentQuestion;
+    private List<Question>? questions;
+    private List<QuestionFile>? questionsFiles;
+
+    protected override async Task OnInitializedAsync()
+    {
+        questions?.Clear();
+        var httpResponse = await Http.GetAsync($"/Question/GetQuizQuestions?category={Category}");
+        if (!httpResponse.IsSuccessStatusCode)
+            return;
+
+        var response = await httpResponse.Content.ReadFromJsonAsync<List<Question>>();
+        questions = response ?? new();
+
+        var questionNames = questions.Where(x => !string.IsNullOrWhiteSpace(x.Media)).Select(x => x.Media).GroupBy(x => x).Select(x => x.Key).ToList();
+        questionsFiles = await GetQuestionFilesByNamesAsync(questionNames) ?? new(); //
+
+        NextQuestion();
+    }
+
+    private async Task<List<QuestionFile>> GetQuestionFilesByNamesAsync(List<string> questionFileNames)
+    {
+        if (!questionFileNames.Any())
+            return default;
+
+        var query = string.Join("&", questionFileNames.Select(x => $"questionFileNames={Uri.EscapeDataString(x)}"));
+        var httpResponse = await Http.GetAsync($"/QuestionFile/GetQuestionFilesByNames?{query}");
+        if (!httpResponse.IsSuccessStatusCode)
+            return default;
+
+        var result = await httpResponse.Content.ReadFromJsonAsync<List<QuestionFile>>();
+        return result;
+    }
+
+    private async Task LoadQuestionAsync()
+    {
+        if (questions is null)
+            return;
+
+        if (currentIndex > questions.Count)
+            return;
+
+        selectedAnswer = null;
+        currentQuestion = questions[currentIndex];
+        currentQuestionHasVideo = !string.IsNullOrEmpty(currentQuestion?.Media) &&
+                                  (currentQuestion.Media.EndsWith(".wmv", StringComparison.OrdinalIgnoreCase) ||
+                                   currentQuestion.Media.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase) ||
+                                   currentQuestion.Media.EndsWith(".webm", StringComparison.OrdinalIgnoreCase) ||
+                                   currentQuestion.Media.EndsWith(".ogg", StringComparison.OrdinalIgnoreCase));
+
+        if (currentQuestionHasVideo)
+            videoUrl = await GetVideoUrl();
+        else
+            videoUrl = null;
+
+        StateHasChanged();
+    }
+
+    private async Task<string> GetVideoUrl()
+    {
+        var file = questionsFiles.FirstOrDefault(x => x.Name == currentQuestion.Media);
+        if (file is null)
+            return default;
+
+        string result = await JS.InvokeAsync<string>("createObjectURL", file.File, file.ContentType);
+        return result;
+    }
+
+    private void SubmitAnswer()
+    {
+        if (selectedAnswer != null && currentQuestion != null)
+            NextQuestion();
+    }
+
+    private async void NextQuestion()
+    {
+        currentIndex++;
+        if (currentIndex > questions.Count)
+            currentIndex = 0;
+
+        await LoadQuestionAsync();
+    }
+
+    private IEnumerable<string> GetCurrentQuestionAnswers()
+    {
+        List<string> result = new();
+        if (questions is null || currentQuestion is null)
+            return result;
+
+        if (string.IsNullOrWhiteSpace(currentQuestion.OdpowiedzA) && string.IsNullOrWhiteSpace(currentQuestion.OdpowiedzB) && string.IsNullOrWhiteSpace(currentQuestion.OdpowiedzC))
+            result.AddRange(new[] { "Tak", "Nie" });
+        else
+            result.AddRange(new[] { currentQuestion.OdpowiedzA!, currentQuestion.OdpowiedzB!, currentQuestion.OdpowiedzC! });
+
+        return result;
+    }
+}
+
 <style>
+    .submit-section-right {
+        display: flex;
+        justify-content: flex-end;
+    }
+
     :root {
         --primary: #2d6cdf;
         --primary-dark: #1b417a;
@@ -99,12 +226,12 @@
 
 
     .quiz-container {
-        max-width: 500px;
+        max-width: 1400px;
         margin: 2rem auto;
-        background: var(--surface);
+        background: rgba(255, 255, 255, 0.85); /* semi-transparent white */
         border-radius: 12px;
         box-shadow: 0 2px 16px rgba(44, 108, 223, 0.08);
-        padding: 2rem 2.5rem 2.5rem 2.5rem;
+        padding: 0.5rem 1.5rem 0.5rem 1.5rem;
     }
 
     .quiz-question {
@@ -122,10 +249,6 @@
         border-radius: 8px;
         margin-bottom: 1em;
         border: 1px solid #e0e0e0;
-    }
-
-    .video-buttons {
-        margin-bottom: 1em;
     }
 
     .btn {
@@ -179,7 +302,8 @@
         }
 
     .submit-section {
-        margin-top: 1em;
+        margin-top: 2em;
+        margin-bottom: 0em;
     }
 
     .result-section {
@@ -221,99 +345,24 @@
         font-size: 0.9em;
         color: #555;
         text-align: right;
-        margin-bottom: 20px;
+        margin-bottom: 0px;
+    }
+
+    .quiz-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 350px;
+    }
+
+    .spinner {
+        width: 64px;
+        height: 64px;
+        border: 8px solid #e0e0e0;
+        border-top: 8px solid var(--primary, #2d6cdf);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-top: 2rem;
     }
 </style>
-
-@code {
-    [Parameter]
-    public string? Category { get; set; }
-    private double ProgressPercent => ((double)(currentIndex + 1) / questions.Count) * 100;
-    private QuizQuestion? currentQuestion;
-    private int currentIndex = 0;
-    private string? selectedAnswer;
-    private bool showResult = false;
-    private bool? isCorrect = null;
-
-    private List<QuizQuestion> questions = new()
-    {
-        new QuizQuestion
-        {
-            Text = "What does this road sign mean?",
-            ImageUrl = "images/road-sign-stop.png",
-            VideoUrl = "videos/stop-sign.mp4",
-            SignLanguageVideoUrl = "videos/stop-sign-signlang.mp4",
-            Answers = new List<string> { "Stop", "Yield", "No entry" },
-            CorrectAnswer = "Stop"
-        },
-        new QuizQuestion
-        {
-            Text = "What should you do at a yellow traffic light?",
-            ImageUrl = null,
-            VideoUrl = "videos/yellow-light.mp4",
-            SignLanguageVideoUrl = "videos/yellow-light-signlang.mp4",
-            Answers = new List<string> { "Speed up", "Stop if safe", "Ignore" },
-            CorrectAnswer = "Stop if safe"
-        }
-    };
-
-    protected override void OnInitialized()
-    {
-        LoadQuestion();
-    }
-
-    private void LoadQuestion()
-    {
-        if (currentIndex < questions.Count)
-        {
-            currentQuestion = questions[currentIndex];
-            selectedAnswer = null;
-            showResult = false;
-            isCorrect = null;
-        }
-    }
-
-    private void SubmitAnswer()
-    {
-        if (selectedAnswer != null && currentQuestion != null)
-        {
-            isCorrect = selectedAnswer == currentQuestion.CorrectAnswer;
-            showResult = true;
-        }
-    }
-
-    private void NextQuestion()
-    {
-        currentIndex++;
-        if (currentIndex < questions.Count)
-        {
-            LoadQuestion();
-        }
-        else
-        {
-            // End of quiz, reset or show summary page
-            currentIndex = 0; // Reset for now
-            LoadQuestion();
-        }
-    }
-
-    private bool CanSubmit => !showResult && !string.IsNullOrEmpty(selectedAnswer);
-
-    private void PlayVideo(string? url)
-    {
-        if (!string.IsNullOrEmpty(url))
-        {
-            JS.InvokeVoidAsync("open", url, "_blank");
-        }
-    }
-
-    public class QuizQuestion
-    {
-        public string Text { get; set; } = "";
-        public string? ImageUrl { get; set; }
-        public string? VideoUrl { get; set; }
-        public string? SignLanguageVideoUrl { get; set; }
-        public List<string> Answers { get; set; } = new();
-        public string CorrectAnswer { get; set; } = "";
-    }
-}

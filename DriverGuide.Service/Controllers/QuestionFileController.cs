@@ -11,7 +11,7 @@ namespace DriverGuide.Service.Controllers
     [Route("[controller]")]
     public class QuestionFileController(IMediator mediator, IQuestionFileRepository questionFileRepository, ILogger<QuestionFileController> logger) : ControllerBase
     {
-        [HttpGet("{questionFileId}", Name = nameof(GetQuestionFile))]
+        [HttpGet(nameof(GetQuestionFile), Name = nameof(GetQuestionFile))]
         public async Task<ActionResult<QuestionFile>> GetQuestionFile([Required] int questionFileId)
         {
             var result = await questionFileRepository.GetByIdAsync(questionFileId);
@@ -19,6 +19,29 @@ namespace DriverGuide.Service.Controllers
                 return NotFound();
 
             return Ok(result);
+        }
+
+        [HttpGet(nameof(GetQuestionFileByName), Name = nameof(GetQuestionFileByName))]
+        public async Task<ActionResult<QuestionFile>> GetQuestionFileByName([Required] string questionFileName)
+        {
+            var result = await questionFileRepository.GetByNameAsync(questionFileName);
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+        [HttpGet(nameof(GetQuestionFilesByNames), Name = nameof(GetQuestionFilesByNames))]
+        public async Task<ActionResult<IEnumerable<QuestionFile>>> GetQuestionFilesByNames([FromQuery][Required] List<string> questionFileNames)
+        {
+            if (questionFileNames == null || questionFileNames.Count == 0)
+                return BadRequest("No file names provided.");
+
+            var files = await questionFileRepository.GetByNamesAsync(questionFileNames);
+            if (files.Count == 0)
+                return NotFound();
+
+            return Ok(files);
         }
 
         [HttpGet(nameof(GetQuestionFiles), Name = nameof(GetQuestionFiles))]
@@ -40,32 +63,6 @@ namespace DriverGuide.Service.Controllers
 
             return Ok(result);
         }
-
-        //[HttpPost(nameof(UploadFromPath))]
-        //public async Task<IActionResult> UploadFromPath([FromBody] UploadFromPathRequest request)
-        //{
-        //    if (!Directory.Exists(request.DirectoryPath))
-        //        return BadRequest("Folder nie istnieje.");
-
-        //    var files = Directory.GetFiles(request.DirectoryPath);
-        //    if (files.Length == 0)
-        //        return BadRequest("Brak plików w folderze.");
-
-        //    foreach (var filePath in files)
-        //    {
-        //        var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
-        //        var command = new CreateQuestionFileCommand
-        //        {
-        //            File = fileBytes,
-        //            FileName = Path.GetFileName(filePath)
-        //        };
-
-        //        await mediator.Send(command);
-        //    }
-
-        //    return Ok($"Wysłano {files.Length} plików.");
-        //}
-
 
     }
 }
