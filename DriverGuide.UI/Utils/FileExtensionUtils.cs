@@ -1,6 +1,6 @@
 ﻿namespace DriverGuide.UI.Utils
 {
-    public static class ExtensionUtils
+    public static class FileExtensionUtils
     {
         private static readonly Dictionary<string, string> MimeTypes = new(StringComparer.OrdinalIgnoreCase)
         {
