@@ -5,14 +5,13 @@
 @inject HttpClient Http
 @inject IJSRuntime JS
 
-
 <div class="quiz-container">
     @if (currentQuestion is null)
     {
         <div class="quiz-loading">
-            <div class="spinner"></div>
+            <div class="blue-spinner"></div>
             <p style="text-align: center; font-size: 2rem; font-weight: bold; margin-top: 1.5rem;">
-                Trwa przygotowanie pytań testowych dla kategorii @Category?.Replace('_',',') ...
+                Trwa przygotowanie pytań testowych dla kategorii @Category?.Replace('_', ',') ...
             </p>
         </div>
     }
@@ -21,75 +20,101 @@
         <p style="text-align: center; font-size: 2rem; font-weight: bold;">Test na prawo jazdy kategorii @Category</p>
 
         <p class="progress-text">Pytanie @(currentIndex + 1) z @questionsCount</p>
-        <div class="progress-container">
-            <div class="progress-bar" style="width:@ProgressPercent%"></div>
-        </div>
 
-        <div class="quiz-question">
+        <hr class="question-underline" />
 
-            @if (!string.IsNullOrWhiteSpace(fileBlobUrl))
-            {
-                var mimeType = !string.IsNullOrEmpty(currentQuestion.Media) ? Utils.FileExtensionUtils.GetMimeType(currentQuestion.Media) : string.Empty;
-                if (mimeType.StartsWith("video/"))
-                {
-                    <video src="@fileBlobUrl" controls autoplay class="img-fluid" style="display: block; margin-left: auto; margin-right: auto; width: 1000px; height: 400px; object-fit: contain;" />
-                }
-                else
-                {
-                    <img src="@fileBlobUrl" class="img-fluid" alt="Question media" style="display: block; margin-left: auto; margin-right: auto; height: 450px; object-fit: contain;" />
-                }
-            }
-
-            <p class="question-text" style="text-align: center; font-size: 1.5rem; font-weight: bold;">@currentQuestion.Pytanie</p>
-
-            <div class="answers-list">
-                @foreach (var answer in GetCurrentQuestionAnswers())
-                {
-                    <div class="answer-option">
-                        <input type="radio" id="@answer" name="answer" value="@answer" @onchange="() => selectedAnswer = answer" checked="@(selectedAnswer == answer)" />
-                        <label for="@answer">@answer</label>
-                    </div>
-                }
+        @if (isLoadingQuestion)
+        {
+            <div class="question-loading">
+                <div class="blue-spinner"></div>
+                <p>Ładowanie pytania...</p>
             </div>
+        }
+        else
+        {
+            <div class="quiz-question">
 
-            <div class="submit-section">
-                <div class="submit-section-right" style="margin: 0;">
-                    <button class="btn btn-primary" @onclick="SubmitAnswer" disabled="@(string.IsNullOrWhiteSpace(selectedAnswer))">
-                        @if (currentIndex == questionsCount)
+                @if (!string.IsNullOrWhiteSpace(fileBlobUrl))
+                {
+                    var mimeType = !string.IsNullOrEmpty(currentQuestion.Media) ? Utils.FileExtensionUtils.GetMimeType(currentQuestion.Media) : string.Empty;
+                    if (mimeType.StartsWith("video/"))
+                    {
+                        <div class="video-container">
+                            @if (isVideoLoading)
+                            {
+                                <div class="media-loading-overlay">
+                                    <div class="blue-spinner"></div>
+                                    <p>Wczytywanie wideo...</p>
+                                </div>
+                            }
+                            <video id="questionVideo"
+                                   src="@fileBlobUrl"
+                                   controls
+                                   preload="auto"
+                                   class="media-content"
+                                   @onloadstart="OnVideoLoadStart"
+                                   @oncanplay="OnVideoCanPlay"
+                                   @onerror="OnVideoError">
+                                Twoja przeglądarka nie obsługuje odtwarzania wideo.
+                            </video>
+                        </div>
+                    }
+                    else
+                    {
+                        <img src="@fileBlobUrl" class="media-content" alt="Question media" />
+                    }
+                }
+
+                <p class="question-text">@currentQuestion.Pytanie</p>
+
+                <div class="answers-list">
+                    @foreach (var answer in GetCurrentQuestionAnswers())
+                    {
+                        <div class="answer-option" @onclick="() => SelectAnswer(answer)">
+                            <input type="radio"
+                                   id="@answer"
+                                   name="answer"
+                                   value="@answer"
+                                   checked="@(selectedAnswer == answer)"
+                                   class="custom-radio"
+                                   @onchange="() => SelectAnswer(answer)" />
+                            <label for="@answer" class="radio-label">@answer</label>
+                        </div>
+                    }
+                </div>
+
+                <div class="submit-section">
+                    <div class="submit-section-right">
+                        @if (string.IsNullOrWhiteSpace(selectedAnswer))
                         {
-                            <b>Zakończ test</b>
+                            <button class="btn btn-primary" disabled>
+                                @if (currentIndex == questionsCount - 1)
+                                {
+                                    <b>Zakończ test</b>
+                                }
+                                else
+                                {
+                                    <b>Następne pytanie</b>
+                                }
+                            </button>
                         }
                         else
                         {
-                            <b>Następne pytanie</b>
+                            <button class="btn btn-accent" @onclick="SubmitAnswer">
+                                @if (currentIndex == questionsCount - 1)
+                                {
+                                    <b>Zakończ test</b>
+                                }
+                                else
+                                {
+                                    <b>Następne pytanie</b>
+                                }
+                            </button>
                         }
-                    </button>
+                    </div>
                 </div>
-            </div>
 
-        </div>
+            </div>
+        }
     }
 </div>
-
-<style>
-
-    :root {
-        --primary: #2d6cdf;
-        --primary-dark: #1b417a;
-        --accent: #f7b32b;
-        --background: #f4f7fa;
-        --surface: #fff;
-        --text: #222;
-        --text-light: #fff;
-        --danger: #e74c3c;
-        --success: #27ae60;
-    }
-
-    body {
-        background: var(--background);
-        color: var(--text);
-        font-family: 'Segoe UI', Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-    }
-</style>
