@@ -1,6 +1,7 @@
 ﻿using DriverGuide.Domain.Enums;
 using DriverGuide.Domain.Interfaces;
 using DriverGuide.Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
@@ -30,6 +31,7 @@ public class QuestionController(IQuestionRepository questionRepository, ILogger<
         return Ok(result);
     }
 
+    [AllowAnonymous]
     [HttpGet(nameof(GetQuizQuestions), Name = nameof(GetQuizQuestions))]
     public async Task<ActionResult<IEnumerable<Question>>> GetQuizQuestions([FromQuery] string category)
     {

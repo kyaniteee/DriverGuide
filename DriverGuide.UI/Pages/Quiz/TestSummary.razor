@@ -1,0 +1,161 @@
+﻿@page "/test-summary/{TestSessionId}"
+@using DriverGuide.Domain.Models
+@using DriverGuide.Domain.Enums
+@using System.ComponentModel.DataAnnotations
+@using DriverGuide.UI.Utils
+@inject IJSRuntime JS
+
+<div class="quiz-container summary-container">
+    @if (_isLoading)
+    {
+        <div class="quiz-loading">
+            <div class="blue-spinner"></div>
+            <p style="text-align: center; font-size: 2rem; font-weight: bold; margin-top: 1.5rem;">
+                Ładowanie wyników testu...
+            </p>
+        </div>
+    }
+    else if (_testSession == null || _questionAnswers == null)
+    {
+        <div class="error-container">
+            <h2>Nie znaleziono wyników testu</h2>
+            <p>Niestety, nie udało się załadować wyników testu. Sesja może nie istnieć lub wystąpił błąd.</p>
+            <button class="btn btn-primary" @onclick="GoToHome">Wróć do strony głównej</button>
+        </div>
+    }
+    else
+    {
+        <h1 class="summary-title">Podsumowanie testu na prawo jazdy</h1>
+
+        <div class="summary-stats-row">
+            <div class="summary-info-card">
+                <div class="info-row">
+                    <div class="info-label">Kategoria:</div>
+                    <div class="info-value">@GetCategoryName()</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Data rozpoczęcia:</div>
+                    <div class="info-value">@_testSession.StartDate.ToString("dd.MM.yyyy HH:mm")</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Data zakończenia:</div>
+                    <div class="info-value">@_testSession.EndDate?.ToString("dd.MM.yyyy HH:mm")</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Czas trwania:</div>
+                    <div class="info-value">@GetTestDuration()</div>
+                </div>
+            </div>
+
+            <div class="result-card @GetResultClass()">
+                <div class="result-status-badge @GetResultClass()">
+                    @if (IsTestPassed())
+                    {
+                        <span>ZALICZONY</span>
+                    }
+                    else
+                    {
+                        <span>NIEZALICZONY</span>
+                    }
+                </div>
+
+                <div class="result-score">
+                    <div class="score-fraction">
+                        <span class="score-numerator">@GetCorrectAnswersCount()</span>
+                        <span class="score-divider">/</span>
+                        <span class="score-denominator">@_questionAnswers.Count</span>
+                    </div>
+                    <div class="score-percentage">
+                        <span>@GetPercentage()%</span>
+                    </div>
+                </div>
+
+                @if (!IsTestPassed())
+                {
+                    <div class="missing-points">
+                        Brakowało @GetMissingPoints() @(GetMissingPointsText())
+                    </div>
+                }
+            </div>
+        </div>
+
+        <h2 class="section-title">Szczegółowe odpowiedzi</h2>
+
+        <div class="questions-list">
+            @foreach (var (answer, index) in _questionAnswers.Select((a, i) => (a, i)))
+            {
+                <div class="question-card @(IsAnswerCorrect(answer) ? "correct" : "incorrect")">
+                    <div class="question-header">
+                        <div class="question-number">Pytanie @(index + 1)</div>
+                        <div class="question-status">
+                            @if (IsAnswerCorrect(answer))
+                            {
+                                <div class="status-badge correct">
+                                    <i class="check-icon">✓</i>
+                                    <span>Poprawna odpowiedź</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="status-badge incorrect">
+                                    <i class="x-icon">✗</i>
+                                    <span>Niepoprawna odpowiedź</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <p class="question-text">@answer.Question</p>
+
+                    <div class="answers-list">
+                        @if (_questions.TryGetValue(answer.QuestionId ?? "", out var question))
+                        {
+                            @foreach (var answerOption in GetAnswerOptions(question))
+                            {
+                                <div class="answer-option @GetAnswerClass(answerOption, answer)">
+                                    <div class="answer-checkbox @GetAnswerClass(answerOption, answer)">
+                                        @if (answerOption == answer.CorrectQuestionAnswer)
+                                        {
+                                            <i class="check-icon">✓</i>
+                                        }
+                                        else if (answerOption == answer.UserQuestionAnswer && answerOption != answer.CorrectQuestionAnswer)
+                                        {
+                                            <i class="x-icon">✗</i>
+                                        }
+                                    </div>
+                                    <span class="answer-text">@answerOption</span>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="answer-option @(answer.UserQuestionAnswer == answer.CorrectQuestionAnswer ? "correct" : "incorrect")">
+                                <div class="answer-info">
+                                    <span>Twoja odpowiedź: <b>@answer.UserQuestionAnswer</b></span>
+                                </div>
+                            </div>
+                            @if (answer.UserQuestionAnswer != answer.CorrectQuestionAnswer)
+                            {
+                                <div class="answer-option correct">
+                                    <div class="answer-info">
+                                        <span>Poprawna odpowiedź: <b>@answer.CorrectQuestionAnswer</b></span>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    <div class="answer-meta">
+                        <span class="answer-time">Czas odpowiedzi: @GetAnswerTime(answer)</span>
+                        <span class="answer-points">Punkty: @GetQuestionPoints(answer.QuestionId)</span>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="actions-row">
+            <button class="btn btn-primary" @onclick="GoToHome">Strona główna</button>
+            <button class="btn btn-secondary" @onclick="RetakeTest">Rozwiąż test ponownie</button>
+        </div>
+    }
+</div>
