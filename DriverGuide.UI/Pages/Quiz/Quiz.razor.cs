@@ -334,7 +334,8 @@ namespace DriverGuide.UI.Pages.Quiz
                         TestSessionId = testSessionId,
                         QuestionId = currentQuestion.QuestionId.ToString(),
                         UserAnswer = selectedAnswer,
-                        EndDate = DateTimeOffset.Now
+                        EndDate = DateTimeOffset.Now,
+                        StartDate = testStartTime,
                     });
             }
             catch (Exception ex)
@@ -397,8 +398,11 @@ namespace DriverGuide.UI.Pages.Quiz
             {
                 // 1. Utwórz sesję testu
                 var categoryEnum = Enum.Parse<LicenseCategory>(Category ?? "B");
-                var createResponse = await Http.PostAsJsonAsync("/TestSession/Create",
-                    new { Category = categoryEnum });
+                var createResponse = await Http.PostAsJsonAsync("/TestSession/Create", new 
+                { 
+                        Category = categoryEnum, 
+                        StartDate = testStartTime 
+                });
 
                 if (!createResponse.IsSuccessStatusCode)
                 {

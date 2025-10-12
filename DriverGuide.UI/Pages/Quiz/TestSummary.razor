@@ -51,11 +51,11 @@
                 <div class="result-status-badge @GetResultClass()">
                     @if (IsTestPassed())
                     {
-                        <span>ZALICZONY</span>
+                        <span style="color: green; font-weight: bold">ZALICZONY</span>
                     }
                     else
                     {
-                        <span>NIEZALICZONY</span>
+                        <span style="color: red; font-weight: bold">NIEZALICZONY</span>
                     }
                 </div>
 
@@ -154,8 +154,7 @@
         </div>
 
         <div class="actions-row">
-            <button class="btn btn-primary" @onclick="GoToHome">Strona główna</button>
-            <button class="btn btn-secondary" @onclick="RetakeTest">Rozwiąż test ponownie</button>
+            <button class="btn btn-warning" @onclick="RetakeTest">Rozwiąż test ponownie</button>
         </div>
     }
 </div>

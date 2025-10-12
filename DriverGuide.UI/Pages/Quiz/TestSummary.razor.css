@@ -15,10 +15,19 @@
     --light-gray: #f8f9fa;
 }
 
-/* Kontener podsumowania - dopasowany do quiz-container */
+/* Blok podsumowania przewija się wewnątrz, nie nachodzi na header
+   i mieści się w granicach strony (bez drugiego suwaka okna) */
 .summary-container {
-    max-width: 1400px;
-    margin: 2rem auto;
+    position: fixed;
+    /* dopasuj 64px do realnej wysokości headera jeśli potrzeba */
+    top: calc(1rem + var(--header-height, 64px));
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(1400px, calc(100vw - 2rem));
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     background: rgba(255, 255, 255, 0.85);
     border-radius: 12px;
     box-shadow: 0 2px 16px rgba(44, 108, 223, 0.08);
@@ -312,8 +321,14 @@
     font-size: 1.1rem;
 }
 
-.check-icon, .x-icon {
+.x-icon {
     font-style: normal;
+    color: red;
+}
+
+.check-icon {
+    font-style: normal;
+    color: green;
 }
 
 .answer-meta {
@@ -361,25 +376,12 @@
         background-color: #5a6268;
     }
 
-/* Responsywność */
+/* Mobile – mniejsze odstępy, wciąż jeden suwak */
 @media (max-width: 768px) {
-    .summary-stats-row {
-        flex-direction: column;
-    }
-
-    .question-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-    }
-
-    .actions-row {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .btn {
-        margin-right: 0;
-        margin-bottom: 0.5rem;
+    .summary-container {
+        top: calc(0.5rem + var(--header-height, 64px));
+        bottom: 0.5rem;
+        width: min(100vw, calc(100vw - 1rem));
+        border-radius: 10px;
     }
 }

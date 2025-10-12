@@ -15,12 +15,12 @@ public class TestSessionRepository : RepositoryBase<TestSession>, ITestSessionRe
             .FirstOrDefaultAsync(ts => ts.TestSessionId == testSessionId);
     }
 
-    public async Task<TestSession> CreateSessionAsync(LicenseCategory category, Guid? userId = null)
+    public async Task<TestSession> CreateSessionAsync(LicenseCategory category, DateTimeOffset startDate, Guid? userId = null)
     {
         var session = new TestSession
         {
             TestSessionId = Guid.NewGuid().ToString(),
-            StartDate = DateTimeOffset.Now,
+            StartDate = startDate,
             UserId = userId
         };
 

@@ -18,7 +18,7 @@ public class TestSessionController : ControllerBase
     [HttpPost("Create")]
     public async Task<IActionResult> CreateTestSession([FromBody] CreateTestSessionRequest request)
     {
-        var session = await _testSessionRepository.CreateSessionAsync(request.Category);
+        var session = await _testSessionRepository.CreateSessionAsync(request.Category, request.StartDate);
         return Ok(session.TestSessionId);
     }
 
