@@ -28,5 +28,31 @@ window.revokeObjectURL = function (url) {
     }
 };
 
+// Register/unregister Escape key handler for modals
+window.modalKey = (function () {
+    let escHandler = null;
+    return {
+        registerEsc: function (dotNetRef, methodName) {
+            if (escHandler) return; // avoid multiple
+            escHandler = function (e) {
+                if (e.key === 'Escape' || e.key === 'Esc') {
+                    try {
+                        dotNetRef.invokeMethodAsync(methodName);
+                    } catch (err) {
+                        console.warn('Invoke Esc handler failed', err);
+                    }
+                }
+            };
+            document.addEventListener('keydown', escHandler);
+        },
+        unregisterEsc: function () {
+            if (escHandler) {
+                document.removeEventListener('keydown', escHandler);
+                escHandler = null;
+            }
+        }
+    };
+})();
+
 // Log that the script has been loaded
 console.log("videoUtils.js loaded successfully");

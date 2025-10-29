@@ -1,0 +1,81 @@
+@page "/pytania"
+@using DriverGuide.Domain.Models
+
+<div class="questions-container">
+ <h1 class="page-title">Baza pytañ</h1>
+
+ <div class="search-row">
+ <input class="search-input" placeholder="Szukaj pytania lub odpowiedzi..." @bind-value="searchTerm" @bind-value:event="oninput" />
+ </div>
+
+ @if (isLoading)
+ {
+ <div class="questions-loading">
+ <div class="blue-spinner"></div>
+ <p>£adowanie pytañ...</p>
+ </div>
+ }
+ else if (loadFailed)
+ {
+ <div class="error-box">
+ Nie uda³o siê za³adowaæ pytañ. Spróbuj ponownie póŸniej.
+ </div>
+ }
+ else
+ {
+ @if (!FilteredQuestions.Any())
+ {
+ <div class="no-results">Brak wyników dla zapytania: <b>@searchTerm</b></div>
+ }
+
+ <div class="table-wrapper">
+ <table class="questions-table">
+ <thead>
+ <tr>
+ <th class="col-lp">Lp.</th>
+ <th>Pytanie</th>
+ <th>OdpowiedŸ</th>
+ <th class="col-media">Za³¹cznik pytania</th>
+ </tr>
+ </thead>
+ <tbody>
+ @foreach (var item in FilteredQuestions.Select((q,i) => new { q, i }))
+ {
+ <tr>
+ <td class="col-lp">@(item.i +1)</td>
+ <td class="col-question">@item.q.Pytanie</td>
+ <td class="col-answer">@GetCorrectAnswerText(item.q)</td>
+ <td class="col-media">
+ @if (!string.IsNullOrWhiteSpace(item.q.Media))
+ {
+ <button class="btn btn-primary btn-media" @onclick="() => OpenMedia(item.q)">Poka¿</button>
+ }
+ </td>
+ </tr>
+ }
+ </tbody>
+ </table>
+ </div>
+ }
+</div>
+
+@if (isMediaOpen)
+{
+ <div class="media-modal-overlay" @onclick="CloseMedia">
+ <div class="media-modal" @onclick:stopPropagation>
+ <button class="media-modal-close" @onclick="CloseMedia">×</button>
+ @if (mediaContentType?.StartsWith("video/") == true)
+ {
+ <video src="@mediaUrl" controls class="media-modal-content"></video>
+ }
+ else if (mediaContentType?.StartsWith("image/") == true)
+ {
+ <img src="@mediaUrl" class="media-modal-content" />
+ }
+ else
+ {
+ <div>Nieobs³ugiwany typ za³¹cznika.</div>
+ }
+ </div>
+ </div>
+}
