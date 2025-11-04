@@ -1,0 +1,35 @@
+﻿.register-container {
+    max-width: 700px;
+    margin: 2rem auto;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(44, 108, 223, 0.08);
+    padding: 1.5rem;
+}
+
+.register-header-panel {
+    display: flex;
+    flex-direction: column; /* logo nad tytułem */
+    align-items: center; /* wyśrodkowanie poziome */
+    justify-content: center;
+    gap: .5rem;
+    background: rgba(45, 108, 223, 0.15);
+    border: 1px solid rgba(45, 108, 223, 0.25);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    text-align: center; /* tytuł w centrum */
+    box-shadow: 0 1px 6px rgba(44, 108, 223, 0.12);
+    backdrop-filter: saturate(120%) blur(2px);
+}
+
+.register-title {
+    color: #000000;
+    margin: 0;
+    font-weight: 800;
+}
+
+.register-container label {
+    color: #222;
+    font-weight: 600;
+}

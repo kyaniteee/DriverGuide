@@ -3,115 +3,64 @@
 @inject HttpClient Http
 @inject NavigationManager Navigation
 
-<h3 style="text-align:center;color:aliceblue;margin-top:40px;"><b>Rejestracja nowego u¿ytkownika</b></h3>
-
-<EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-
-    <div class="row mb-3">
-        <div class="col">
-            <label style="color:aliceblue">Login</label><br />
-            <InputText @bind-Value="registerModel.Login" class="form-control" />
-            <ValidationMessage For="@(() => registerModel.Login)" />
-        </div>
-        <div class="col">
-            <label style="color:aliceblue">Email</label><br />
-            <InputText @bind-Value="registerModel.Email" class="form-control" />
-            <ValidationMessage For="@(() => registerModel.Email)" />
-        </div>
+<div class="register-container">
+    <div class="register-header-panel">
+        <img src="images/steering-wheel.svg" alt="DriverGuide logo" width="64" height="64" />
+        <h5 class="register-title"><b>Rozpocznij naukê ju¿ teraz !</b></h5>
     </div>
 
-    <div class="row mb-3">
-        <div class="col">
-            <label style="color:aliceblue">Has³o</label><br />
-            <InputText @bind-Value="registerModel.Password" type="password" class="form-control" />
-            <ValidationMessage For="@(() => registerModel.Password)" />
-        </div>
-        <div class="col">
-            <label style="color:aliceblue">Powtórz has³o</label><br />
-            <InputText @bind-Value="registerModel.ConfirmPassword" type="password" class="form-control" />
-            <ValidationMessage For="@(() => registerModel.ConfirmPassword)" />
-        </div>
-    </div>
+    <EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
+        <DataAnnotationsValidator />
 
-    <div class="row mb-3">
-        <div class="col">
-            <label style="color:aliceblue">Imiê</label><br />
-            <InputText @bind-Value="registerModel.FirstName" class="form-control" />
-            <ValidationMessage For="@(() => registerModel.FirstName)" />
+        <div class="row mb-3">
+            <div class="col">
+                <label>Login</label><br />
+                <InputText @bind-Value="registerModel.Login" class="form-control" />
+                <ValidationMessage For="@(() => registerModel.Login)" />
+            </div>
+            <div class="col">
+                <label>Email</label><br />
+                <InputText @bind-Value="registerModel.Email" class="form-control" />
+                <ValidationMessage For="@(() => registerModel.Email)" />
+            </div>
         </div>
-        <div class="col">
-            <label style="color:aliceblue">Nazwisko</label><br />
-            <InputText @bind-Value="registerModel.LastName" class="form-control" />
-            <ValidationMessage For="@(() => registerModel.LastName)" />
+
+        <div class="row mb-3">
+            <div class="col">
+                <label>Has³o</label><br />
+                <InputText @bind-Value="registerModel.Password" type="password" class="form-control" />
+                <ValidationMessage For="@(() => registerModel.Password)" />
+            </div>
+            <div class="col">
+                <label>Powtórz has³o</label><br />
+                <InputText @bind-Value="registerModel.ConfirmPassword" type="password" class="form-control" />
+                <ValidationMessage For="@(() => registerModel.ConfirmPassword)" />
+            </div>
         </div>
-        <div class="col">
-            <label style="color:aliceblue">Data urodzenia</label><br />
-            <InputDate @bind-Value="registerModel.BirthDate" class="form-control" />
-            <ValidationMessage For="@(() => registerModel.BirthDate)" />
+
+        <div class="row mb-3">
+            <div class="col">
+                <label>Imiê</label><br />
+                <InputText @bind-Value="registerModel.FirstName" class="form-control" />
+                <ValidationMessage For="@(() => registerModel.FirstName)" />
+            </div>
+            <div class="col">
+                <label>Nazwisko</label><br />
+                <InputText @bind-Value="registerModel.LastName" class="form-control" />
+                <ValidationMessage For="@(() => registerModel.LastName)" />
+            </div>
+            <div class="col">
+                <label>Data urodzenia</label><br />
+                <InputDate @bind-Value="registerModel.BirthDate" class="form-control" />
+                <ValidationMessage For="@(() => registerModel.BirthDate)" />
+            </div>
         </div>
-    </div>
 
-    <button type="submit" class="btn btn-primary d-block mx-auto" style="font-size:1.3rem;font-weight:bold;padding:0.75rem 2.5rem;">Zarejestruj siê</button>
-</EditForm>
+        <button type="submit" class="btn btn-primary d-block mx-auto" style="font-size:1.3rem;font-weight:bold;padding:0.75rem 2.5rem;">Za³ó¿ darmowe konto</button>
+    </EditForm>
 
-@if (!string.IsNullOrWhiteSpace(message))
-{
-    <div class="alert alert-info mt-3">@message</div>
-}
-
-@code {
-    private RegisterRequest registerModel = new RegisterRequest();
-    private string? message;
-
-    private async Task HandleRegister()
+    @if (!string.IsNullOrWhiteSpace(message))
     {
-        if (registerModel.Password != registerModel.ConfirmPassword)
-        {
-            message = "Has³a nie s¹ zgodne.";
-            return;
-        }
-
-        var response = await Http.PostAsJsonAsync("/User/register", registerModel);
-        if (response.IsSuccessStatusCode)
-        {
-            message = "Rejestracja zakoñczona sukcesem. Przekierowanie do logowania...";
-            await Task.Delay(1500);
-            Navigation.NavigateTo("/");
-        }
-        else
-        {
-            var error = await response.Content.ReadAsStringAsync();
-            message = $"Wyst¹pi³ nieoczekiwany problem podczas rejestracji: {error}";
-        }
+        <div class="alert alert-info mt-3">@message</div>
     }
-
-    public class RegisterRequest
-    {
-        [Required(ErrorMessage = "Login jest wymagany")]
-        public string? Login { get; set; }
-
-        [Required(ErrorMessage = "Imiê jest wymagane")]
-        public string? FirstName { get; set; }
-
-        [Required(ErrorMessage = "Nazwisko jest wymagane")]
-        public string? LastName { get; set; }
-
-        [Required(ErrorMessage = "Data urodzenia jest wymagana")]
-        public DateOnly? BirthDate { get; set; }
-
-        [Required(ErrorMessage = "Email jest wymagany")]
-        [EmailAddress(ErrorMessage = "Nieprawid³owy adres email")]
-        public string? Email { get; set; }
-
-        [Required(ErrorMessage = "Has³o jest wymagane")]
-        [MinLength(6, ErrorMessage = "Has³o musi mieæ co najmniej 6 znaków")]
-        public string? Password { get; set; }
-
-        [System.Text.Json.Serialization.JsonIgnore]
-        [Required(ErrorMessage = "Powtórz has³o jest wymagane")]
-        [Compare(nameof(Password), ErrorMessage = "Has³a nie s¹ zgodne")]
-        public string? ConfirmPassword { get; set; }
-    }
-}
+</div>
