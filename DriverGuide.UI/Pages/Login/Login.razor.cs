@@ -1,104 +1,99 @@
-ï»¿using DriverGuide.UI.Models;
+using Blazored.LocalStorage;
+using DriverGuide.UI.Auth;
+using DriverGuide.UI.Models;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace DriverGuide.UI.Pages.Register
+namespace DriverGuide.UI.Pages.Login
 {
-    public partial class Register
+    public partial class Login
     {
         [Inject] private HttpClient Http { get; set; } = default!;
         [Inject] private NavigationManager Navigation { get; set; } = default!;
+        [Inject] private AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
+        [Inject] private ILocalStorageService LocalStorage { get; set; } = default!;
 
-        private RegisterRequest registerModel = new();
+        private LoginRequest loginModel = new();
         private Dictionary<string, List<string>> validationErrors = new();
         private string? generalMessage;
         private bool isLoading = false;
         private bool isSuccess = false;
 
-        private async Task HandleRegister()
+        private async Task HandleLogin()
         {
-            // Reset poprzednich bÅ‚Ä™dÃ³w
+            // Reset poprzednich b³êdów
             validationErrors.Clear();
             generalMessage = null;
-
-            // Walidacja potwierdzenia hasÅ‚a (tylko na froncie)
-            if (registerModel.Password != registerModel.ConfirmPassword)
-            {
-                validationErrors["ConfirmPassword"] = new List<string> { "HasÅ‚a nie sÄ… zgodne" };
-                return;
-            }
-
-            // SprawdÅº, czy data urodzenia jest wybrana
-            if (!registerModel.BirthDate.HasValue)
-            {
-                validationErrors["BirthDate"] = new List<string> { "Data urodzenia jest wymagana" };
-                return;
-            }
 
             isLoading = true;
             StateHasChanged();
 
             try
             {
-                // Przygotuj request do API (bez ConfirmPassword)
-                var apiRequest = new
-                {
-                    registerModel.Login,
-                    registerModel.FirstName,
-                    registerModel.LastName,
-                    BirthDate = registerModel.BirthDate.Value,
-                    registerModel.Email,
-                    registerModel.Password
-                };
-
-                var response = await Http.PostAsJsonAsync("/User/register", apiRequest);
+                var response = await Http.PostAsJsonAsync("/User/login", loginModel);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    isSuccess = true;
-                    generalMessage = "Rejestracja zakoÅ„czona sukcesem. Przekierowanie do logowania...";
-                    StateHasChanged();
-                    await Task.Delay(2000);
-                    Navigation.NavigateTo("/login");
+                    var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
+                    
+                    if (loginResponse != null && !string.IsNullOrEmpty(loginResponse.Token))
+                    {
+                        // Zapisz token w localStorage
+                        await LocalStorage.SetItemAsync("authToken", loginResponse.Token);
+
+                        // Powiadom AuthenticationStateProvider o logowaniu
+                        ((ServerAuthenticationStateProvider)AuthStateProvider).NotifyUserAuthentication(loginResponse.Token);
+
+                        isSuccess = true;
+                        generalMessage = "Logowanie zakoñczone sukcesem. Przekierowanie...";
+                        StateHasChanged();
+                        await Task.Delay(1500);
+                        Navigation.NavigateTo("/profile", true);
+                    }
                 }
                 else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
                 {
-                    // ObsÅ‚uga bÅ‚Ä™dÃ³w walidacji z backendu
+                    // Obs³uga b³êdów walidacji
                     var errorContent = await response.Content.ReadAsStringAsync();
-
+                    
                     try
                     {
                         var options = new JsonSerializerOptions
                         {
                             PropertyNameCaseInsensitive = true
                         };
-
+                        
                         var validationResponse = JsonSerializer.Deserialize<ValidationErrorResponse>(errorContent, options);
-
+                        
                         if (validationResponse?.Errors != null && validationResponse.Errors.Any())
                         {
                             validationErrors = validationResponse.Errors;
-                            generalMessage = validationResponse.Message ?? "WystÄ…piÅ‚y bÅ‚Ä™dy walidacji";
+                            generalMessage = validationResponse.Message ?? "Wyst¹pi³y b³êdy walidacji";
                         }
                         else
                         {
-                            generalMessage = "WystÄ…piÅ‚ bÅ‚Ä…d podczas rejestracji. SprÃ³buj ponownie.";
+                            generalMessage = "Wyst¹pi³ b³¹d podczas logowania. Spróbuj ponownie.";
                         }
                     }
                     catch
                     {
-                        generalMessage = $"WystÄ…piÅ‚ bÅ‚Ä…d podczas rejestracji: {errorContent}";
+                        generalMessage = errorContent;
                     }
+                }
+                else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    generalMessage = "Nieprawid³owy login lub has³o";
                 }
                 else
                 {
-                    generalMessage = "WystÄ…piÅ‚ nieoczekiwany problem podczas rejestracji. SprÃ³buj ponownie pÃ³Åºniej.";
+                    generalMessage = "Wyst¹pi³ nieoczekiwany problem podczas logowania. Spróbuj ponownie póŸniej.";
                 }
             }
             catch (Exception ex)
             {
-                generalMessage = $"WystÄ…piÅ‚ bÅ‚Ä…d poÅ‚Ä…czenia: {ex.Message}";
+                generalMessage = $"Wyst¹pi³ b³¹d po³¹czenia: {ex.Message}";
             }
             finally
             {
@@ -128,7 +123,7 @@ namespace DriverGuide.UI.Pages.Register
 
         private string GetButtonCssClass()
         {
-            return isLoading ? "btn btn-primary btn-register btn-loading" : "btn btn-primary btn-register";
+            return isLoading ? "btn btn-primary btn-login btn-loading" : "btn btn-primary btn-login";
         }
 
         private string GetAlertCssClass()

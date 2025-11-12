@@ -1,0 +1,146 @@
+@page "/profile"
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthStateProvider
+
+<AuthorizeView>
+    <Authorized>
+        <div class="profile-container">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <h3 class="profile-name">@userName</h3>
+                <p class="profile-email">@userEmail</p>
+            </div>
+
+            <div class="profile-content">
+                <div class="profile-section">
+                    <h5 class="section-title">
+                        <i class="bi bi-person-badge me-2"></i>
+                        Informacje o koncie
+                    </h5>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Login</label>
+                            <div class="info-value">@userName</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Email</label>
+                            <div class="info-value">@userEmail</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Imiê</label>
+                            <div class="info-value">@firstName</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Nazwisko</label>
+                            <div class="info-value">@lastName</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Data urodzenia</label>
+                            <div class="info-value">@birthDate</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Role</label>
+                            <div class="info-value">
+                                @foreach (var role in userRoles)
+                                {
+                                    <span class="badge bg-primary me-1">@role</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-section">
+                    <h5 class="section-title">
+                        <i class="bi bi-graph-up me-2"></i>
+                        Statystyki
+                    </h5>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon bg-primary">
+                                <i class="bi bi-clipboard-check"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Ukoñczone testy</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-success">
+                                <i class="bi bi-trophy"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">0%</div>
+                                <div class="stat-label">Œredni wynik</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-warning">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Czas nauki (godz.)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-section">
+                    <h5 class="section-title">
+                        <i class="bi bi-gear me-2"></i>
+                        Akcje
+                    </h5>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline-primary" onclick="location.href='/test'">
+                            <i class="bi bi-play-circle me-2"></i>
+                            Rozpocznij test
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="location.href='/wyniki'">
+                            <i class="bi bi-graph-up me-2"></i>
+                            Zobacz wyniki
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="text-center mt-5">
+            <h3>Musisz byæ zalogowany aby zobaczyæ profil</h3>
+            <a href="/login" class="btn btn-primary mt-3">PrzejdŸ do logowania</a>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private string userName = string.Empty;
+    private string userEmail = string.Empty;
+    private string firstName = string.Empty;
+    private string lastName = string.Empty;
+    private string birthDate = string.Empty;
+    private List<string> userRoles = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            userName = user.Identity.Name ?? "U¿ytkownik";
+            userEmail = user.FindFirst(ClaimTypes.Email)?.Value ?? user.FindFirst("email")?.Value ?? "Brak";
+            firstName = user.FindFirst("FirstName")?.Value ?? "Brak";
+            lastName = user.FindFirst("LastName")?.Value ?? "Brak";
+            birthDate = user.FindFirst("BirthDate")?.Value ?? "Brak";
+            userRoles = user.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
+
+            if (!userRoles.Any())
+            {
+                userRoles.Add("User");
+            }
+        }
+    }
+}

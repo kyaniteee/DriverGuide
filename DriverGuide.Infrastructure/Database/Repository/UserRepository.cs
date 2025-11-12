@@ -1,6 +1,7 @@
 ﻿using DriverGuide.Domain.Interfaces;
 using DriverGuide.Domain.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace DriverGuide.Infrastructure.Database;
 
@@ -52,5 +53,14 @@ public class UserRepository : RepositoryBase<User>, IUserRepository
         }
 
         return false;
+    }
+
+    public async Task<User?> GetWithRolesAndClaimsAsync(string loginOrEmail)
+    {
+        return await ((DriverGuideDbContext)Context).Users
+            .Include(u => u.UserRoles!)
+                .ThenInclude(ur => ur.Role)
+            .Include(u => u.Claims)
+            .FirstOrDefaultAsync(u => u.UserName == loginOrEmail || u.Email == loginOrEmail);
     }
 }

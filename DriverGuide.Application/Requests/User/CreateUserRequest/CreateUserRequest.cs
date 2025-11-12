@@ -4,10 +4,10 @@ namespace DriverGuide.Application.Requests;
 
 public class CreateUserRequest : IRequest<Guid>
 {
-    public string? Login { get; set; }
-    public string? FirstName { get; set; }
-    public string? LastName { get; set; }
-    public DateOnly? BirthDate { get; set; }
-    public required string Email { get; init; }
-    public required string Password { get; init; }
+    public required string Login { get; set; }
+    public required string FirstName { get; set; }
+    public required string LastName { get; set; }
+    public required DateOnly BirthDate { get; set; }
+    public required string Email { get; set; }
+    public required string Password { get; set; }
 }

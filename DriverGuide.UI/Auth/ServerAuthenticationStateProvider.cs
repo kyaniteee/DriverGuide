@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
+﻿using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
 using System.Text.Json;
 
@@ -7,12 +8,40 @@ namespace DriverGuide.UI.Auth;
 public class ServerAuthenticationStateProvider : AuthenticationStateProvider
 {
     private readonly HttpClient _httpClient;
+    private readonly ILocalStorageService _localStorage;
     private ClaimsPrincipal _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
 
-    public ServerAuthenticationStateProvider(HttpClient httpClient)
+    public ServerAuthenticationStateProvider(HttpClient httpClient, ILocalStorageService localStorage)
     {
         _httpClient = httpClient;
+        _localStorage = localStorage;
     }
+
+    public override async Task<AuthenticationState> GetAuthenticationStateAsync()
+    {
+        try
+        {
+            var token = await _localStorage.GetItemAsync<string>("authToken");
+            
+            if (string.IsNullOrEmpty(token))
+            {
+                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+            }
+
+            var authenticatedUser = new ClaimsPrincipal(
+                new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt"));
+
+            _currentUser = authenticatedUser;
+            SetAuthHeader(token);
+
+            return new AuthenticationState(_currentUser);
+        }
+        catch
+        {
+            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+        }
+    }
+
     private static IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
     {
         var claims = new List<Claim>();
@@ -37,14 +66,7 @@ public class ServerAuthenticationStateProvider : AuthenticationStateProvider
         }
         return Convert.FromBase64String(base64);
     }
-    public override Task<AuthenticationState> GetAuthenticationStateAsync()
-    {
-        // W przyszłości można tu dodać faktyczną logikę uwierzytelniania
-        // np. sprawdzając token JWT w localStorage i weryfikując go
-        return Task.FromResult(new AuthenticationState(_currentUser)); 
-    }
 
-    // Metoda do używania, gdy użytkownik się zaloguje
     public void NotifyUserAuthentication(string token)
     {
         var authenticatedUser = new ClaimsPrincipal(
@@ -56,13 +78,19 @@ public class ServerAuthenticationStateProvider : AuthenticationStateProvider
         var authState = Task.FromResult(new AuthenticationState(_currentUser));
         NotifyAuthenticationStateChanged(authState);
     }
+
     public void SetAuthHeader(string token)
     {
-        _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        _httpClient.DefaultRequestHeaders.Authorization = 
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
     }
-    // Metoda do używania, gdy użytkownik się wyloguje
-    public void NotifyUserLogout()
+
+    public async Task NotifyUserLogout()
     {
+        await _localStorage.RemoveItemAsync("authToken");
+        
+        _httpClient.DefaultRequestHeaders.Authorization = null;
+
         var anonymousUser = new ClaimsPrincipal(new ClaimsIdentity());
         _currentUser = anonymousUser;
 

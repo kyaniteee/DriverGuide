@@ -1,66 +1,107 @@
 @page "/register"
-@using System.ComponentModel.DataAnnotations
-@inject HttpClient Http
-@inject NavigationManager Navigation
 
 <div class="register-container">
     <div class="register-header-panel">
         <img src="images/steering-wheel.svg" alt="DriverGuide logo" width="64" height="64" />
-        <h5 class="register-title"><b>Rozpocznij naukê ju¿ teraz !</b></h5>
+        <h5 class="register-title"><b>Rozpocznij naukê ju¿ teraz!</b></h5>
     </div>
 
     <EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
-        <DataAnnotationsValidator />
-
         <div class="row mb-3">
             <div class="col">
                 <label>Login</label><br />
-                <InputText @bind-Value="registerModel.Login" class="form-control" />
-                <ValidationMessage For="@(() => registerModel.Login)" />
+                <InputText @bind-Value="registerModel.Login" class="@GetCssClass("Login")" disabled="@isLoading" />
+                @if (HasFieldErrors("Login"))
+                {
+                    <div class="validation-message">@GetFieldErrors("Login")</div>
+                }
             </div>
             <div class="col">
                 <label>Email</label><br />
-                <InputText @bind-Value="registerModel.Email" class="form-control" />
-                <ValidationMessage For="@(() => registerModel.Email)" />
+                <InputText @bind-Value="registerModel.Email" class="@GetCssClass("Email")" disabled="@isLoading" />
+                @if (HasFieldErrors("Email"))
+                {
+                    <div class="validation-message">@GetFieldErrors("Email")</div>
+                }
             </div>
         </div>
 
         <div class="row mb-3">
             <div class="col">
                 <label>Has³o</label><br />
-                <InputText @bind-Value="registerModel.Password" type="password" class="form-control" />
-                <ValidationMessage For="@(() => registerModel.Password)" />
+                <InputText @bind-Value="registerModel.Password" type="password" class="@GetCssClass("Password")" disabled="@isLoading" />
+                @if (HasFieldErrors("Password"))
+                {
+                    <div class="validation-message">@GetFieldErrors("Password")</div>
+                }
             </div>
             <div class="col">
                 <label>Powtórz has³o</label><br />
-                <InputText @bind-Value="registerModel.ConfirmPassword" type="password" class="form-control" />
-                <ValidationMessage For="@(() => registerModel.ConfirmPassword)" />
+                <InputText @bind-Value="registerModel.ConfirmPassword" type="password" class="@GetCssClass("ConfirmPassword")" disabled="@isLoading" />
+                @if (HasFieldErrors("ConfirmPassword"))
+                {
+                    <div class="validation-message">@GetFieldErrors("ConfirmPassword")</div>
+                }
             </div>
         </div>
 
         <div class="row mb-3">
             <div class="col">
                 <label>Imiê</label><br />
-                <InputText @bind-Value="registerModel.FirstName" class="form-control" />
-                <ValidationMessage For="@(() => registerModel.FirstName)" />
+                <InputText @bind-Value="registerModel.FirstName" class="@GetCssClass("FirstName")" disabled="@isLoading" />
+                @if (HasFieldErrors("FirstName"))
+                {
+                    <div class="validation-message">@GetFieldErrors("FirstName")</div>
+                }
             </div>
             <div class="col">
                 <label>Nazwisko</label><br />
-                <InputText @bind-Value="registerModel.LastName" class="form-control" />
-                <ValidationMessage For="@(() => registerModel.LastName)" />
+                <InputText @bind-Value="registerModel.LastName" class="@GetCssClass("LastName")" disabled="@isLoading" />
+                @if (HasFieldErrors("LastName"))
+                {
+                    <div class="validation-message">@GetFieldErrors("LastName")</div>
+                }
             </div>
             <div class="col">
                 <label>Data urodzenia</label><br />
-                <InputDate @bind-Value="registerModel.BirthDate" class="form-control" />
-                <ValidationMessage For="@(() => registerModel.BirthDate)" />
+                <InputDate @bind-Value="registerModel.BirthDate" class="@GetCssClass("BirthDate")" disabled="@isLoading" />
+                @if (HasFieldErrors("BirthDate"))
+                {
+                    <div class="validation-message">@GetFieldErrors("BirthDate")</div>
+                }
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary d-block mx-auto" style="font-size:1.3rem;font-weight:bold;padding:0.75rem 2.5rem;">Za³ó¿ darmowe konto</button>
+        <div class="text-center mb-3">
+            <button type="submit" 
+                    class="@GetButtonCssClass()" 
+                    disabled="@isLoading"
+                    style="font-size:1.3rem;font-weight:bold;padding:0.75rem 2.5rem;">
+                @if (isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>Rejestrowanie...</span>
+                }
+                else
+                {
+                    <span>Za³ó¿ darmowe konto</span>
+                }
+            </button>
+        </div>
     </EditForm>
 
-    @if (!string.IsNullOrWhiteSpace(message))
+    @if (!string.IsNullOrWhiteSpace(generalMessage))
     {
-        <div class="alert alert-info mt-3">@message</div>
+        <div class="@GetAlertCssClass()" role="alert">
+            @if (isSuccess)
+            {
+                <i class="bi bi-check-circle-fill me-2"></i>
+            }
+            else
+            {
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            }
+            @generalMessage
+        </div>
     }
 </div>

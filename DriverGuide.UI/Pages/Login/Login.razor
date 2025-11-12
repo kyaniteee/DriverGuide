@@ -1,0 +1,64 @@
+@page "/login"
+
+<div class="login-container">
+    <div class="login-header-panel">
+        <img src="images/steering-wheel.svg" alt="DriverGuide logo" width="64" height="64" />
+        <h5 class="login-title"><b>Zaloguj siê do swojego konta</b></h5>
+    </div>
+
+    <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+        <div class="mb-3">
+            <label>Login lub Email</label><br />
+            <InputText @bind-Value="loginModel.Login" class="@GetCssClass("Login")" disabled="@isLoading" placeholder="WprowadŸ login lub email" />
+            @if (HasFieldErrors("Login"))
+            {
+                <div class="validation-message">@GetFieldErrors("Login")</div>
+            }
+        </div>
+
+        <div class="mb-3">
+            <label>Has³o</label><br />
+            <InputText @bind-Value="loginModel.Password" type="password" class="@GetCssClass("Password")" disabled="@isLoading" placeholder="WprowadŸ has³o" />
+            @if (HasFieldErrors("Password"))
+            {
+                <div class="validation-message">@GetFieldErrors("Password")</div>
+            }
+        </div>
+
+        <div class="text-center mb-3">
+            <button type="submit" 
+                    class="@GetButtonCssClass()" 
+                    disabled="@isLoading"
+                    style="font-size:1.3rem;font-weight:bold;padding:0.75rem 2.5rem;width:100%;">
+                @if (isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>Logowanie...</span>
+                }
+                else
+                {
+                    <span>WejdŸ</span>
+                }
+            </button>
+        </div>
+    </EditForm>
+
+    @if (!string.IsNullOrWhiteSpace(generalMessage))
+    {
+        <div class="@GetAlertCssClass()" role="alert">
+            @if (isSuccess)
+            {
+                <i class="bi bi-check-circle-fill me-2"></i>
+            }
+            else
+            {
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            }
+            @generalMessage
+        </div>
+    }
+
+    <div class="text-center mt-3">
+        <p>Nie masz jeszcze konta? <a href="/register">Zarejestruj siê</a></p>
+    </div>
+</div>

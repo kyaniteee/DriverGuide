@@ -1,4 +1,5 @@
-﻿using DriverGuide.Application.Requests;
+﻿using DriverGuide.Application.Models;
+using DriverGuide.Application.Requests;
 using DriverGuide.Domain.Interfaces;
 using DriverGuide.Domain.Models;
 using MediatR;
@@ -33,11 +34,29 @@ public class UserController(IMediator mediator, IUserRepository userReposiotory,
         try
         {
             var result = await mediator.Send(request);
-            return Ok(new { token = result });
+            return Ok(new { userId = result, message = "Rejestracja zakończona sukcesem" });
+        }
+        catch (FluentValidation.ValidationException ex)
+        {
+            // FluentValidation ValidationException
+            var errorResponse = new ValidationErrorResponse
+            {
+                Message = "Wystąpiły błędy walidacji",
+                Errors = ex.Errors
+                    .GroupBy(e => e.PropertyName)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.Select(e => e.ErrorMessage).ToList()
+                    )
+            };
+
+            logger.LogWarning("Validation failed for registration: {@Errors}", errorResponse.Errors);
+            return BadRequest(errorResponse);
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            logger.LogError(ex, "Unexpected error during registration");
+            return StatusCode(500, new { message = "Wystąpił nieoczekiwany błąd podczas rejestracji" });
         }
     }
 

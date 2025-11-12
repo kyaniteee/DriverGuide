@@ -1,5 +1,5 @@
-﻿.register-container {
-    max-width: 700px;
+.login-container {
+    max-width: 500px;
     margin: 2rem auto;
     background: rgba(255, 255, 255, 0.85);
     border-radius: 12px;
@@ -7,31 +7,32 @@
     padding: 1.5rem;
 }
 
-.register-header-panel {
+.login-header-panel {
     display: flex;
-    flex-direction: column; /* logo nad tytułem */
-    align-items: center; /* wyśrodkowanie poziome */
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
     gap: .5rem;
     background: rgba(45, 108, 223, 0.15);
     border: 1px solid rgba(45, 108, 223, 0.25);
     border-radius: 12px;
     padding: 1rem;
-    margin-bottom: 1rem;
-    text-align: center; /* tytuł w centrum */
+    margin-bottom: 1.5rem;
+    text-align: center;
     box-shadow: 0 1px 6px rgba(44, 108, 223, 0.12);
     backdrop-filter: saturate(120%) blur(2px);
 }
 
-.register-title {
+.login-title {
     color: #000000;
     margin: 0;
     font-weight: 800;
 }
 
-.register-container label {
+.login-container label {
     color: #222;
     font-weight: 600;
+    margin-bottom: 0.5rem;
 }
 
 .form-control.is-invalid {
@@ -46,13 +47,12 @@
     display: block;
 }
 
-.btn-register {
+.btn-login {
     position: relative;
-    min-width: 250px;
     transition: all 0.3s ease;
 }
 
-.btn-register.btn-loading {
+.btn-login.btn-loading {
     opacity: 0.7;
     cursor: not-allowed;
 }
@@ -92,4 +92,14 @@
     background-color: rgba(220, 53, 69, 0.1);
     border: 1px solid rgba(220, 53, 69, 0.3);
     color: #721c24;
+}
+
+.login-container a {
+    color: #1b6ec2;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.login-container a:hover {
+    text-decoration: underline;
 }
