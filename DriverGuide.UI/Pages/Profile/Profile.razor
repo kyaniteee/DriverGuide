@@ -1,6 +1,7 @@
 @page "/profile"
 @using System.Security.Claims
 @inject AuthenticationStateProvider AuthStateProvider
+@inject HttpClient Http
 
 <AuthorizeView>
     <Authorized>
@@ -57,35 +58,99 @@
                         <i class="bi bi-graph-up me-2"></i>
                         Statystyki
                     </h5>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon bg-primary">
-                                <i class="bi bi-clipboard-check"></i>
+                    @if (_isLoadingStats)
+                    {
+                        <div class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="visually-hidden">£adowanie...</span>
                             </div>
-                            <div class="stat-info">
-                                <div class="stat-value">0</div>
-                                <div class="stat-label">Ukoñczone testy</div>
+                            <p class="text-muted mt-2">£adowanie statystyk...</p>
+                        </div>
+                    }
+                    else if (_totalTests == 0)
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Nie masz jeszcze ¿adnych testów. Rozpocznij swój pierwszy test!
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon bg-primary">
+                                    <i class="bi bi-clipboard-check"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-value">@_completedTests</div>
+                                    <div class="stat-label">Ukoñczone testy</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon bg-success">
+                                    <i class="bi bi-trophy"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-value">@_passedTests</div>
+                                    <div class="stat-label">Zaliczone</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon bg-danger">
+                                    <i class="bi bi-x-circle"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-value">@_failedTests</div>
+                                    <div class="stat-label">Niezaliczone</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon bg-warning">
+                                    <i class="bi bi-clock-history"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-value">@_incompleteTests</div>
+                                    <div class="stat-label">Nieukoñczone</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon bg-info">
+                                    <i class="bi bi-percent"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-value">@GetAverageScoreDisplay()</div>
+                                    <div class="stat-label">Œredni wynik</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon bg-success">
+                                    <i class="bi bi-star-fill"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-value">@GetBestScoreDisplay()</div>
+                                    <div class="stat-label">Najlepszy wynik</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon bg-primary">
+                                    <i class="bi bi-check-circle"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-value">@GetPassRateDisplay()</div>
+                                    <div class="stat-label">WskaŸnik zdawalnoœci</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon bg-secondary">
+                                    <i class="bi bi-clock"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-value">@GetStudyHoursDisplay()</div>
+                                    <div class="stat-label">Czas nauki (godz.)</div>
+                                </div>
                             </div>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-icon bg-success">
-                                <i class="bi bi-trophy"></i>
-                            </div>
-                            <div class="stat-info">
-                                <div class="stat-value">0%</div>
-                                <div class="stat-label">Œredni wynik</div>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon bg-warning">
-                                <i class="bi bi-clock-history"></i>
-                            </div>
-                            <div class="stat-info">
-                                <div class="stat-value">0</div>
-                                <div class="stat-label">Czas nauki (godz.)</div>
-                            </div>
-                        </div>
-                    </div>
+                    }
                 </div>
 
                 <div class="profile-section">
@@ -94,11 +159,11 @@
                         Akcje
                     </h5>
                     <div class="action-buttons">
-                        <button class="btn btn-outline-primary" onclick="location.href='/test'">
+                        <button class="btn btn-outline-primary" @onclick="StartNewTest">
                             <i class="bi bi-play-circle me-2"></i>
                             Rozpocznij test
                         </button>
-                        <button class="btn btn-outline-secondary" onclick="location.href='/wyniki'">
+                        <button class="btn btn-outline-secondary" @onclick="ViewResults">
                             <i class="bi bi-graph-up me-2"></i>
                             Zobacz wyniki
                         </button>
@@ -114,33 +179,3 @@
         </div>
     </NotAuthorized>
 </AuthorizeView>
-
-@code {
-    private string userName = string.Empty;
-    private string userEmail = string.Empty;
-    private string firstName = string.Empty;
-    private string lastName = string.Empty;
-    private string birthDate = string.Empty;
-    private List<string> userRoles = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (user.Identity?.IsAuthenticated == true)
-        {
-            userName = user.Identity.Name ?? "U¿ytkownik";
-            userEmail = user.FindFirst(ClaimTypes.Email)?.Value ?? user.FindFirst("email")?.Value ?? "Brak";
-            firstName = user.FindFirst("FirstName")?.Value ?? "Brak";
-            lastName = user.FindFirst("LastName")?.Value ?? "Brak";
-            birthDate = user.FindFirst("BirthDate")?.Value ?? "Brak";
-            userRoles = user.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
-
-            if (!userRoles.Any())
-            {
-                userRoles.Add("User");
-            }
-        }
-    }
-}

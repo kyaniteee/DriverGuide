@@ -1,5 +1,251 @@
-﻿<h3>Results</h3>
+﻿@page "/wyniki"
+@using Microsoft.AspNetCore.Components.Authorization
+
+<PageTitle>Moje Wyniki - DriverGuide</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <div class="results-container">
+            @if (_isLoading)
+            {
+                <div class="loading-container">
+                    <div class="spinner"></div>
+                    <p>Ładowanie wyników...</p>
+                </div>
+            }
+            else if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="error-container">
+                    <div class="error-icon">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <h3>@_errorMessage</h3>
+                    <button class="btn btn-primary" @onclick="GoToProfile">
+                        Powrót do profilu
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="results-header">
+                    <div class="header-content">
+                        <h1 class="results-title">
+                            <i class="bi bi-clipboard-data me-2"></i>
+                            Moje Wyniki
+                        </h1>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-back" @onclick="GoToProfile">
+                            <i class="bi bi-arrow-left me-2"></i>
+                            Powrót
+                        </button>
+                        <button class="btn btn-new-test" @onclick="StartNewTest">
+                            <i class="bi bi-play-circle me-2"></i>
+                            Nowy test
+                        </button>
+                    </div>
+                </div>
+
+                @if (!_testResults.Any())
+                {
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="bi bi-inbox"></i>
+                        </div>
+                        <h3>Brak wyników</h3>
+                        <p>Nie rozwiązałeś jeszcze żadnego testu. Rozpocznij teraz i zobacz swoje wyniki!</p>
+                        <button class="btn btn-new-test" @onclick="StartNewTest">
+                            <i class="bi bi-play-circle me-2"></i>
+                            Rozpocznij pierwszy test
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <!-- Statystyki -->
+                    <div class="stats-summary">
+                        <div class="stat-card">
+                            <div class="stat-icon bg-primary">
+                                <i class="bi bi-clipboard-check"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">@GetCompletedCount()</div>
+                                <div class="stat-label">Ukończone testy</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-success">
+                                <i class="bi bi-trophy"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">@GetPassedCount()</div>
+                                <div class="stat-label">Zaliczone</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-danger">
+                                <i class="bi bi-x-circle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">@GetFailedCount()</div>
+                                <div class="stat-label">Niezaliczone</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-incomplete">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">@GetIncompleteCount()</div>
+                                <div class="stat-label">Nieukończone</div>
+                            </div>
+                        </div>
+                        @if (GetCompletedCount() > 0)
+                        {
+                            <div class="stat-card">
+                                <div class="stat-icon bg-warning">
+                                    <i class="bi bi-star-fill"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-value">@GetAverageScore()</div>
+                                    <div class="stat-label">Średni wynik (pkt)</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="results-list">
+                        @foreach (var result in _testResults)
+                        {
+                            <div class="result-card @GetResultClass(result)">
+                                <div class="result-header">
+                                    <div class="result-date">
+                                        <i class="bi bi-calendar3 me-2"></i>
+                                        @if (result.IsCompleted)
+                                        {
+                                            @result.EndDate?.ToString("dd.MM.yyyy HH:mm")
+                                        }
+                                        else
+                                        {
+                                            <span>Rozpoczęto: @result.StartDate.ToString("dd.MM.yyyy HH:mm")</span>
+                                        }
+                                    </div>
+                                    <span class="result-badge @GetResultBadgeClass(result)">
+                                        @GetResultText(result)
+                                    </span>
+                                </div>
+
+                                <div class="result-body">
+                                    <div class="result-score-section">
+                                        <div class="score-circle @GetResultClass(result)">
+                                            @if (result.IsCompleted)
+                                            {
+                                                <span class="score-value">@((int)(result.Result ?? 0))%</span>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-clock-history"></i>
+                                            }
+                                        </div>
+                                        <div class="score-details">
+                                            @if (result.IsCompleted)
+                                            {
+                                                <div class="score-fraction">
+                                                    <span class="correct">@result.CorrectAnswers</span>
+                                                    <span class="divider">/</span>
+                                                    <span class="total">@result.TotalQuestions</span>
+                                                </div>
+                                                <div class="score-label">poprawnych odpowiedzi</div>
+                                            }
+                                            else
+                                            {
+                                                <div class="incomplete-info">
+                                                    @if (result.TotalQuestions > 0)
+                                                    {
+                                                        <div class="score-fraction">
+                                                            <span class="correct">@result.TotalQuestions</span>
+                                                        </div>
+                                                        <div class="score-label">udzielonych odpowiedzi</div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="score-label">Test w trakcie...</div>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <div class="result-info">
+                                        <div class="info-item">
+                                            <i class="bi bi-clock me-2"></i>
+                                            <span class="info-label">@(result.IsCompleted ? "Czas:" : "Status:")</span>
+                                            <span class="info-value">@result.Duration</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <i class="bi bi-calendar-check me-2"></i>
+                                            <span class="info-label">Data rozpoczęcia:</span>
+                                            <span class="info-value">@result.StartDate.ToString("dd.MM.yyyy")</span>
+                                        </div>
+                                        @if (!result.IsCompleted)
+                                        {
+                                            <div class="info-item incomplete-notice">
+                                                <i class="bi bi-info-circle me-2"></i>
+                                                <span class="info-value">Test został rozpoczęty, ale nie ukończony</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="result-footer">
+                                    @if (result.IsCompleted)
+                                    {
+                                        <button class="btn btn-view" @onclick="() => ViewDetails(result.TestSessionId)">
+                                            <i class="bi bi-eye me-2"></i>
+                                            Zobacz szczegóły
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-continue" @onclick="() => ContinueTest(result.TestSessionId)">
+                                            <i class="bi bi-play-circle me-2"></i>
+                                            Kontynuuj test
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="not-authorized-container">
+            <div class="not-authorized-content">
+                <div class="not-authorized-icon">
+                    <i class="bi bi-lock"></i>
+                </div>
+                <h2>Wymagane logowanie</h2>
+                <p>Musisz być zalogowany, aby zobaczyć swoje wyniki testów.</p>
+                <button class="btn btn-new-test" onclick="location.href='/login'">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>
+                    Przejdź do logowania
+                </button>
+            </div>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
-
+    private string GetAverageScore()
+    {
+        var completedTests = _testResults.Where(r => r.IsCompleted).ToList();
+        if (!completedTests.Any()) return "0/32";
+        
+        var avgCorrectAnswers = (int)completedTests.Average(r => r.CorrectAnswers);
+        var totalQuestions = completedTests.FirstOrDefault()?.TotalQuestions ?? 32;
+        
+        return $"{avgCorrectAnswers}/{totalQuestions}";
+    }
 }

@@ -23,6 +23,9 @@ namespace DriverGuide.UI.Pages.Quiz
         [Parameter]
         public string? Category { get; set; }
 
+        [Parameter]
+        public string? TestSessionId { get; set; }
+
         private double questionsCount => questions?.Count ?? 32;
 
         private string? fileBlobUrl;
@@ -36,6 +39,8 @@ namespace DriverGuide.UI.Pages.Quiz
         private string? testSessionId;
         private readonly List<StoredQuestionAnswer> storedAnswers = [];
         private DateTimeOffset testStartTime;
+        private bool isContinuingTest = false;
+        private HashSet<string> answeredQuestionIds = new();
 
         private Question? currentQuestion;
         private readonly List<Question>? questions = [];
@@ -61,12 +66,39 @@ namespace DriverGuide.UI.Pages.Quiz
             // Zapisz czas rozpoczęcia testu
             testStartTime = DateTimeOffset.Now;
 
-            // Dla zalogowanego użytkownika - utwórz sesję testu w bazie
-            if (isUserAuthenticated)
+            // Sprawdź czy kontynuujemy test czy rozpoczynamy nowy
+            bool isNewTest = string.IsNullOrEmpty(TestSessionId);
+            
+            if (!isNewTest)
             {
-                await InitializeTestSessionInDatabase();
+                isContinuingTest = true;
+                testSessionId = TestSessionId;
+                Console.WriteLine($"Continuing test session: {testSessionId}");
+                
+                // Dla kontynuacji: najpierw załaduj odpowiedzi, potem pytania w oryginalnej kolejności
+                await LoadExistingTestSession();
+                await LoadQuestionsForContinuation();
+            }
+            else
+            {
+                // Dla nowego testu: załaduj losowe pytania
+                await LoadRandomQuestions();
+                
+                // Dla zalogowanego użytkownika - utwórz sesję testu w bazie
+                if (isUserAuthenticated)
+                {
+                    await InitializeTestSessionInDatabase();
+                }
             }
 
+            // Załaduj pierwsze pytanie
+            await LoadQuestionAsync();
+        }
+
+        private async Task LoadRandomQuestions()
+        {
+            Console.WriteLine("=== LoadRandomQuestions START ===");
+            
             try
             {
                 using var questionsHttpResponse = await Http.GetAsync($"/Question/GetQuizQuestions?category={Category}");
@@ -81,7 +113,6 @@ namespace DriverGuide.UI.Pages.Quiz
                     return;
                 }
 
-                // Guard: if HTML, abort JSON parse early
                 if (contentType != null && contentType.Contains("html", StringComparison.OrdinalIgnoreCase))
                 {
                     var raw = await questionsHttpResponse.Content.ReadAsStringAsync();
@@ -99,13 +130,213 @@ namespace DriverGuide.UI.Pages.Quiz
                 }
 
                 questions!.AddRange(questionsResponse);
+                Console.WriteLine($"✓ Loaded {questions.Count} random questions for category {Category}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Fetch questions threw: {ex}");
+                Console.WriteLine($"✗ Fetch questions threw: {ex}");
+            }
+            
+            Console.WriteLine("=== LoadRandomQuestions END ===");
+        }
+
+        private async Task LoadQuestionsForContinuation()
+        {
+            Console.WriteLine("=== LoadQuestionsForContinuation START ===");
+            
+            try
+            {
+                // 1. Pobierz wszystkie pytania z bazy dla tej kategorii
+                using var allQuestionsResponse = await Http.GetAsync($"/Question/GetQuizQuestions?category={Category}");
+                
+                if (!allQuestionsResponse.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"✗ Failed to load questions: {allQuestionsResponse.StatusCode}");
+                    return;
+                }
+
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var allQuestions = await allQuestionsResponse.Content.ReadFromJsonAsync<List<Question>>(options);
+
+                if (allQuestions is null || allQuestions.Count == 0)
+                {
+                    Console.WriteLine("✗ No questions available");
+                    return;
+                }
+
+                Console.WriteLine($"Available questions in database: {allQuestions.Count}");
+
+                // 2. Pobierz odpowiedzi posortowane po StartDate (oryginalna kolejność)
+                var answersResponse = await Http.GetAsync($"/QuestionAnswer/GetByTestSession/{testSessionId}");
+                
+                if (!answersResponse.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("✗ Failed to load session answers");
+                    return;
+                }
+
+                var sessionAnswers = await answersResponse.Content.ReadFromJsonAsync<List<QuestionAnswer>>(options);
+                
+                if (sessionAnswers is null || !sessionAnswers.Any())
+                {
+                    Console.WriteLine("⚠ No answers in session, loading random questions");
+                    await LoadRandomQuestions();
+                    return;
+                }
+
+                // Sortuj odpowiedzi według daty rozpoczęcia (oryginalna kolejność)
+                var orderedAnswers = sessionAnswers.OrderBy(a => a.StartDate).ToList();
+                Console.WriteLine($"Session has {orderedAnswers.Count} questions (in original order)");
+
+                // 3. Odtwórz listę pytań w oryginalnej kolejności
+                var questionIds = orderedAnswers.Select(a => int.Parse(a.QuestionId!)).ToList();
+                var sessionQuestions = new List<Question>();
+
+                foreach (var questionId in questionIds)
+                {
+                    var question = allQuestions.FirstOrDefault(q => q.QuestionId == questionId);
+                    if (question != null)
+                    {
+                        sessionQuestions.Add(question);
+                        Console.WriteLine($"  ✓ Added question ID {questionId} to position {sessionQuestions.Count}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"  ⚠ Question ID {questionId} not found in database!");
+                    }
+                }
+
+                // 4. Dodaj pozostałe losowe pytania do pełnego zestawu 32
+                var usedQuestionIds = questionIds.ToHashSet();
+                var remainingQuestions = allQuestions
+                    .Where(q => !usedQuestionIds.Contains(q.QuestionId))
+                    .ToList();
+
+                // Losuj pozostałe pytania
+                var random = new Random();
+                var questionsNeeded = 32 - sessionQuestions.Count;
+                
+                if (questionsNeeded > 0 && remainingQuestions.Any())
+                {
+                    var additionalQuestions = remainingQuestions
+                        .OrderBy(x => random.Next())
+                        .Take(questionsNeeded)
+                        .ToList();
+                    
+                    sessionQuestions.AddRange(additionalQuestions);
+                    Console.WriteLine($"✓ Added {additionalQuestions.Count} random questions to complete the test");
+                }
+
+                // 5. Ustaw pytania i znajdź pierwsze bez odpowiedzi
+                questions!.AddRange(sessionQuestions);
+                Console.WriteLine($"✓ Total questions loaded: {questions.Count}");
+
+                // Znajdź pierwsze pytanie bez odpowiedzi
+                FindNextUnansweredQuestion();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"✗ Error loading questions for continuation: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                
+                // Fallback: załaduj losowe pytania
+                await LoadRandomQuestions();
+            }
+            
+            Console.WriteLine("=== LoadQuestionsForContinuation END ===");
+        }
+
+        private async Task LoadExistingTestSession()
+        {
+            Console.WriteLine($"=== LoadExistingTestSession START ===");
+            Console.WriteLine($"Loading answers for testSessionId: {testSessionId}");
+            
+            try
+            {
+                var answersResponse = await Http.GetAsync($"/QuestionAnswer/GetByTestSession/{testSessionId}");
+
+                Console.WriteLine($"Response status: {answersResponse.StatusCode}");
+
+                if (answersResponse.IsSuccessStatusCode)
+                {
+                    var answers = await answersResponse.Content.ReadFromJsonAsync<List<QuestionAnswer>>();
+
+                    Console.WriteLine($"Total answers received: {answers?.Count ?? 0}");
+
+                    if (answers != null && answers.Any())
+                    {
+                        // Zapisz ID pytań, które już mają odpowiedź
+                        answeredQuestionIds = answers
+                            .Where(a => !string.IsNullOrEmpty(a.UserQuestionAnswer))
+                            .Select(a => a.QuestionId!)
+                            .ToHashSet();
+
+                        Console.WriteLine($"✓ Loaded {answeredQuestionIds.Count} answered questions from session {testSessionId}");
+                        
+                        // Wyświetl szczegóły odpowiedzianych pytań
+                        foreach (var answer in answers.Where(a => !string.IsNullOrEmpty(a.UserQuestionAnswer)))
+                        {
+                            Console.WriteLine($"  - QuestionId: {answer.QuestionId}, Answer: {answer.UserQuestionAnswer}");
+                        }
+                        
+                        // Wyświetl pytania bez odpowiedzi (jeśli są)
+                        var unanswered = answers.Where(a => string.IsNullOrEmpty(a.UserQuestionAnswer)).ToList();
+                        if (unanswered.Any())
+                        {
+                            Console.WriteLine($"⚠ Found {unanswered.Count} questions WITHOUT answers (started but not answered):");
+                            foreach (var answer in unanswered)
+                            {
+                                Console.WriteLine($"  - QuestionId: {answer.QuestionId}");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("⚠ No answers found for this session");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"✗ Failed to load answers: {answersResponse.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"✗ Error loading existing test session: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            }
+            
+            Console.WriteLine($"=== LoadExistingTestSession END ===");
+        }
+
+        private void FindNextUnansweredQuestion()
+        {
+            Console.WriteLine($"=== FindNextUnansweredQuestion START ===");
+            Console.WriteLine($"Total questions loaded: {questions!.Count}");
+            Console.WriteLine($"Answered questions count: {answeredQuestionIds.Count}");
+            Console.WriteLine($"Answered question IDs: {string.Join(", ", answeredQuestionIds)}");
+            
+            // Znajdź pierwsze pytanie bez odpowiedzi
+            for (int i = 0; i < questions!.Count; i++)
+            {
+                var questionId = questions[i].QuestionId.ToString();
+                var isAnswered = answeredQuestionIds.Contains(questionId);
+                
+                Console.WriteLine($"Question {i + 1}: ID={questionId}, IsAnswered={isAnswered}");
+                
+                if (!isAnswered)
+                {
+                    currentIndex = i;
+                    Console.WriteLine($"✓ Found unanswered question at index {currentIndex} (question {currentIndex + 1})");
+                    Console.WriteLine($"=== FindNextUnansweredQuestion END ===");
+                    return;
+                }
             }
 
-            await LoadQuestionAsync();
+            // Jeśli wszystkie pytania mają odpowiedzi, użytkownik powinien być przekierowany przy ładowaniu
+            Console.WriteLine($"⚠ All {answeredQuestionIds.Count} questions have been answered");
+            currentIndex = questions.Count; // Ustawienie poza zakresem aby nie pokazywać pytań
+            Console.WriteLine($"=== FindNextUnansweredQuestion END ===");
         }
 
         private async Task InitializeTestSessionInDatabase()
@@ -116,11 +347,13 @@ namespace DriverGuide.UI.Pages.Quiz
                 var userId = await GetCurrentUserId();
 
                 var response = await Http.PostAsJsonAsync("/TestSession/Create",
-                    new { Category = categoryEnum, UserId = userId });
+                    new { Category = categoryEnum, StartDate = testStartTime, UserId = userId });
 
                 if (response.IsSuccessStatusCode)
                 {
                     testSessionId = await response.Content.ReadAsStringAsync();
+                    // Usuń cudzysłowy z ID jeśli istnieją
+                    testSessionId = testSessionId?.Trim('"');
                     Console.WriteLine($"Created test session: {testSessionId}");
                 }
             }
@@ -149,7 +382,10 @@ namespace DriverGuide.UI.Pages.Quiz
         private async Task LoadQuestionAsync()
         {
             if (questions is null || currentIndex >= questions.Count)
+            {
+                Console.WriteLine($"Cannot load question: currentIndex={currentIndex}, questionsCount={questions?.Count ?? 0}");
                 return;
+            }
 
             isLoadingQuestion = true;
             StateHasChanged();
@@ -157,10 +393,22 @@ namespace DriverGuide.UI.Pages.Quiz
             selectedAnswer = null;
             currentQuestion = questions[currentIndex];
 
-            // Dla zalogowanego użytkownika - zacznij śledzić pytanie w bazie
-            if (isUserAuthenticated && !string.IsNullOrEmpty(testSessionId))
+            Console.WriteLine($"Loading question {currentIndex + 1}/{questions.Count}: {currentQuestion.QuestionId}");
+
+            // Dla zalogowanego użytkownika rozpoczynającego nowy test - zacznij śledzić pytanie w bazie
+            if (isUserAuthenticated && !string.IsNullOrEmpty(testSessionId) && !isContinuingTest)
             {
                 await RegisterQuestionStartInDatabase();
+            }
+
+            // Dla kontynuowanego testu - zarejestruj pytanie jeśli jeszcze nie było
+            if (isContinuingTest && isUserAuthenticated && !string.IsNullOrEmpty(testSessionId))
+            {
+                var questionId = currentQuestion.QuestionId.ToString();
+                if (!answeredQuestionIds.Contains(questionId))
+                {
+                    await RegisterQuestionStartInDatabase();
+                }
             }
 
             // Wyczyść poprzedni URL bloba
@@ -286,6 +534,10 @@ namespace DriverGuide.UI.Pages.Quiz
             if (selectedAnswer == null || currentQuestion == null || isLoadingQuestion)
                 return;
 
+            // Oznacz pytanie jako odpowiedziane przed zapisem
+            var questionId = currentQuestion.QuestionId.ToString();
+            answeredQuestionIds.Add(questionId);
+
             var isLastQuestion = currentIndex == (questions?.Count ?? 0) - 1;
 
             if (isUserAuthenticated)
@@ -293,8 +545,12 @@ namespace DriverGuide.UI.Pages.Quiz
                 // Zalogowany użytkownik - zapisz odpowiedź natychmiast
                 await RegisterAnswerInDatabase();
 
-                if (isLastQuestion)
+                // Sprawdź czy to było ostatnie pytanie lub wszystkie pytania są odpowiedziane
+                var allQuestionsAnswered = answeredQuestionIds.Count >= questions!.Count;
+                
+                if (isLastQuestion || allQuestionsAnswered)
                 {
+                    Console.WriteLine($"Completing test: isLastQuestion={isLastQuestion}, allAnswered={allQuestionsAnswered}");
                     await CompleteTestInDatabase();
                     NavigateToSummary();
                 }
@@ -305,7 +561,7 @@ namespace DriverGuide.UI.Pages.Quiz
             }
             else
             {
-                // Niezalogowany użytkownik - przechowaj odpowiedź lokalnie
+                // Niezalogowany użytkownik - przechowuj odpowiedź lokalnie
                 StoreAnswerLocally();
 
                 if (isLastQuestion)
@@ -349,7 +605,7 @@ namespace DriverGuide.UI.Pages.Quiz
             if (currentQuestion == null || string.IsNullOrEmpty(selectedAnswer))
                 return;
 
-            // Przechowaj odpowiedź lokalnie
+            // Przechowuj odpowiedź lokalnie
             storedAnswers.Add(new StoredQuestionAnswer
             {
                 QuestionId = currentQuestion.QuestionId.ToString(),
@@ -370,18 +626,26 @@ namespace DriverGuide.UI.Pages.Quiz
 
             try
             {
-                // Oblicz wynik testu
-                double correctAnswersCount = 0;
-
-                foreach (var answer in storedAnswers)
+                // Pobierz wszystkie odpowiedzi dla tej sesji
+                var answersResponse = await Http.GetAsync($"/QuestionAnswer/GetByTestSession/{testSessionId}");
+                
+                if (!answersResponse.IsSuccessStatusCode)
                 {
-                    if (answer.UserQuestionAnswer == answer.CorrectQuestionAnswer)
-                    {
-                        correctAnswersCount++;
-                    }
+                    Console.WriteLine("Failed to get answers for test completion");
+                    return;
                 }
 
-                var result = (correctAnswersCount / questions!.Count) * 100;
+                var answers = await answersResponse.Content.ReadFromJsonAsync<List<QuestionAnswer>>();
+                
+                if (answers == null || !answers.Any())
+                {
+                    Console.WriteLine("No answers found for test completion");
+                    return;
+                }
+
+                // Oblicz wynik testu
+                double correctAnswersCount = answers.Count(a => a.UserQuestionAnswer == a.CorrectQuestionAnswer);
+                var result = (correctAnswersCount / answers.Count) * 100;
 
                 await Http.PostAsJsonAsync("/TestSession/Complete",
                     new { TestSessionId = testSessionId, Result = result });
@@ -411,6 +675,7 @@ namespace DriverGuide.UI.Pages.Quiz
                 }
 
                 testSessionId = await createResponse.Content.ReadAsStringAsync();
+                testSessionId = testSessionId?.Trim('"');
 
                 // 2. Zapisz wszystkie odpowiedzi za jednym razem
                 await Http.PostAsJsonAsync("/QuestionAnswer/BulkSubmitAnswers",
@@ -457,6 +722,38 @@ namespace DriverGuide.UI.Pages.Quiz
         private async Task NextQuestion()
         {
             currentIndex++;
+            
+            // Jeśli kontynuujemy test, przeskocz już odpowiedziane pytania
+            if (isContinuingTest)
+            {
+                while (currentIndex < questions!.Count && 
+                       answeredQuestionIds.Contains(questions[currentIndex].QuestionId.ToString()))
+                {
+                    Console.WriteLine($"Skipping already answered question at index {currentIndex}");
+                    currentIndex++;
+                }
+
+                // Jeśli dotarliśmy do końca, sprawdź czy wszystkie pytania mają odpowiedzi
+                if (currentIndex >= questions.Count)
+                {
+                    if (answeredQuestionIds.Count >= questions.Count)
+                    {
+                        Console.WriteLine("All questions answered - completing test");
+                        await CompleteTestInDatabase();
+                        NavigateToSummary();
+                        return;
+                    }
+                    else
+                    {
+                        // Nie powinno się zdarzyć, ale dla bezpieczeństwa
+                        Console.WriteLine($"Reached end but not all questions answered: {answeredQuestionIds.Count}/{questions.Count}");
+                        await CompleteTestInDatabase();
+                        NavigateToSummary();
+                        return;
+                    }
+                }
+            }
+
             await LoadQuestionAsync();
         }
 

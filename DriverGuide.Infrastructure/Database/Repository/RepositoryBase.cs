@@ -42,6 +42,18 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
         }
     }
 
+    public virtual async Task<ICollection<T>> FindAsync(Expression<Func<T, bool>> filter, bool useNoTracking = false)
+    {
+        if (useNoTracking)
+        {
+            return await DBSet.AsNoTracking().Where(filter).ToListAsync();
+        }
+        else
+        {
+            return await DBSet.Where(filter).ToListAsync();
+        }
+    }
+
     public virtual async Task<T> CreateAsync(T entity)
     {
         await DBSet.AddAsync(entity);

@@ -123,8 +123,20 @@
     background: linear-gradient(135deg, #28a745, #20c997);
 }
 
+.stat-icon.bg-danger {
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+}
+
 .stat-icon.bg-warning {
     background: linear-gradient(135deg, #ffc107, #fd7e14);
+}
+
+.stat-icon.bg-info {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+}
+
+.stat-icon.bg-secondary {
+    background: linear-gradient(135deg, #6c757d, #5a6268);
 }
 
 .stat-info {

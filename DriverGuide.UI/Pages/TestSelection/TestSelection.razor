@@ -1,0 +1,183 @@
+@page "/test"
+@using DriverGuide.Domain.Enums
+@using System.ComponentModel.DataAnnotations
+@inject NavigationManager Navigation
+
+<PageTitle>Wybór kategorii testu - DriverGuide</PageTitle>
+
+<div class="test-selection-container">
+    <div class="test-selection-card">
+        <div class="card-header">
+            <i class="bi bi-clipboard-check-fill"></i>
+            <h2>Wybierz kategoriê prawa jazdy</h2>
+            <p>Rozpocznij test teoretyczny dla wybranej kategorii</p>
+        </div>
+        
+        <div class="card-body">
+            <div class="category-grid">
+                @foreach (var category in Categories)
+                {
+                    <div class="category-card" @onclick="() => SelectCategory(category)">
+                        <div class="category-image-container">
+                            <img src="@GetCategoryImage(category)" 
+                                 alt="@GetDisplayName(category)" 
+                                 class="category-image"
+                                 loading="lazy" />
+                            <div class="category-overlay">
+                                <i class="@GetCategoryIcon(category)"></i>
+                            </div>
+                        </div>
+                        <div class="category-content">
+                            <div class="category-name">@GetDisplayName(category)</div>
+                            <div class="category-description">@GetCategoryDescription(category)</div>
+                            <button class="btn btn-primary mt-3">
+                                <i class="bi bi-play-circle me-2"></i>
+                                Rozpocznij test
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <button class="btn btn-outline-secondary" @onclick="GoBack">
+                <i class="bi bi-arrow-left me-2"></i>
+                Powrót
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private IEnumerable<LicenseCategory> Categories => Enum.GetValues<LicenseCategory>()
+        .Where(c => c != LicenseCategory.PT); // Exclude PT (tramwaj) for now
+
+    private void SelectCategory(LicenseCategory category)
+    {
+        Navigation.NavigateTo($"/quiz/{category}");
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/profile");
+    }
+
+    private string GetDisplayName(LicenseCategory category)
+    {
+        var field = category.GetType().GetField(category.ToString());
+        var attr = field?.GetCustomAttributes(typeof(DisplayAttribute), false).FirstOrDefault() as DisplayAttribute;
+        return attr?.Name ?? category.ToString();
+    }
+
+    private string GetCategoryImage(LicenseCategory category)
+    {
+        // Starannie dobrane wysokiej jakoœci obrazki z Unsplash
+        return category switch
+        {
+            // Motorower - nowoczesny skuter elektryczny
+            LicenseCategory.AM => "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=600&h=450&fit=crop&q=85",
+            
+            // Motocykl 125cc - ma³y sportowy motocykl
+            LicenseCategory.A1 => "https://images.unsplash.com/photo-1558981359-219d6364c9c8?w=600&h=450&fit=crop&q=85",
+            
+            // Motocykl 35kW - œredni naked bike
+            LicenseCategory.A2 => "https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=600&h=450&fit=crop&q=85",
+            
+            // Motocykl bez ograniczeñ - superbike
+            LicenseCategory.A => "https://images.unsplash.com/photo-1558980664-769d59546b3d?w=600&h=450&fit=crop&q=85",
+            
+            // Quad - nowoczesny ATV
+            LicenseCategory.B1 => "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=600&h=450&fit=crop&q=85",
+            
+            // Samochód osobowy - niebieski sedan (NAJPOPULARNIEJSZY)
+            LicenseCategory.B => "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&h=450&fit=crop&q=85",
+            
+            // Samochód z przyczep¹ - SUV ci¹gn¹cy przyczepê
+            LicenseCategory.B_E => "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&h=450&fit=crop&q=85",
+            
+            // Ciê¿arówka 7.5t - delivery truck
+            LicenseCategory.C1 => "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=600&h=450&fit=crop&q=85",
+            
+            // Ciê¿arówka du¿a - semi truck
+            LicenseCategory.C => "https://images.unsplash.com/photo-1566140967404-b8b3932483f5?w=600&h=450&fit=crop&q=85",
+            
+            // C1 z przyczep¹ - œrednia ciê¿arówka z przyczep¹
+            LicenseCategory.C1_E => "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=600&h=450&fit=crop&q=85",
+            
+            // C z przyczep¹ - articulated lorry
+            LicenseCategory.C_E => "https://images.unsplash.com/photo-1566140967404-b8b3932483f5?w=600&h=450&fit=crop&q=85",
+            
+            // Minibus - Mercedes Sprinter bus
+            LicenseCategory.D1 => "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&h=450&fit=crop&q=85",
+            
+            // Autobus - nowoczesny autobus miejski
+            LicenseCategory.D => "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&h=450&fit=crop&q=85",
+            
+            // D1 z przyczep¹ - minibus
+            LicenseCategory.D1_E => "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&h=450&fit=crop&q=85",
+            
+            // D z przyczep¹ - autobus przegubowy
+            LicenseCategory.D_E => "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&h=450&fit=crop&q=85",
+            
+            // Ci¹gnik rolniczy - nowoczesny zielony traktor
+            LicenseCategory.T => "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=600&h=450&fit=crop&q=85",
+            
+            // Tramwaj - nowoczesny tramwaj miejski
+            LicenseCategory.PT => "https://images.unsplash.com/photo-1554672407-fb6497c5e0e8?w=600&h=450&fit=crop&q=85",
+            
+            // Default fallback
+            _ => "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=600&h=450&fit=crop&q=85"
+        };
+    }
+
+    private string GetCategoryIcon(LicenseCategory category)
+    {
+        return category switch
+        {
+            LicenseCategory.AM => "bi bi-scooter",
+            LicenseCategory.A1 => "bi bi-bicycle",
+            LicenseCategory.A2 => "bi bi-bicycle",
+            LicenseCategory.A => "bi bi-bicycle",
+            LicenseCategory.B1 => "bi bi-car-front",
+            LicenseCategory.B => "bi bi-car-front-fill",
+            LicenseCategory.B_E => "bi bi-truck",
+            LicenseCategory.C1 => "bi bi-truck",
+            LicenseCategory.C => "bi bi-truck-front-fill",
+            LicenseCategory.C1_E => "bi bi-truck",
+            LicenseCategory.C_E => "bi bi-truck",
+            LicenseCategory.D1 => "bi bi-bus-front",
+            LicenseCategory.D => "bi bi-bus-front-fill",
+            LicenseCategory.D1_E => "bi bi-bus-front",
+            LicenseCategory.D_E => "bi bi-bus-front",
+            LicenseCategory.T => "bi bi-truck-flatbed",
+            LicenseCategory.PT => "bi bi-train-front",
+            _ => "bi bi-card-checklist"
+        };
+    }
+
+    private string GetCategoryDescription(LicenseCategory category)
+    {
+        return category switch
+        {
+            LicenseCategory.AM => "Motorower, pojazd wolnobie¿ny",
+            LicenseCategory.A1 => "Motocykl o pojemnoœci do 125 cm?",
+            LicenseCategory.A2 => "Motocykl o mocy do 35 kW",
+            LicenseCategory.A => "Motocykl - bez ograniczeñ",
+            LicenseCategory.B1 => "Pojazd czteroko³owy",
+            LicenseCategory.B => "Samochód osobowy",
+            LicenseCategory.B_E => "Samochód z przyczep¹",
+            LicenseCategory.C1 => "Pojazd o masie do 7,5 tony",
+            LicenseCategory.C => "Pojazd o masie powy¿ej 3,5 tony",
+            LicenseCategory.C1_E => "C1 z przyczep¹",
+            LicenseCategory.C_E => "C z przyczep¹",
+            LicenseCategory.D1 => "Autobus do 17 osób",
+            LicenseCategory.D => "Autobus",
+            LicenseCategory.D1_E => "D1 z przyczep¹",
+            LicenseCategory.D_E => "D z przyczep¹",
+            LicenseCategory.T => "Ci¹gnik rolniczy",
+            LicenseCategory.PT => "Tramwaj",
+            _ => "32 pytania testowe"
+        };
+    }
+}

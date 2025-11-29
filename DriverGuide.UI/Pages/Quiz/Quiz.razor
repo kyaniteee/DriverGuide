@@ -1,4 +1,5 @@
 ﻿@page "/quiz/{Category}"
+@page "/quiz/{Category}/{TestSessionId}"
 @using System.ComponentModel.DataAnnotations
 @using DriverGuide.Domain.Models
 @using DriverGuide.UI.Utils
@@ -10,13 +11,29 @@
         <div class="quiz-loading">
             <div class="blue-spinner"></div>
             <p style="text-align: center; font-size: 2rem; font-weight: bold; margin-top: 1.5rem;">
-                Trwa przygotowanie pytań testowych dla kategorii @Category?.Replace('_', ',') ...
+                @if (isContinuingTest)
+                {
+                    <text>Wczytywanie testu...</text>
+                }
+                else
+                {
+                    <text>Trwa przygotowanie pytań testowych dla kategorii @Category?.Replace('_', ',') ...</text>
+                }
             </p>
         </div>
     }
     else
     {
-        <p style="text-align: center; font-size: 2rem; font-weight: bold;">Test na prawo jazdy kategorii @Category</p>
+        <p style="text-align: center; font-size: 2rem; font-weight: bold;">
+            @if (isContinuingTest)
+            {
+                <text>Kontynuacja testu na prawo jazdy kategorii @Category</text>
+            }
+            else
+            {
+                <text>Test na prawo jazdy kategorii @Category</text>
+            }
+        </p>
 
         <p class="progress-text">Pytanie @(currentIndex + 1) z @questionsCount</p>
 

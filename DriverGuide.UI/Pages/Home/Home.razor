@@ -1,45 +1,494 @@
 ﻿@page "/"
-@using System.ComponentModel
 @using System.ComponentModel.DataAnnotations
 @using DriverGuide.Domain.Enums
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
 
-<PageTitle>DriverGuide</PageTitle>
+<PageTitle>DriverGuide - Twoja droga do prawa jazdy</PageTitle>
 
-<h1 class="text-center mt-5" style="color:lightgrey">Witamy w aplikacji DriverGuide</h1>
-<p class="text-center" style="color:lightgrey">Nasz system umożliwi Ci przegląd bazy pytań oraz symulacje egzaminu w dowolnym miejscu i czasie jeżeli masz tylko dostęp do internetu.</p>
-
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            @* <label for="categorySelect" class="form-label">Wybierz kategorię:</label> *@
-            <select class="form-select" id="categorySelect" @bind="SelectedCategory">
-                @foreach (var category in Categories)
-                {
-                    <option value="@category">@GetDisplayName(category)</option>
-                }
-            </select>
-            <div class="d-grid mt-3">
-                <button class="btn btn-primary" @onclick="StartTest">ROZWIĄŻ DARMOWY TEST NA PRAWO JAZDY</button>
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-content">
+        <div class="hero-badge">
+            <i class="bi bi-shield-check"></i>
+            <span>Zaufało nam już ponad 50 000 użytkowników</span>
+        </div>
+        <h1 class="hero-title">
+            Zdaj egzamin na prawo jazdy <span class="highlight">za pierwszym razem</span>
+        </h1>
+        <p class="hero-subtitle">
+            Najnowocześniejsza platforma do nauki na prawo jazdy online. 
+            Oficjalne pytania WORD, symulacje egzaminu i zaawansowane statystyki.
+        </p>
+        <div class="hero-cta">
+            <AuthorizeView>
+                <Authorized>
+                    <button class="btn btn-hero-primary" @onclick="NavigateToTest">
+                        <i class="bi bi-play-circle-fill me-2"></i>
+                        Rozpocznij naukę
+                    </button>
+                    <button class="btn btn-hero-secondary" @onclick="NavigateToProfile">
+                        <i class="bi bi-graph-up me-2"></i>
+                        Moje statystyki
+                    </button>
+                </Authorized>
+                <NotAuthorized>
+                    <button class="btn btn-hero-primary" @onclick="NavigateToRegister">
+                        <i class="bi bi-rocket-takeoff-fill me-2"></i>
+                        Zacznij za darmo
+                    </button>
+                    <button class="btn btn-hero-secondary" @onclick="StartGuestTest">
+                        <i class="bi bi-play-circle me-2"></i>
+                        Wypróbuj jako gość
+                    </button>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+        <div class="hero-features">
+            <div class="feature-tag">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Darmowy dostęp</span>
+            </div>
+            <div class="feature-tag">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Bez reklam</span>
+            </div>
+            <div class="feature-tag">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Wszystkie kategorie</span>
             </div>
         </div>
     </div>
-</div>
+    <div class="hero-image">
+        <div class="floating-card card-1">
+            <i class="bi bi-trophy-fill"></i>
+            <div>
+                <div class="card-label">Średni wynik</div>
+                <div class="card-value">94%</div>
+            </div>
+        </div>
+        <div class="floating-card card-2">
+            <i class="bi bi-people-fill"></i>
+            <div>
+                <div class="card-label">Aktywni użytkownicy</div>
+                <div class="card-value">12,453</div>
+            </div>
+        </div>
+        <div class="floating-card card-3">
+            <i class="bi bi-clock-fill"></i>
+            <div>
+                <div class="card-label">Testów dzisiaj</div>
+                <div class="card-value">2,847</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="stats-section">
+    <div class="stats-container">
+        <div class="stat-item">
+            <div class="stat-icon">
+                <i class="bi bi-file-earmark-text-fill"></i>
+            </div>
+            <div class="stat-number">@TotalQuestions+</div>
+            <div class="stat-label">Pytań egzaminacyjnych</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-icon">
+                <i class="bi bi-mortarboard-fill"></i>
+            </div>
+            <div class="stat-number">50K+</div>
+            <div class="stat-label">Zadowolonych uczniów</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-icon">
+                <i class="bi bi-award-fill"></i>
+            </div>
+            <div class="stat-number">94%</div>
+            <div class="stat-label">Zdawalność</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-icon">
+                <i class="bi bi-card-checklist"></i>
+            </div>
+            <div class="stat-number">17</div>
+            <div class="stat-label">Kategorii prawa jazdy</div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="section-header">
+        <h2 class="section-title">Dlaczego DriverGuide?</h2>
+        <p class="section-subtitle">Nowoczesne narzędzia wspierające Twoją naukę</p>
+    </div>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon bg-blue">
+                <i class="bi bi-database-fill"></i>
+            </div>
+            <h3>Oficjalna baza pytań</h3>
+            <p>Aktualne pytania egzaminacyjne z Wojewódzkich Ośrodków Ruchu Drogowego (WORD)</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon bg-green">
+                <i class="bi bi-speedometer2"></i>
+            </div>
+            <h3>Symulacja egzaminu</h3>
+            <p>Tryb symulacji z dokładnym odwzorowaniem warunków rzeczywistego egzaminu państwowego</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon bg-purple">
+                <i class="bi bi-graph-up-arrow"></i>
+            </div>
+            <h3>Zaawansowane statystyki</h3>
+            <p>Śledź swoje postępy, analizuj błędy i monitoruj obszary wymagające poprawy</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon bg-orange">
+                <i class="bi bi-phone-fill"></i>
+            </div>
+            <h3>Dostęp mobilny</h3>
+            <p>Ucz się w dowolnym miejscu i czasie - na telefonie, tablecie czy komputerze</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon bg-red">
+                <i class="bi bi-bookmark-star-fill"></i>
+            </div>
+            <h3>Ulubione pytania</h3>
+            <p>Zapisuj trudne pytania i wracaj do nich, aby utrwalić wiedzę</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon bg-teal">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            <h3>Bezpieczeństwo danych</h3>
+            <p>Twoje dane są bezpieczne i chronione zgodnie z RODO</p>
+        </div>
+    </div>
+</section>
+
+<!-- Popular Categories Section -->
+<section class="categories-section">
+    <div class="section-header">
+        <h2 class="section-title">Najpopularniejsze kategorie</h2>
+        <p class="section-subtitle">Wybierz kategorię i rozpocznij naukę już teraz</p>
+    </div>
+    <div class="categories-carousel">
+        @foreach (var category in PopularCategories)
+        {
+            <div class="category-card-home" @onclick="() => StartCategoryTest(category)">
+                <div class="category-image-wrapper">
+                    <img src="@GetCategoryImage(category)" alt="@GetDisplayName(category)" loading="lazy" />
+                    <div class="category-overlay-home">
+                        <i class="@GetCategoryIcon(category)"></i>
+                    </div>
+                </div>
+                <div class="category-info-home">
+                    <h4>@GetCategoryCode(category)</h4>
+                    <p>@GetCategoryShortDescription(category)</p>
+                    <button class="btn btn-category">
+                        <i class="bi bi-arrow-right-circle-fill"></i>
+                        Rozpocznij
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="text-center mt-4">
+        <button class="btn btn-outline-primary btn-lg" @onclick="NavigateToTest">
+            Wszystkie kategorie
+            <i class="bi bi-arrow-right ms-2"></i>
+        </button>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works-section">
+    <div class="section-header">
+        <h2 class="section-title">Jak to działa?</h2>
+        <p class="section-subtitle">Trzy proste kroki do sukcesu</p>
+    </div>
+    <div class="steps-container">
+        <div class="step-item">
+            <div class="step-number">1</div>
+            <div class="step-icon">
+                <i class="bi bi-person-plus-fill"></i>
+            </div>
+            <h3>Zarejestruj się</h3>
+            <p>Utwórz darmowe konto w mniej niż minutę i zyskaj dostęp do wszystkich funkcji</p>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-item">
+            <div class="step-number">2</div>
+            <div class="step-icon">
+                <i class="bi bi-book-fill"></i>
+            </div>
+            <h3>Ucz się</h3>
+            <p>Rozwiązuj testy, analizuj błędy i śledź swoje postępy w czasie rzeczywistym</p>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-item">
+            <div class="step-number">3</div>
+            <div class="step-icon">
+                <i class="bi bi-trophy-fill"></i>
+            </div>
+            <h3>Zdaj egzamin</h3>
+            <p>Zdaj egzamin państwowy za pierwszym razem z pełnym przygotowaniem</p>
+        </div>
+    </div>
+</section>
+
+<!-- Government Links Section -->
+<section class="links-section">
+    <div class="section-header">
+        <h2 class="section-title">Przydatne linki</h2>
+        <p class="section-subtitle">Oficjalne strony instytucji odpowiedzialnych za prawo jazdy</p>
+    </div>
+    <div class="links-grid">
+        <a href="https://www.gov.pl/web/infrastruktura/prawo-jazdy" target="_blank" class="link-card">
+            <div class="link-icon">
+                <i class="bi bi-building"></i>
+            </div>
+            <div class="link-content">
+                <h4>Ministerstwo Infrastruktury</h4>
+                <p>Oficjalne informacje o prawie jazdy</p>
+                <span class="link-arrow"><i class="bi bi-arrow-up-right"></i></span>
+            </div>
+        </a>
+        <a href="https://www.gov.pl/web/kdl" target="_blank" class="link-card">
+            <div class="link-icon">
+                <i class="bi bi-file-earmark-text"></i>
+            </div>
+            <div class="link-content">
+                <h4>Krajowa Rada Bezpieczeństwa</h4>
+                <p>Bezpieczeństwo ruchu drogowego</p>
+                <span class="link-arrow"><i class="bi bi-arrow-up-right"></i></span>
+            </div>
+        </a>
+        <a href="https://www.cepik.gov.pl/" target="_blank" class="link-card">
+            <div class="link-icon">
+                <i class="bi bi-pc-display"></i>
+            </div>
+            <div class="link-content">
+                <h4>CEPIK</h4>
+                <p>Centralna Ewidencja Pojazdów i Kierowców</p>
+                <span class="link-arrow"><i class="bi bi-arrow-up-right"></i></span>
+            </div>
+        </a>
+        <a href="https://info-car.pl/" target="_blank" class="link-card">
+            <div class="link-icon">
+                <i class="bi bi-search"></i>
+            </div>
+            <div class="link-content">
+                <h4>InfoCar</h4>
+                <p>Historia pojazdu i sprawdzenie prawa jazdy</p>
+                <span class="link-arrow"><i class="bi bi-arrow-up-right"></i></span>
+            </div>
+        </a>
+        <a href="https://www.gov.pl/web/infrastruktura/wyszukaj-oskde" target="_blank" class="link-card">
+            <div class="link-icon">
+                <i class="bi bi-geo-alt"></i>
+            </div>
+            <div class="link-content">
+                <h4>Wyszukiwarka OSK/DE</h4>
+                <p>Znajdź ośrodek szkolenia kierowców</p>
+                <span class="link-arrow"><i class="bi bi-arrow-up-right"></i></span>
+            </div>
+        </a>
+        <a href="https://www.word.com.pl/" target="_blank" class="link-card">
+            <div class="link-icon">
+                <i class="bi bi-clipboard-check"></i>
+            </div>
+            <div class="link-content">
+                <h4>WORD</h4>
+                <p>Wojewódzkie Ośrodki Ruchu Drogowego</p>
+                <span class="link-arrow"><i class="bi bi-arrow-up-right"></i></span>
+            </div>
+        </a>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="cta-content">
+        <h2>Gotowy na start?</h2>
+        <p>Dołącz do tysięcy osób, które zdobyły prawo jazdy z DriverGuide</p>
+        <AuthorizeView>
+            <Authorized>
+                <button class="btn btn-cta" @onclick="NavigateToTest">
+                    <i class="bi bi-rocket-takeoff-fill me-2"></i>
+                    Rozpocznij test
+                </button>
+            </Authorized>
+            <NotAuthorized>
+                <button class="btn btn-cta" @onclick="NavigateToRegister">
+                    <i class="bi bi-rocket-takeoff-fill me-2"></i>
+                    Zarejestruj się za darmo
+                </button>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+</section>
 
 @code {
-    private LicenseCategory SelectedCategory { get; set; } = LicenseCategory.B;
-    private IEnumerable<LicenseCategory> Categories => Enum.GetValues<LicenseCategory>();
+    private const int TotalQuestions = 5000;
 
-    private void StartTest()
+    private LicenseCategory[] PopularCategories = new[]
     {
-        NavigationManager.NavigateTo($"/quiz/{SelectedCategory}");
+        LicenseCategory.B,
+        LicenseCategory.A,
+        LicenseCategory.A2,
+        LicenseCategory.C,
+        LicenseCategory.D,
+        LicenseCategory.T
+    };
+
+    private void NavigateToTest()
+    {
+        Navigation.NavigateTo("/test");
     }
 
-    [Inject] NavigationManager NavigationManager { get; set; } = default!;
+    private void NavigateToProfile()
+    {
+        Navigation.NavigateTo("/profile");
+    }
+
+    private void NavigateToRegister()
+    {
+        Navigation.NavigateTo("/register");
+    }
+
+    private void StartGuestTest()
+    {
+        Navigation.NavigateTo($"/quiz/{LicenseCategory.B}");
+    }
+
+    private void StartCategoryTest(LicenseCategory category)
+    {
+        Navigation.NavigateTo($"/quiz/{category}");
+    }
 
     private string GetDisplayName(LicenseCategory category)
     {
         var field = category.GetType().GetField(category.ToString());
         var attr = field?.GetCustomAttributes(typeof(DisplayAttribute), false).FirstOrDefault() as DisplayAttribute;
         return attr?.Name ?? category.ToString();
+    }
+
+    private string GetCategoryCode(LicenseCategory category)
+    {
+        return category.ToString().Replace("_", "+");
+    }
+
+    private string GetCategoryShortDescription(LicenseCategory category)
+    {
+        return category switch
+        {
+            LicenseCategory.B => "Samochód osobowy",
+            LicenseCategory.A => "Motocykl bez ograniczeń",
+            LicenseCategory.A2 => "Motocykl do 35 kW",
+            LicenseCategory.C => "Ciężarówka",
+            LicenseCategory.D => "Autobus",
+            LicenseCategory.T => "Ciągnik rolniczy",
+            _ => "Test egzaminacyjny"
+        };
+    }
+
+    private string GetCategoryImage(LicenseCategory category)
+    {
+        // Fallback: sprawdzamy czy używać lokalnych obrazów czy Unsplash
+        // W produkcji można użyć lokalnych obrazów dla lepszej wydajności
+        bool useLocalImages = false; // Zmień na true aby użyć lokalnych obrazów
+        
+        if (useLocalImages)
+        {
+            return $"/images/categories/{category.ToString().ToLower().Replace("_", "")}.jpg";
+        }
+        
+        // Wysokiej jakości obrazy z Unsplash (optymalizowane parametry)
+        return category switch
+        {
+            // Motorower - nowoczesny skuter elektryczny
+            LicenseCategory.AM => "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=600&h=450&fit=crop&q=85",
+            
+            // Motocykl 125cc - mały sportowy motocykl
+            LicenseCategory.A1 => "https://images.unsplash.com/photo-1558981359-219d6364c9c8?w=600&h=450&fit=crop&q=85",
+            
+            // Motocykl 35kW - średni naked bike
+            LicenseCategory.A2 => "https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=600&h=450&fit=crop&q=85",
+            
+            // Motocykl bez ograniczeń - superbike
+            LicenseCategory.A => "https://images.unsplash.com/photo-1558980664-769d59546b3d?w=600&h=450&fit=crop&q=85",
+            
+            // Quad - nowoczesny ATV
+            LicenseCategory.B1 => "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=600&h=450&fit=crop&q=85",
+            
+            // Samochód osobowy - niebieski sedan (NAJPOPULARNIEJSZY)
+            LicenseCategory.B => "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&h=450&fit=crop&q=85",
+            
+            // Samochód z przyczepą - SUV ciągnący przyczepę
+            LicenseCategory.B_E => "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&h=450&fit=crop&q=85",
+            
+            // Ciężarówka 7.5t - delivery truck
+            LicenseCategory.C1 => "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=600&h=450&fit=crop&q=85",
+            
+            // Ciężarówka duża - semi truck
+            LicenseCategory.C => "https://images.unsplash.com/photo-1566140967404-b8b3932483f5?w=600&h=450&fit=crop&q=85",
+            
+            // C1 z przyczepą - średnia ciężarówka z przyczepą
+            LicenseCategory.C1_E => "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=600&h=450&fit=crop&q=85",
+            
+            // C z przyczepą - articulated lorry
+            LicenseCategory.C_E => "https://images.unsplash.com/photo-1566140967404-b8b3932483f5?w=600&h=450&fit=crop&q=85",
+            
+            // Minibus - Mercedes Sprinter bus
+            LicenseCategory.D1 => "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&h=450&fit=crop&q=85",
+            
+            // Autobus - nowoczesny autobus miejski
+            LicenseCategory.D => "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&h=450&fit=crop&q=85",
+            
+            // D1 z przyczepą - minibus
+            LicenseCategory.D1_E => "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&h=450&fit=crop&q=85",
+            
+            // D z przyczepą - autobus przegubowy
+            LicenseCategory.D_E => "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&h=450&fit=crop&q=85",
+            
+            // Ciągnik rolniczy - nowoczesny zielony traktor
+            LicenseCategory.T => "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=600&h=450&fit=crop&q=85",
+            
+            // Tramwaj - nowoczesny tramwaj miejski
+            LicenseCategory.PT => "https://images.unsplash.com/photo-1554672407-fb6497c5e0e8?w=600&h=450&fit=crop&q=85",
+            
+            // Default fallback
+            _ => "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=600&h=450&fit=crop&q=85"
+        };
+    }
+
+    private string GetCategoryIcon(LicenseCategory category)
+    {
+        return category switch
+        {
+            LicenseCategory.AM => "bi bi-scooter",
+            LicenseCategory.A1 => "bi bi-bicycle",
+            LicenseCategory.A2 => "bi bi-bicycle",
+            LicenseCategory.A => "bi bi-bicycle",
+            LicenseCategory.B1 => "bi bi-car-front",
+            LicenseCategory.B => "bi bi-car-front-fill",
+            LicenseCategory.B_E => "bi bi-truck",
+            LicenseCategory.C1 => "bi bi-truck",
+            LicenseCategory.C => "bi bi-truck-front-fill",
+            LicenseCategory.C1_E => "bi bi-truck",
+            LicenseCategory.C_E => "bi bi-truck",
+            LicenseCategory.D1 => "bi bi-bus-front",
+            LicenseCategory.D => "bi bi-bus-front-fill",
+            LicenseCategory.D1_E => "bi bi-bus-front",
+            LicenseCategory.D_E => "bi bi-bus-front",
+            LicenseCategory.T => "bi bi-truck-flatbed",
+            LicenseCategory.PT => "bi bi-train-front",
+            _ => "bi bi-card-checklist"
+        };
     }
 }

@@ -42,4 +42,12 @@ public class TestSessionRepository : RepositoryBase<TestSession>, ITestSessionRe
         await Context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<List<TestSession>> GetByUserIdAsync(Guid userId)
+    {
+        return await Context.TestSessions!
+            .Where(ts => ts.UserId == userId && ts.EndDate != null)
+            .OrderByDescending(ts => ts.EndDate)
+            .ToListAsync();
+    }
 }

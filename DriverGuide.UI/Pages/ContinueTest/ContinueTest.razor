@@ -1,0 +1,88 @@
+@page "/continue-test/{TestSessionId}"
+@using Microsoft.AspNetCore.Components.Authorization
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<PageTitle>Kontynuacja Testu - DriverGuide</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <div class="continue-test-container">
+            @if (_isLoading)
+            {
+                <div class="loading-container">
+                    <div class="spinner"></div>
+                    <p>£adowanie informacji o teœcie...</p>
+                </div>
+            }
+            else if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="error-container">
+                    <div class="error-icon">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <h3>@_errorMessage</h3>
+                    <button class="btn btn-primary" @onclick="GoToResults">
+                        Powrót do wyników
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="continue-test-content">
+                    <div class="test-info-card">
+                        <div class="card-header">
+                            <i class="bi bi-clipboard-check"></i>
+                            <h2>Kontynuacja Testu</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="info-row">
+                                <span class="info-label">Data rozpoczêcia:</span>
+                                <span class="info-value">@_testSession?.StartDate.ToString("dd.MM.yyyy HH:mm")</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Kategoria:</span>
+                                <span class="info-value">@_category</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Postêp:</span>
+                                <span class="info-value">@_answeredQuestions / @_totalQuestions pytañ</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" style="width: @(_progressPercentage)%"></div>
+                            </div>
+                            <div class="progress-text">
+                                Ukoñczono @(_progressPercentage)% testu
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-back" @onclick="GoToResults">
+                                <i class="bi bi-arrow-left me-2"></i>
+                                Anuluj
+                            </button>
+                            <button class="btn btn-continue" @onclick="StartContinuation">
+                                <i class="bi bi-play-circle me-2"></i>
+                                Kontynuuj test
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="not-authorized-container">
+            <div class="not-authorized-content">
+                <div class="not-authorized-icon">
+                    <i class="bi bi-lock"></i>
+                </div>
+                <h2>Wymagane logowanie</h2>
+                <p>Musisz byæ zalogowany, aby kontynuowaæ test.</p>
+                <button class="btn btn-primary" onclick="location.href='/login'">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>
+                    PrzejdŸ do logowania
+                </button>
+            </div>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
