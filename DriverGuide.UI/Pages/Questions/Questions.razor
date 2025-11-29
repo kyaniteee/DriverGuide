@@ -1,83 +1,470 @@
 @page "/pytania"
 @using DriverGuide.Domain.Models
+@using DriverGuide.Domain.Enums
+@using System.ComponentModel.DataAnnotations
 
-<div class="questions-container">
-    <h1 class="page-title">Baza pytañ</h1>
+<PageTitle>Baza Pytañ Egzaminacyjnych - DriverGuide</PageTitle>
 
-    <div class="search-row">
-        <input class="search-input" placeholder="Szukaj pytania lub odpowiedzi..." @bind-value="searchTerm" @bind-value:event="oninput" />
+<div class="questions-page">
+    <!-- Header Section -->
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-title-section">
+                <h1 class="page-title">
+                    <i class="bi bi-card-checklist"></i>
+                    Baza Pytañ Egzaminacyjnych
+                </h1>
+                <p class="page-subtitle">
+                    Przegl¹daj oficjalne pytania z egzaminu na prawo jazdy
+                </p>
+            </div>
+            @if (!isLoading && !loadFailed)
+            {
+                <div class="header-stats">
+                    <div class="stat-badge">
+                        <i class="bi bi-list-check"></i>
+                        <span><strong>@allQuestions.Count</strong> pytañ</span>
+                    </div>
+                    <div class="stat-badge">
+                        <i class="bi bi-funnel"></i>
+                        <span><strong>@FilteredQuestions.Count()</strong> wyników</span>
+                    </div>
+                </div>
+            }
+        </div>
     </div>
 
     @if (isLoading)
     {
-        <div class="questions-loading">
-            <div class="blue-spinner"></div>
-            <p>£adowanie pytañ...</p>
+        <div class="loading-state">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">£adowanie pytañ...</p>
+            <p class="loading-subtext">Pobieramy najnowsze pytania egzaminacyjne</p>
         </div>
     }
     else if (loadFailed)
     {
-        <div class="error-box">
-            Nie uda³o siê za³adowaæ pytañ. Spróbuj ponownie póŸniej.
+        <div class="error-state">
+            <div class="error-icon">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            <h3>B³¹d ³adowania</h3>
+            <p>Nie uda³o siê za³adowaæ pytañ. Spróbuj odœwie¿yæ stronê.</p>
+            <button class="btn btn-primary" @onclick="ReloadPage">
+                <i class="bi bi-arrow-clockwise me-2"></i>
+                Odœwie¿ stronê
+            </button>
         </div>
     }
     else
     {
-        @if (!FilteredQuestions.Any())
-        {
-            <div class="no-results">Brak wyników dla zapytania: <b>@searchTerm</b></div>
-        }
-
-        <div class="table-wrapper">
-            <table class="questions-table">
-                <thead>
-                    <tr>
-                        <th class="col-lp">Lp.</th>
-                        <th>Pytanie</th>
-                        <th>OdpowiedŸ</th>
-                        <th class="col-categories">Kategorie</th>
-                        <th class="col-media">Media</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in FilteredQuestions.Select((q, i) => new { q, i }))
+        <!-- Filters Section -->
+        <div class="filters-section">
+            <div class="filters-row">
+                <!-- Search Bar -->
+                <div class="search-container">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text"
+                           class="search-input"
+                           placeholder="Szukaj pytania, odpowiedzi lub kategorii..."
+                           @bind="searchTerm"
+                           @bind:event="oninput" />
+                    @if (!string.IsNullOrWhiteSpace(searchTerm))
                     {
-                        <tr>
-                            <td class="col-lp">@(item.i + 1)</td>
-                            <td class="col-question">@item.q.Pytanie</td>
-                            <td class="col-answer">@GetCorrectAnswerText(item.q)</td>
-                            <td class="col-categories">@GetCategoriesText(item.q)</td>
-                            <td class="col-media">
-                                @if (!string.IsNullOrWhiteSpace(item.q.Media))
-                                {
-                                    <button class="btn btn-primary btn-media" @onclick="() => OpenMedia(item.q)">Poka¿</button>
-                                }
-                            </td>
-                        </tr>
+                        <button class="clear-search" @onclick="ClearSearch">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
                     }
-                </tbody>
-            </table>
-        </div>
-    }
-</div>
+                </div>
 
-@if (isMediaOpen)
-{
-    <div class="media-modal-overlay" @onclick="CloseMedia">
-        <div class="media-modal" @onclick:stopPropagation>
-            <button class="media-modal-close" @onclick="CloseMedia">×</button>
-            @if (mediaContentType?.StartsWith("video/") == true)
+                <!-- View Toggle -->
+                <div class="view-toggle">
+                    <button class="toggle-btn @(viewMode == ViewMode.Cards ? "active" : "")"
+                            @onclick="() => SetViewMode(ViewMode.Cards)"
+                            title="Widok kafelków">
+                        <i class="bi bi-grid-3x2-gap-fill"></i>
+                    </button>
+                    <button class="toggle-btn @(viewMode == ViewMode.List ? "active" : "")"
+                            @onclick="() => SetViewMode(ViewMode.List)"
+                            title="Widok listy">
+                        <i class="bi bi-list-ul"></i>
+                    </button>
+                    <button class="toggle-btn @(viewMode == ViewMode.Compact ? "active" : "")"
+                            @onclick="() => SetViewMode(ViewMode.Compact)"
+                            title="Widok kompaktowy">
+                        <i class="bi bi-justify"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Category Filters -->
+            <div class="category-filters">
+                <button class="category-chip @(selectedCategory == null ? "active" : "")"
+                        @onclick="() => SelectCategory(null)">
+                    <i class="bi bi-grid-fill"></i>
+                    Wszystkie (@allQuestions.Count)
+                </button>
+                @foreach (var category in AvailableCategories.OrderBy(c => c.ToString()))
+                {
+                    <button class="category-chip @(selectedCategory == category ? "active" : "")"
+                            @onclick="() => SelectCategory(category)">
+                        <i class="@GetCategoryIcon(category)"></i>
+                        @category (@GetCategoryCount(category))
+                    </button>
+                }
+            </div>
+
+            <!-- Sort Options -->
+            <div class="sort-section">
+                <label class="sort-label">
+                    <i class="bi bi-sort-down"></i>
+                    Sortuj:
+                </label>
+                <select class="sort-select" @bind="sortMode">
+                    <option value="@SortMode.Newest">Najnowsze</option>
+                    <option value="@SortMode.Oldest">Najstarsze</option>
+                    <option value="@SortMode.QuestionAZ">Pytanie A-Z</option>
+                    <option value="@SortMode.QuestionZA">Pytanie Z-A</option>
+                    <option value="@SortMode.CategoryAZ">Kategoria A-Z</option>
+                </select>
+            </div>
+        </div>
+
+        @if (!FilteredAndSortedQuestions.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="bi bi-search"></i>
+                </div>
+                <h3>Brak wyników</h3>
+                <p>Nie znaleziono pytañ pasuj¹cych do: <strong>"@searchTerm"</strong></p>
+                <button class="btn btn-secondary" @onclick="ClearFilters">
+                    <i class="bi bi-arrow-counterclockwise me-2"></i>
+                    Wyczyœæ filtry
+                </button>
+            </div>
+        }
+        else
+        {
+            <!-- Results Header -->
+            <div class="results-header">
+                <span class="results-count">
+                    Wyœwietlanie <strong>@GetPageStartIndex() - @GetPageEndIndex()</strong> z <strong>@FilteredAndSortedQuestions.Count()</strong> pytañ
+                </span>
+                <div class="per-page-selector">
+                    <label>Na stronie:</label>
+                    <select @bind="questionsPerPage">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Questions Display -->
+            @if (viewMode == ViewMode.Cards)
             {
-                <video src="@mediaUrl" controls class="media-modal-content"></video>
+                <div class="questions-grid">
+                    @foreach (var question in PaginatedQuestions)
+                    {
+                        <div class="question-card" @onclick="() => ToggleQuestionDetails(question.QuestionId)">
+                            <div class="card-header">
+                                <div class="card-header-left">
+                                    <span class="question-number">#@question.QuestionId</span>
+                                    @if (IsYesNoQuestion(question))
+                                    {
+                                        <span class="question-type-badge yes-no">TAK/NIE</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="question-type-badge abc">ABC</span>
+                                    }
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(question.Media))
+                                {
+                                    <span class="media-badge" @onclick:stopPropagation @onclick="() => OpenMedia(question)" title="Zobacz materia³">
+                                        <i class="@GetMediaIcon(question.Media)"></i>
+                                    </span>
+                                }
+                            </div>
+                            <div class="card-body">
+                                <h4 class="question-text">@question.Pytanie</h4>
+                                <div class="question-categories">
+                                    @foreach (var cat in GetQuestionCategoriesList(question))
+                                    {
+                                        <span class="category-tag">@cat</span>
+                                    }
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(question.Media))
+                                {
+                                    <button class="btn-view-media" @onclick:stopPropagation @onclick="() => OpenMedia(question)">
+                                        <i class="@GetMediaIcon(question.Media)"></i>
+                                        <span>Zobacz materia³</span>
+                                    </button>
+                                }
+                            </div>
+                            @if (expandedQuestionId == question.QuestionId)
+                            {
+                                <div class="card-details" @onclick:stopPropagation>
+                                    <div class="answers-section">
+                                        <h5 class="answers-title">Odpowiedzi:</h5>
+                                        @foreach (var answer in GetQuestionAnswers(question))
+                                        {
+                                            var isCorrect = IsAnswerCorrect(question, answer.Letter);
+                                            <div class="answer-item @(isCorrect ? "correct" : "")">
+                                                <span class="answer-letter">@answer.Letter</span>
+                                                <span class="answer-text">@answer.Text</span>
+                                                @if (isCorrect)
+                                                {
+                                                    <i class="bi bi-check-circle-fill correct-icon"></i>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            <div class="card-footer">
+                                <button class="expand-btn">
+                                    @if (expandedQuestionId == question.QuestionId)
+                                    {
+                                        <i class="bi bi-chevron-up"></i>
+                                        <span>Zwiñ</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-chevron-down"></i>
+                                        <span>Rozwiñ</span>
+                                    }
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
             }
-            else if (mediaContentType?.StartsWith("image/") == true)
+            else if (viewMode == ViewMode.List)
             {
-                <img src="@mediaUrl" class="media-modal-content" />
+                <div class="questions-list">
+                    @foreach (var question in PaginatedQuestions)
+                    {
+                        <div class="question-list-item">
+                            <div class="list-item-header" @onclick="() => ToggleQuestionDetails(question.QuestionId)">
+                                <div class="item-number-section">
+                                    <span class="item-number">#@question.QuestionId</span>
+                                    @if (!string.IsNullOrWhiteSpace(question.Media))
+                                    {
+                                        <span class="media-indicator" @onclick:stopPropagation @onclick="() => OpenMedia(question)" title="Zobacz materia³">
+                                            <i class="@GetMediaIcon(question.Media)"></i>
+                                        </span>
+                                    }
+                                </div>
+                                <div class="item-content">
+                                    <div class="item-question-row">
+                                        <h4 class="item-question">@question.Pytanie</h4>
+                                        @if (IsYesNoQuestion(question))
+                                        {
+                                            <span class="question-type-badge-sm yes-no">TAK/NIE</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="question-type-badge-sm abc">ABC</span>
+                                        }
+                                    </div>
+                                    <div class="item-meta">
+                                        <div class="item-categories">
+                                            @foreach (var cat in GetQuestionCategoriesList(question))
+                                            {
+                                                <span class="category-badge">@cat</span>
+                                            }
+                                        </div>
+                                        <span class="correct-answer-preview">
+                                            <i class="bi bi-check-circle"></i>
+                                            Poprawna: <strong>@GetCorrectAnswerText(question)</strong>
+                                        </span>
+                                    </div>
+                                    @if (!string.IsNullOrWhiteSpace(question.Media))
+                                    {
+                                        <button class="btn-view-media-list" @onclick:stopPropagation @onclick="() => OpenMedia(question)">
+                                            <i class="@GetMediaIcon(question.Media)"></i>
+                                            <span>Zobacz materia³</span>
+                                        </button>
+                                    }
+                                </div>
+                                <button class="expand-toggle">
+                                    <i class="bi bi-chevron-@(expandedQuestionId == question.QuestionId ? "up" : "down")"></i>
+                                </button>
+                            </div>
+                            @if (expandedQuestionId == question.QuestionId)
+                            {
+                                <div class="list-item-details">
+                                    <div class="details-answers">
+                                        @foreach (var answer in GetQuestionAnswers(question))
+                                        {
+                                            var isCorrect = IsAnswerCorrect(question, answer.Letter);
+                                            <div class="detail-answer @(isCorrect ? "is-correct" : "")">
+                                                <div class="detail-answer-letter">@answer.Letter</div>
+                                                <div class="detail-answer-text">@answer.Text</div>
+                                                @if (isCorrect)
+                                                {
+                                                    <i class="bi bi-check-circle-fill detail-correct-icon"></i>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
             }
             else
             {
-                <div>Nieobs³ugiwany typ za³¹cznika.</div>
+                <!-- Compact Table View -->
+                <div class="questions-table-wrapper">
+                    <table class="questions-table">
+                        <thead>
+                            <tr>
+                                <th class="col-id">#</th>
+                                <th class="col-question">Pytanie</th>
+                                <th class="col-answer">Poprawna odpowiedŸ</th>
+                                <th class="col-categories">Kategorie</th>
+                                <th class="col-media">Media</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var question in PaginatedQuestions)
+                            {
+                                <tr class="table-row" @onclick="() => ToggleQuestionDetails(question.QuestionId)">
+                                    <td class="col-id">@question.QuestionId</td>
+                                    <td class="col-question">
+                                        <div class="table-question-text">@question.Pytanie</div>
+                                    </td>
+                                    <td class="col-answer">@GetCorrectAnswerText(question)</td>
+                                    <td class="col-categories">
+                                        <div class="table-categories">
+                                            @foreach (var cat in GetQuestionCategoriesList(question).Take(3))
+                                            {
+                                                <span class="table-category-tag">@cat</span>
+                                            }
+                                            @if (GetQuestionCategoriesList(question).Count > 3)
+                                            {
+                                                <span class="more-categories">+@(GetQuestionCategoriesList(question).Count - 3)</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td class="col-media">
+                                        @if (!string.IsNullOrWhiteSpace(question.Media))
+                                        {
+                                            <button class="media-btn" @onclick:stopPropagation @onclick="() => OpenMedia(question)">
+                                                <i class="bi bi-play-circle"></i>
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             }
+
+            <!-- Pagination -->
+            @if (TotalPages > 1)
+            {
+                <div class="pagination-section">
+                    <button class="pagination-btn"
+                            disabled="@(currentPage == 1)"
+                            @onclick="() => ChangePage(1)">
+                        <i class="bi bi-chevron-double-left"></i>
+                    </button>
+                    <button class="pagination-btn"
+                            disabled="@(currentPage == 1)"
+                            @onclick="() => ChangePage(currentPage - 1)">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+
+                    @foreach (var pageNum in GetVisiblePages())
+                    {
+                        @if (pageNum == -1)
+                        {
+                            <span class="pagination-ellipsis">...</span>
+                        }
+                        else
+                        {
+                            <button class="pagination-btn @(currentPage == pageNum ? "active" : "")"
+                                    @onclick="() => ChangePage(pageNum)">
+                                @pageNum
+                            </button>
+                        }
+                    }
+
+                    <button class="pagination-btn"
+                            disabled="@(currentPage == TotalPages)"
+                            @onclick="() => ChangePage(currentPage + 1)">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                    <button class="pagination-btn"
+                            disabled="@(currentPage == TotalPages)"
+                            @onclick="() => ChangePage(TotalPages)">
+                        <i class="bi bi-chevron-double-right"></i>
+                    </button>
+                </div>
+            }
+        }
+    }
+</div>
+
+<!-- Media Modal -->
+@if (isMediaOpen)
+{
+    <div class="media-modal-overlay" @onclick="CloseMedia">
+        <div class="media-modal-container" @onclick:stopPropagation>
+            <div class="media-modal-header">
+                <div class="modal-title-section">
+                    <h3>Materia³ pomocniczy</h3>
+                    @if (currentMediaQuestion != null)
+                    {
+                        <p class="modal-question-preview">Pytanie #@currentMediaQuestion.QuestionId</p>
+                    }
+                </div>
+                <button class="modal-close-btn" @onclick="CloseMedia" title="Zamknij (ESC)">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="media-modal-body">
+                @if (mediaContentType?.StartsWith("video/") == true)
+                {
+                    <video src="@mediaUrl" controls class="media-content" autoplay>
+                        Twoja przegl¹darka nie obs³uguje odtwarzania wideo.
+                    </video>
+                }
+                else if (mediaContentType?.StartsWith("image/") == true)
+                {
+                    <img src="@mediaUrl" alt="Materia³ pomocniczy do pytania" class="media-content" />
+                }
+                else
+                {
+                    <div class="media-error">
+                        <i class="bi bi-exclamation-circle"></i>
+                        <p>Nieobs³ugiwany typ pliku</p>
+                        <p class="media-error-details">Typ: @mediaContentType</p>
+                    </div>
+                }
+            </div>
+            <div class="media-modal-footer">
+                <div class="media-info">
+                    @if (!string.IsNullOrWhiteSpace(mediaContentType))
+                    {
+                        <span class="media-type-badge">
+                            <i class="@(mediaContentType.StartsWith("video/") ? "bi bi-camera-video" : mediaContentType.StartsWith("image/") ? "bi bi-image" : "bi bi-file-earmark")"></i>
+                            @GetMediaTypeName(mediaContentType)
+                        </span>
+                    }
+                </div>
+                <button class="btn btn-secondary" @onclick="CloseMedia">
+                    <i class="bi bi-x-circle me-2"></i>
+                    Zamknij
+                </button>
+            </div>
         </div>
     </div>
 }
