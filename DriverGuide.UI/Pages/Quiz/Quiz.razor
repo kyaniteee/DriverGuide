@@ -50,6 +50,21 @@
         {
             <div class="quiz-question">
 
+                @* Timer Display *@
+                @if (isTimerRunning && remainingTimeSeconds >= 0)
+                {
+                    <div class="timer-container @(remainingTimeSeconds <= 5 ? "timer-warning" : remainingTimeSeconds <= 10 ? "timer-caution" : "")">
+                        <div class="timer-icon">
+                            <i class="bi bi-clock-fill"></i>
+                        </div>
+                        <div class="timer-display">
+                            <span class="timer-value">@remainingTimeSeconds</span>
+                            <span class="timer-unit">s</span>
+                        </div>
+                        <div class="timer-label">pozostało</div>
+                    </div>
+                }
+
                 @if (!string.IsNullOrWhiteSpace(fileBlobUrl))
                 {
                     var mimeType = !string.IsNullOrEmpty(currentQuestion.Media) ? Utils.FileExtensionUtils.GetMimeType(currentQuestion.Media) : string.Empty;

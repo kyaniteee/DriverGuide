@@ -9,7 +9,7 @@ using System.Text.Json;
 
 namespace DriverGuide.UI.Pages.Quiz
 {
-    public partial class Quiz
+    public partial class Quiz : IDisposable
     {
         [Inject]
         private NavigationManager NavigationManager { get; set; } = default!;
@@ -33,6 +33,11 @@ namespace DriverGuide.UI.Pages.Quiz
         private string? selectedAnswer;
         private bool isVideoLoading = true;
         private bool isLoadingQuestion = false;
+
+        // Timer variables
+        private System.Threading.Timer? questionTimer;
+        private int remainingTimeSeconds = 0;
+        private bool isTimerRunning = false;
 
         // Dodane flagi i kolekcje dla optymalizacji
         private bool isUserAuthenticated = false;
@@ -390,6 +395,9 @@ namespace DriverGuide.UI.Pages.Quiz
             isLoadingQuestion = true;
             StateHasChanged();
 
+            // Stop previous timer if exists
+            StopTimer();
+
             selectedAnswer = null;
             currentQuestion = questions[currentIndex];
 
@@ -427,7 +435,129 @@ namespace DriverGuide.UI.Pages.Quiz
 
             await Task.Delay(300);
             isLoadingQuestion = false;
+            
+            // Start timer for this question
+            StartTimer(currentQuestion.TimeToAnswerSeconds);
+            
             StateHasChanged();
+        }
+
+        private void StartTimer(int seconds)
+        {
+            remainingTimeSeconds = seconds;
+            isTimerRunning = true;
+            
+            questionTimer = new System.Threading.Timer(async _ =>
+            {
+                if (remainingTimeSeconds > 0)
+                {
+                    remainingTimeSeconds--;
+                    await InvokeAsync(StateHasChanged);
+                }
+                else
+                {
+                    // Time's up - auto submit with no answer (incorrect)
+                    isTimerRunning = false;
+                    await InvokeAsync(async () => await HandleTimeExpired());
+                }
+            }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+        }
+
+        private void StopTimer()
+        {
+            isTimerRunning = false;
+            questionTimer?.Dispose();
+            questionTimer = null;
+        }
+
+        private async Task HandleTimeExpired()
+        {
+            Console.WriteLine($"Time expired for question {currentQuestion?.QuestionId}");
+            
+            if (currentQuestion == null)
+                return;
+
+            // Oznacz pytanie jako odpowiedziane (brak odpowiedzi = niepoprawna)
+            var questionId = currentQuestion.QuestionId.ToString();
+            answeredQuestionIds.Add(questionId);
+
+            var isLastQuestion = currentIndex == (questions?.Count ?? 0) - 1;
+
+            if (isUserAuthenticated && !string.IsNullOrEmpty(testSessionId))
+            {
+                // Zapisz pustą odpowiedź (niepoprawną) do bazy
+                await RegisterTimeoutAnswerInDatabase();
+
+                var allQuestionsAnswered = answeredQuestionIds.Count >= questions!.Count;
+                
+                if (isLastQuestion || allQuestionsAnswered)
+                {
+                    Console.WriteLine($"Completing test after timeout: isLastQuestion={isLastQuestion}, allAnswered={allQuestionsAnswered}");
+                    await CompleteTestInDatabase();
+                    NavigateToSummary();
+                }
+                else
+                {
+                    await NextQuestion();
+                }
+            }
+            else
+            {
+                // Dla niezalogowanego - zapisz lokalnie pustą odpowiedź
+                StoreTimeoutAnswerLocally();
+
+                if (isLastQuestion)
+                {
+                    await SaveEntireTestToDatabase();
+                    NavigateToSummary();
+                }
+                else
+                {
+                    await NextQuestion();
+                }
+            }
+        }
+
+        private async Task RegisterTimeoutAnswerInDatabase()
+        {
+            if (currentQuestion == null || string.IsNullOrEmpty(testSessionId))
+                return;
+
+            try
+            {
+                // Zapisz pustą odpowiedź jako timeout
+                await Http.PostAsJsonAsync("/QuestionAnswer/SubmitAnswer",
+                    new
+                    {
+                        TestSessionId = testSessionId,
+                        QuestionId = currentQuestion.QuestionId.ToString(),
+                        UserAnswer = "", // Pusta odpowiedź oznacza timeout
+                        EndDate = DateTimeOffset.Now,
+                        StartDate = testStartTime,
+                    });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error registering timeout answer: {ex.Message}");
+            }
+        }
+
+        private void StoreTimeoutAnswerLocally()
+        {
+            if (currentQuestion == null)
+                return;
+
+            storedAnswers.Add(new StoredQuestionAnswer
+            {
+                QuestionId = currentQuestion.QuestionId.ToString(),
+                QuestionCategory = Enum.Parse<LicenseCategory>(Category ?? "B"),
+                Question = currentQuestion.Pytanie ?? string.Empty,
+                CorrectQuestionAnswer = currentQuestion.PoprawnaOdp ?? string.Empty,
+                UserQuestionAnswer = "", // Pusta odpowiedź
+                StartDate = DateTimeOffset.Now.AddSeconds(-currentQuestion.TimeToAnswerSeconds),
+                EndDate = DateTimeOffset.Now,
+                QuestionLanguage = Language.PL
+            });
         }
 
         private async Task RegisterQuestionStartInDatabase()
@@ -533,6 +663,9 @@ namespace DriverGuide.UI.Pages.Quiz
         {
             if (selectedAnswer == null || currentQuestion == null || isLoadingQuestion)
                 return;
+
+            // Stop timer when answer is submitted
+            StopTimer();
 
             // Oznacz pytanie jako odpowiedziane przed zapisem
             var questionId = currentQuestion.QuestionId.ToString();
@@ -788,6 +921,11 @@ namespace DriverGuide.UI.Pages.Quiz
             isVideoLoading = false;
             Console.WriteLine("Video error occurred");
             StateHasChanged();
+        }
+
+        public void Dispose()
+        {
+            StopTimer();
         }
     }
 
