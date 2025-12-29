@@ -7,12 +7,20 @@ using NSubstitute;
 
 namespace DriverGuide.Tests.Application.Requests.User;
 
+/// <summary>
+/// Klasa testowa dla LoginUserHandler.
+/// Testuje proces uwierzytelniania u¿ytkownika, weryfikacji has³a i generowania tokenu JWT.
+/// Pokrywa scenariusze sukcesu i b³êdów uwierzytelniania.
+/// </summary>
 public class LoginUserHandlerTests
 {
     private readonly IUserRepository _userRepository;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
     private readonly LoginUserHandler _handler;
 
+    /// <summary>
+    /// Konstruktor inicjalizuj¹cy mocki repozytorium i generatora JWT oraz instancjê handlera.
+    /// </summary>
     public LoginUserHandlerTests()
     {
         _userRepository = Substitute.For<IUserRepository>();
@@ -20,6 +28,17 @@ public class LoginUserHandlerTests
         _handler = new LoginUserHandler(_userRepository, _jwtTokenGenerator);
     }
 
+    /// <summary>
+    /// Test weryfikuj¹cy poprawne logowanie u¿ytkownika z prawid³owymi danymi uwierzytelniaj¹cymi.
+    /// Sprawdza czy handler:
+    /// - Pobiera u¿ytkownika z rolami i claims
+    /// - Weryfikuje has³o
+    /// - Generuje i zwraca token JWT
+    /// </summary>
+    /// <remarks>
+    /// Test scenariusza happy path dla logowania.
+    /// Mockuje wszystkie zale¿noœci aby zwraca³y oczekiwane wartoœci.
+    /// </remarks>
     [Fact]
     public async Task Handle_ValidCredentials_ShouldReturnToken()
     {
@@ -60,6 +79,14 @@ public class LoginUserHandlerTests
         await _userRepository.Received(1).VerifyPasswordAsync(user, request.Password);
     }
 
+    /// <summary>
+    /// Test weryfikuj¹cy obs³ugê scenariusza gdy u¿ytkownik nie istnieje w systemie.
+    /// Sprawdza czy handler rzuca wyj¹tek UnauthorizedAccessException z odpowiednim komunikatem.
+    /// </summary>
+    /// <remarks>
+    /// Test security - sprawdza czy system nie ujawnia czy u¿ytkownik istnieje czy nie.
+    /// Komunikat b³êdu jest ogólny: "Nieprawid³owy login lub has³o".
+    /// </remarks>
     [Fact]
     public async Task Handle_UserNotFound_ShouldThrowUnauthorizedException()
     {
@@ -76,6 +103,14 @@ public class LoginUserHandlerTests
             () => _handler.Handle(request, CancellationToken.None));
     }
 
+    /// <summary>
+    /// Test weryfikuj¹cy obs³ugê scenariusza z nieprawid³owym has³em.
+    /// Sprawdza czy handler rzuca wyj¹tek UnauthorizedAccessException gdy has³o nie pasuje.
+    /// </summary>
+    /// <remarks>
+    /// Test security - weryfikuje ¿e nieprawid³owe has³o jest odrzucane.
+    /// Komunikat b³êdu jest taki sam jak dla nieistniej¹cego u¿ytkownika (zapobiega user enumeration).
+    /// </remarks>
     [Fact]
     public async Task Handle_InvalidPassword_ShouldThrowUnauthorizedException()
     {
