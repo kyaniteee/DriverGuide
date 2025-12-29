@@ -1,0 +1,46 @@
+@inject IThemeService ThemeService
+@implements IDisposable
+
+<button class="theme-toggle-btn" @onclick="ToggleTheme" title="@GetTooltip()" aria-label="Toggle theme">
+    <span class="theme-icon">
+        @if (isDarkMode)
+        {
+            <i class="bi bi-sun-fill"></i>
+        }
+        else
+        {
+            <i class="bi bi-moon-stars-fill"></i>
+        }
+    </span>
+    <span class="theme-label">@GetLabel()</span>
+</button>
+
+@code {
+    private bool isDarkMode;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isDarkMode = await ThemeService.GetIsDarkModeAsync();
+        ThemeService.ThemeChanged += OnThemeChanged;
+    }
+
+    private async Task ToggleTheme()
+    {
+        await ThemeService.ToggleThemeAsync();
+        isDarkMode = !isDarkMode;
+    }
+
+    private void OnThemeChanged(object? sender, bool newIsDarkMode)
+    {
+        isDarkMode = newIsDarkMode;
+        StateHasChanged();
+    }
+
+    private string GetTooltip() => isDarkMode ? "Prze³¹cz na tryb jasny" : "Prze³¹cz na tryb ciemny";
+    private string GetLabel() => isDarkMode ? "Jasny" : "Ciemny";
+
+    public void Dispose()
+    {
+        ThemeService.ThemeChanged -= OnThemeChanged;
+    }
+}

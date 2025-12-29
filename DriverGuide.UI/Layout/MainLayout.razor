@@ -5,6 +5,8 @@
 @using DriverGuide.UI.Auth
 @using System.Security.Claims
 
+<ThemeManager />
+
 <div class="main-layout">
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -25,26 +27,30 @@
                         <li class="nav-item"><NavLink class="nav-link" href="pytania">Baza pytañ egzaminacyjnych</NavLink></li>
                     </ul>
                     
-                    <AuthorizeView>
-                        <Authorized>
-                            <div class="d-flex align-items-center gap-2">
-                                <button class="btn btn-outline-light" @onclick="NavigateToProfile">
-                                    <i class="bi bi-person-circle me-1"></i>
-                                    @context.User.Identity?.Name
-                                </button>
-                                <button class="btn btn-danger" @onclick="HandleLogout">
-                                    <i class="bi bi-box-arrow-right me-1"></i>
-                                    Wyloguj
-                                </button>
-                            </div>
-                        </Authorized>
-                        <NotAuthorized>
-                            <div class="d-flex">
-                                <NavLink class="btn btn-outline-light me-2" href="login">Zaloguj siê</NavLink>
-                                <NavLink class="btn btn-warning" href="register">Zarejestruj siê</NavLink>
-                            </div>
-                        </NotAuthorized>
-                    </AuthorizeView>
+                    <div class="d-flex align-items-center gap-3">
+                        <ThemeToggle />
+                        
+                        <AuthorizeView>
+                            <Authorized>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button class="btn btn-outline-light" @onclick="NavigateToProfile">
+                                        <i class="bi bi-person-circle me-1"></i>
+                                        @context.User.Identity?.Name
+                                    </button>
+                                    <button class="btn btn-danger" @onclick="HandleLogout">
+                                        <i class="bi bi-box-arrow-right me-1"></i>
+                                        Wyloguj
+                                    </button>
+                                </div>
+                            </Authorized>
+                            <NotAuthorized>
+                                <div class="d-flex">
+                                    <NavLink class="btn btn-outline-light me-2" href="login">Zaloguj siê</NavLink>
+                                    <NavLink class="btn btn-warning" href="register">Zarejestruj siê</NavLink>
+                                </div>
+                            </NotAuthorized>
+                        </AuthorizeView>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -76,8 +82,7 @@
         min-height: 100vh;
         display: flex;
         flex-direction: column;
-        /* Nowoczesny gradient background z subtelnym wzorem */
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+        background: var(--bg-primary);
         background-size: 400% 400%;
         animation: gradientShift 15s ease infinite;
         position: relative;
@@ -116,6 +121,10 @@
         flex-shrink: 0;
     }
 
+    header .navbar {
+        background-color: var(--navbar-bg) !important;
+    }
+
     main.container {
         flex: 1 0 auto;
         position: relative;
@@ -131,6 +140,7 @@
         position: relative;
         z-index: 5;
         width: 100%;
+        background: var(--footer-bg) !important;
     }
 
     .hero-banner {
@@ -138,7 +148,7 @@
         height: 100%;
         width: 100%;
         margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--shadow-lg);
         border-radius: 16px;
     }
 

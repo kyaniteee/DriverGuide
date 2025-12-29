@@ -1,0 +1,39 @@
+@inject IThemeService ThemeService
+@inject IJSRuntime JS
+@implements IDisposable
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var isDarkMode = await ThemeService.GetIsDarkModeAsync();
+            await ApplyThemeAsync(isDarkMode);
+            
+            ThemeService.ThemeChanged += OnThemeChanged;
+        }
+    }
+
+    private async void OnThemeChanged(object? sender, bool isDarkMode)
+    {
+        await ApplyThemeAsync(isDarkMode);
+    }
+
+    private async Task ApplyThemeAsync(bool isDarkMode)
+    {
+        try
+        {
+            var theme = isDarkMode ? "dark" : "light";
+            await JS.InvokeVoidAsync("document.documentElement.setAttribute", "data-theme", theme);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error applying theme: {ex.Message}");
+        }
+    }
+
+    public void Dispose()
+    {
+        ThemeService.ThemeChanged -= OnThemeChanged;
+    }
+}

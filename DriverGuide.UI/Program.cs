@@ -1,6 +1,7 @@
 using Blazored.LocalStorage;
 using DriverGuide.UI;
 using DriverGuide.UI.Auth;
+using DriverGuide.UI.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -15,5 +16,6 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(baseAddr
 builder.Services.AddAuthorizationCore();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
+builder.Services.AddScoped<IThemeService, ThemeService>();
 
 await builder.Build().RunAsync();
