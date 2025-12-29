@@ -53,6 +53,8 @@
     <main class="container">
         @Body
     </main>
+
+    <Footer />
 </div>
 
 @code {
@@ -93,6 +95,7 @@
             radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
             radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
         pointer-events: none;
+        z-index: 0;
     }
 
     @@keyframes gradientShift {
@@ -107,10 +110,27 @@
         }
     }
 
+    header {
+        position: relative;
+        z-index: 10;
+        flex-shrink: 0;
+    }
+
     main.container {
-        flex: 1;
+        flex: 1 0 auto;
         position: relative;
         z-index: 1;
+        margin-bottom: 2rem;
+        padding-top: 1rem;
+        padding-bottom: 2rem;
+    }
+
+    /* Ensure footer is visible */
+    .app-footer {
+        flex-shrink: 0;
+        position: relative;
+        z-index: 5;
+        width: 100%;
     }
 
     .hero-banner {
@@ -135,5 +155,11 @@
     /* Smooth scrolling */
     html {
         scroll-behavior: smooth;
+    }
+
+    /* Ensure body doesn't have margin */
+    body {
+        margin: 0;
+        padding: 0;
     }
 </style>

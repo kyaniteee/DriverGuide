@@ -1,0 +1,433 @@
+@page "/regulamin"
+
+<PageTitle>Regulamin serwisu - DriverGuide</PageTitle>
+
+<style>
+    .legal-page {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 2rem;
+    }
+
+    .legal-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+    }
+
+    .legal-header {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 3rem 2.5rem;
+        text-align: center;
+    }
+
+    .legal-header i:first-child {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+    }
+
+    .legal-header h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin: 0 0 1rem 0;
+    }
+
+    .update-date {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50px;
+        font-size: 0.9rem;
+        margin-top: 1rem;
+    }
+
+    .legal-content {
+        padding: 3rem 2.5rem;
+    }
+
+    .legal-section {
+        margin-bottom: 3rem;
+        padding-bottom: 3rem;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .legal-section:last-child {
+        border-bottom: none;
+    }
+
+    .legal-section h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin: 0 0 2rem 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .legal-section h2 i {
+        color: #667eea;
+        font-size: 2rem;
+    }
+
+    .section-content {
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: #2d3748;
+    }
+
+    .section-content p {
+        margin-bottom: 1.5rem;
+    }
+
+    .section-content strong {
+        color: #667eea;
+        font-weight: 600;
+    }
+
+    .section-content ul {
+        margin: 1rem 0 1.5rem 2rem;
+        padding: 0;
+    }
+
+    .section-content li {
+        margin-bottom: 0.75rem;
+        padding-left: 0.5rem;
+    }
+
+    .section-content a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        border-bottom: 2px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .section-content a:hover {
+        border-bottom-color: #667eea;
+    }
+
+    .legal-footer {
+        background: rgba(102, 126, 234, 0.05);
+        padding: 2rem 2.5rem;
+        border-top: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .footer-info {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .footer-info i {
+        font-size: 1.5rem;
+        color: #667eea;
+        flex-shrink: 0;
+        margin-top: 0.25rem;
+    }
+
+    .footer-info p {
+        margin: 0;
+        font-size: 1rem;
+        line-height: 1.6;
+        color: #2d3748;
+    }
+
+    .footer-info a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    @@media (max-width: 768px) {
+        .legal-page { padding: 0 1rem 1rem; }
+        .legal-header { padding: 2rem 1.5rem; }
+        .legal-header h1 { font-size: 1.75rem; }
+        .legal-content { padding: 2rem 1.5rem; }
+        .legal-section h2 { font-size: 1.3rem; flex-direction: column; align-items: flex-start; }
+    }
+</style>
+
+<div class="legal-page">
+    <div class="legal-container">
+        <div class="legal-header">
+            <i class="bi bi-file-text-fill"></i>
+            <h1>Regulamin Serwisu DriverGuide</h1>
+            <p class="update-date">
+                <i class="bi bi-calendar-event"></i>
+                Data ostatniej aktualizacji: @DateTime.Now.ToString("dd.MM.yyyy")
+            </p>
+        </div>
+
+        <div class="legal-content">
+            <!-- I. Postanowienia ogólne -->
+            <section class="legal-section">
+                <h2>
+                    <i class="bi bi-1-circle-fill"></i>
+                    I. Postanowienia ogólne
+                </h2>
+                <div class="section-content">
+                    <p>
+                        <strong>1.1</strong> Niniejszy Regulamin okreœla zasady korzystania z serwisu internetowego DriverGuide, 
+                        dostêpnego pod adresem internetowym oraz za poœrednictwem aplikacji mobilnych.
+                    </p>
+                    <p>
+                        <strong>1.2</strong> W³aœcicielem i administratorem serwisu jest DriverGuide Sp. z o.o. z siedzib¹ w Polsce.
+                    </p>
+                    <p>
+                        <strong>1.3</strong> Korzystanie z serwisu jest równoznaczne z akceptacj¹ niniejszego Regulaminu.
+                    </p>
+                    <p>
+                        <strong>1.4</strong> Regulamin jest dostêpny nieodp³atnie w serwisie w formie umo¿liwiaj¹cej jego 
+                        pobranie, utrwalenie i wydrukowanie.
+                    </p>
+                </div>
+            </section>
+
+            <!-- II. Definicje -->
+            <section class="legal-section">
+                <h2>
+                    <i class="bi bi-2-circle-fill"></i>
+                    II. Definicje
+                </h2>
+                <div class="section-content">
+                    <p>
+                        <strong>2.1 Serwis</strong> - platforma internetowa DriverGuide umo¿liwiaj¹ca przygotowanie siê 
+                        do egzaminu teoretycznego na prawo jazdy.
+                    </p>
+                    <p>
+                        <strong>2.2 U¿ytkownik</strong> - osoba korzystaj¹ca z Serwisu, zarówno zarejestrowana jak i niezarejestrowana.
+                    </p>
+                    <p>
+                        <strong>2.3 Konto</strong> - zbiór zasobów i ustawieñ utworzonych dla U¿ytkownika w Serwisie.
+                    </p>
+                    <p>
+                        <strong>2.4 Us³ugi</strong> - funkcjonalnoœci oferowane przez Serwis, w tym testy egzaminacyjne, 
+                        baza pytañ, statystyki.
+                    </p>
+                </div>
+            </section>
+
+            <!-- III. Zasady korzystania z serwisu -->
+            <section class="legal-section">
+                <h2>
+                    <i class="bi bi-3-circle-fill"></i>
+                    III. Zasady korzystania z Serwisu
+                </h2>
+                <div class="section-content">
+                    <p>
+                        <strong>3.1</strong> Serwis jest dostêpny bezp³atnie dla wszystkich U¿ytkowników.
+                    </p>
+                    <p>
+                        <strong>3.2</strong> Korzystanie z pe³nej funkcjonalnoœci Serwisu wymaga utworzenia Konta poprzez rejestracjê.
+                    </p>
+                    <p>
+                        <strong>3.3</strong> U¿ytkownik jest zobowi¹zany do:
+                    </p>
+                    <ul>
+                        <li>Podawania prawdziwych i aktualnych danych podczas rejestracji</li>
+                        <li>Zachowania poufnoœci has³a dostêpu do Konta</li>
+                        <li>Niezw³ocznego informowania o nieautoryzowanym dostêpie do Konta</li>
+                        <li>Korzystania z Serwisu zgodnie z jego przeznaczeniem</li>
+                    </ul>
+                    <p>
+                        <strong>3.4</strong> Zabrania siê:
+                    </p>
+                    <ul>
+                        <li>Dostarczania treœci o charakterze bezprawnym</li>
+                        <li>Podejmowania dzia³añ mog¹cych zak³óciæ funkcjonowanie Serwisu</li>
+                        <li>Kopiowania, rozpowszechniania lub modyfikowania materia³ów z Serwisu bez zgody</li>
+                        <li>Korzystania z automatycznych narzêdzi do pobierania danych</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- IV. Rejestracja i Konto -->
+            <section class="legal-section">
+                <h2>
+                    <i class="bi bi-4-circle-fill"></i>
+                    IV. Rejestracja i Konto
+                </h2>
+                <div class="section-content">
+                    <p>
+                        <strong>4.1</strong> Rejestracja w Serwisie jest dobrowolna i bezp³atna.
+                    </p>
+                    <p>
+                        <strong>4.2</strong> Do utworzenia Konta wymagane jest podanie:
+                    </p>
+                    <ul>
+                        <li>Adresu e-mail</li>
+                        <li>Has³a</li>
+                        <li>Nazwy u¿ytkownika</li>
+                    </ul>
+                    <p>
+                        <strong>4.3</strong> U¿ytkownik mo¿e w ka¿dej chwili usun¹æ swoje Konto poprzez panel ustawieñ.
+                    </p>
+                    <p>
+                        <strong>4.4</strong> Administrator ma prawo zablokowaæ lub usun¹æ Konto w przypadku naruszenia Regulaminu.
+                    </p>
+                </div>
+            </section>
+
+            <!-- V. W³asnoœæ intelektualna -->
+            <section class="legal-section">
+                <h2>
+                    <i class="bi bi-5-circle-fill"></i>
+                    V. W³asnoœæ intelektualna
+                </h2>
+                <div class="section-content">
+                    <p>
+                        <strong>5.1</strong> Wszelkie prawa autorskie do Serwisu, w tym jego struktury, uk³adu, 
+                        grafiki i treœci, nale¿¹ do Administratora.
+                    </p>
+                    <p>
+                        <strong>5.2</strong> Pytania egzaminacyjne pochodz¹ z oficjalnych Ÿróde³ Wojewódzkich Oœrodków Ruchu Drogowego.
+                    </p>
+                    <p>
+                        <strong>5.3</strong> Zabrania siê kopiowania, modyfikowania lub rozpowszechniania treœci Serwisu 
+                        bez pisemnej zgody Administratora.
+                    </p>
+                </div>
+            </section>
+
+            <!-- VI. Odpowiedzialnoœæ -->
+            <section class="legal-section">
+                <h2>
+                    <i class="bi bi-6-circle-fill"></i>
+                    VI. Odpowiedzialnoœæ
+                </h2>
+                <div class="section-content">
+                    <p>
+                        <strong>6.1</strong> Administrator nie ponosi odpowiedzialnoœci za:
+                    </p>
+                    <ul>
+                        <li>Wynik rzeczywistego egzaminu pañstwowego</li>
+                        <li>Przerwê w dostêpnoœci Serwisu spowodowan¹ si³¹ wy¿sz¹</li>
+                        <li>Dzia³ania osób trzecich naruszaj¹ce zasady korzystania z Serwisu</li>
+                    </ul>
+                    <p>
+                        <strong>6.2</strong> Administrator do³o¿y wszelkich starañ, aby treœci w Serwisie by³y aktualne i zgodne 
+                        z obowi¹zuj¹cymi przepisami.
+                    </p>
+                    <p>
+                        <strong>6.3</strong> U¿ytkownik korzysta z Serwisu na w³asn¹ odpowiedzialnoœæ.
+                    </p>
+                </div>
+            </section>
+
+            <!-- VII. Ochrona danych osobowych -->
+            <section class="legal-section">
+                <h2>
+                    <i class="bi bi-7-circle-fill"></i>
+                    VII. Ochrona danych osobowych
+                </h2>
+                <div class="section-content">
+                    <p>
+                        <strong>7.1</strong> Administrator przetwarza dane osobowe U¿ytkowników zgodnie z Rozporz¹dzeniem 
+                        Parlamentu Europejskiego i Rady (UE) 2016/679 (RODO).
+                    </p>
+                    <p>
+                        <strong>7.2</strong> Szczegó³owe informacje dotycz¹ce przetwarzania danych osobowych zawarte s¹ 
+                        w <a href="/polityka-prywatnosci">Polityce Prywatnoœci</a>.
+                    </p>
+                    <p>
+                        <strong>7.3</strong> Administrator stosuje odpowiednie œrodki techniczne i organizacyjne zapewniaj¹ce 
+                        bezpieczeñstwo danych osobowych.
+                    </p>
+                </div>
+            </section>
+
+            <!-- VIII. Zmiany Regulaminu -->
+            <section class="legal-section">
+                <h2>
+                    <i class="bi bi-8-circle-fill"></i>
+                    VIII. Zmiany Regulaminu
+                </h2>
+                <div class="section-content">
+                    <p>
+                        <strong>8.1</strong> Administrator zastrzega sobie prawo do wprowadzania zmian w Regulaminie.
+                    </p>
+                    <p>
+                        <strong>8.2</strong> O zmianach w Regulaminie U¿ytkownicy zostan¹ poinformowani poprzez:
+                    </p>
+                    <ul>
+                        <li>Komunikat w Serwisie</li>
+                        <li>Wiadomoœæ e-mail na adres podany podczas rejestracji</li>
+                    </ul>
+                    <p>
+                        <strong>8.3</strong> Zmiany wchodz¹ w ¿ycie w terminie wskazanym przez Administratora, nie krótszym ni¿ 7 dni.
+                    </p>
+                    <p>
+                        <strong>8.4</strong> Dalsze korzystanie z Serwisu po wejœciu w ¿ycie zmian oznacza akceptacjê nowego Regulaminu.
+                    </p>
+                </div>
+            </section>
+
+            <!-- IX. Reklamacje -->
+            <section class="legal-section">
+                <h2>
+                    <i class="bi bi-9-circle-fill"></i>
+                    IX. Reklamacje
+                </h2>
+                <div class="section-content">
+                    <p>
+                        <strong>9.1</strong> Reklamacje dotycz¹ce funkcjonowania Serwisu mo¿na sk³adaæ poprzez 
+                        <a href="/kontakt">formularz kontaktowy</a>.
+                    </p>
+                    <p>
+                        <strong>9.2</strong> Reklamacja powinna zawieraæ:
+                    </p>
+                    <ul>
+                        <li>Opis problemu</li>
+                        <li>Dane kontaktowe</li>
+                        <li>¯¹danie w sprawie reklamacji</li>
+                    </ul>
+                    <p>
+                        <strong>9.3</strong> Administrator rozpatrzy reklamacjê w terminie do 14 dni od jej otrzymania.
+                    </p>
+                </div>
+            </section>
+
+            <!-- X. Postanowienia koñcowe -->
+            <section class="legal-section">
+                <h2>
+                    <i class="bi bi-0-circle-fill"></i>
+                    X. Postanowienia koñcowe
+                </h2>
+                <div class="section-content">
+                    <p>
+                        <strong>10.1</strong> W sprawach nieuregulowanych w niniejszym Regulaminie zastosowanie maj¹ 
+                        przepisy prawa polskiego.
+                    </p>
+                    <p>
+                        <strong>10.2</strong> Wszelkie spory wynik³e z korzystania z Serwisu bêd¹ rozstrzygane przez 
+                        s¹d w³aœciwy dla siedziby Administratora.
+                    </p>
+                    <p>
+                        <strong>10.3</strong> W przypadku rozbie¿noœci miêdzy wersj¹ polsk¹ a innojêzyczn¹ Regulaminu, 
+                        wersja polska ma charakter rozstrzygaj¹cy.
+                    </p>
+                </div>
+            </section>
+        </div>
+
+        <div class="legal-footer">
+            <div class="footer-info">
+                <i class="bi bi-info-circle-fill"></i>
+                <p>
+                    Masz pytania dotycz¹ce Regulaminu? <a href="/kontakt">Skontaktuj siê z nami</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    // No code-behind needed
+}

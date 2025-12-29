@@ -1,0 +1,486 @@
+@page "/polityka-prywatnosci"
+
+<PageTitle>Polityka Prywatnoœci - DriverGuide</PageTitle>
+
+<style>
+    .legal-page {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 2rem;
+    }
+
+    .legal-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+    }
+
+    .legal-header {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 3rem 2.5rem;
+        text-align: center;
+    }
+
+    .legal-header i:first-child {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+    }
+
+    .legal-header h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin: 0 0 1rem 0;
+    }
+
+    .update-date {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50px;
+        font-size: 0.9rem;
+        margin-top: 1rem;
+    }
+
+    .legal-content {
+        padding: 3rem 2.5rem;
+    }
+
+    .legal-section {
+        margin-bottom: 3rem;
+        padding-bottom: 3rem;
+        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .legal-section:last-child {
+        border-bottom: none;
+    }
+
+    .legal-section h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin: 0 0 2rem 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .legal-section h2 i {
+        color: #667eea;
+        font-size: 2rem;
+    }
+
+    .section-content {
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: #2d3748;
+    }
+
+    .section-content p {
+        margin-bottom: 1.5rem;
+    }
+
+    .section-content strong {
+        color: #667eea;
+        font-weight: 600;
+    }
+
+    .section-content ul {
+        margin: 1rem 0 1.5rem 2rem;
+        padding: 0;
+    }
+
+    .section-content li {
+        margin-bottom: 0.75rem;
+        padding-left: 0.5rem;
+    }
+
+    .section-content a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        border-bottom: 2px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .section-content a:hover {
+        border-bottom-color: #667eea;
+    }
+
+    .info-box, .warning-box, .success-box {
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .info-box {
+        background: rgba(102, 126, 234, 0.1);
+        border-left: 4px solid #667eea;
+    }
+
+    .warning-box {
+        background: rgba(245, 101, 101, 0.1);
+        border-left: 4px solid #f56565;
+    }
+
+    .success-box {
+        background: rgba(72, 187, 120, 0.1);
+        border-left: 4px solid #48bb78;
+    }
+
+    .info-box i, .warning-box i, .success-box i {
+        font-size: 1.3rem;
+        flex-shrink: 0;
+    }
+
+    .info-box i { color: #667eea; }
+    .warning-box i { color: #f56565; }
+    .success-box i { color: #48bb78; }
+
+    .info-box p, .warning-box p, .success-box p {
+        margin: 0;
+    }
+
+    .legal-footer {
+        background: rgba(102, 126, 234, 0.05);
+        padding: 2rem 2.5rem;
+        border-top: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .footer-info {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .footer-info i {
+        font-size: 1.5rem;
+        color: #667eea;
+        flex-shrink: 0;
+        margin-top: 0.25rem;
+    }
+
+    .footer-info p {
+        margin: 0;
+        font-size: 1rem;
+        line-height: 1.6;
+        color: #2d3748;
+    }
+
+    .footer-info a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    @@media (max-width: 768px) {
+        .legal-page { padding: 0 1rem 1rem; }
+        .legal-header { padding: 2rem 1.5rem; }
+        .legal-header h1 { font-size: 1.75rem; }
+        .legal-content { padding: 2rem 1.5rem; }
+        .legal-section h2 { font-size: 1.3rem; flex-direction: column; align-items: flex-start; }
+    }
+</style>
+
+<div class="legal-page">
+    <div class="legal-container">
+        <div class="legal-header">
+            <i class="bi bi-shield-lock-fill"></i>
+            <h1>Polityka Prywatnoœci</h1>
+            <p class="update-date">
+                <i class="bi bi-calendar-event"></i>
+                Data ostatniej aktualizacji: @DateTime.Now.ToString("dd.MM.yyyy")
+            </p>
+        </div>
+
+        <div class="legal-content">
+            <!-- I. Postanowienia ogólne -->
+            <section class="legal-section">
+                <h2>
+                    <i class="bi bi-1-circle-fill"></i>
+                    I. Postanowienia ogólne
+                </h2>
+                <div class="section-content">
+                    <p>
+                        <strong>1.1</strong> Niniejsza Polityka Prywatnoœci okreœla zasady przetwarzania i ochrony danych osobowych 
+                        przekazanych przez U¿ytkowników w zwi¹zku z korzystaniem przez nich z us³ug dostêpnych w serwisie DriverGuide.
+                    </p>
+                    <p>
+                        <strong>1.2</strong> Administratorem danych osobowych jest DriverGuide Sp. z o.o. z siedzib¹ w Polsce.
+                    </p>
+                    <p>
+                        <strong>1.3</strong> Ochrona danych odbywa siê zgodnie z wymogami powszechnie obowi¹zuj¹cych przepisów prawa, 
+                        w tym zgodnie z Rozporz¹dzeniem Parlamentu Europejskiego i Rady (UE) 2016/679 (RODO).
+                    </p>
+                    <div class="info-box">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <p>
+                            Dbamy o bezpieczeñstwo Twoich danych osobowych i stosujemy najwy¿sze standardy ich ochrony zgodne z RODO.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- II. Zakres zbieranych danych -->
+            <section class="legal-section">
+                <h2>
+                    <i class="bi bi-2-circle-fill"></i>
+                    II. Zakres zbieranych danych
+                </h2>
+                <div class="section-content">
+                    <p>
+                        <strong>2.1 Podczas rejestracji zbieramy:</strong>
+                    </p>
+                    <ul>
+                        <li>Adres e-mail</li>
+                        <li>Nazwê u¿ytkownika</li>
+                        <li>Has³o (przechowywane w formie zaszyfrowanej)</li>
+                    </ul>
+                    <p>
+                        <strong>2.2 Podczas korzystania z serwisu automatycznie zbieramy:</strong>
+                    </p>
+                    <ul>
+                        <li>Adres IP</li>
+                        <li>Typ przegl¹darki</li>
+                        <li>System operacyjny</li>
+                        <li>Czas wizyty w serwisie</li>
+                        <li>Odwiedzane podstrony</li>
+                    </ul>
+                    <p>
+                        <strong>2.3 Dobrowolnie podane dane:</strong>
+                    </p>
+                    <ul>
+                        <li>Zdjêcie profilowe (avatar)</li>
+                        <li>Dane kontaktowe w formularzu kontaktowym</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- III. Cele przetwarzania danych -->
+            <section class="legal-section">
+                <h2>
+                    <i class="bi bi-3-circle-fill"></i>
+                    III. Cele przetwarzania danych
+                </h2>
+                <div class="section-content">
+                    <p>
+                        <strong>3.1</strong> Dane osobowe przetwarzane s¹ w celu:
+                    </p>
+                    <ul>
+                        <li>Œwiadczenia us³ug dostêpnych w serwisie</li>
+                        <li>Utworzenia i obs³ugi Konta U¿ytkownika</li>
+                        <li>Komunikacji z U¿ytkownikiem</li>
+                        <li>Zapewnienia bezpieczeñstwa serwisu</li>
+                        <li>Prowadzenia statystyk i analiz</li>
+                        <li>Realizacji obowi¹zków prawnych</li>
+                    </ul>
+                    <p>
+                        <strong>3.2</strong> Podstaw¹ prawn¹ przetwarzania danych jest:
+                    </p>
+                    <ul>
+                        <li>Zgoda U¿ytkownika (Art. 6 ust. 1 lit. a RODO)</li>
+                        <li>Niezbêdnoœæ do wykonania umowy (Art. 6 ust. 1 lit. b RODO)</li>
+                        <li>Prawnie uzasadniony interes Administratora (Art. 6 ust. 1 lit. f RODO)</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- IV. Udostêpnianie danych -->
+            <section class="legal-section">
+                <h2>
+                    <i class="bi bi-4-circle-fill"></i>
+                    IV. Udostêpnianie danych
+                </h2>
+                <div class="section-content">
+                    <p>
+                        <strong>4.1</strong> Dane osobowe mog¹ byæ udostêpniane:
+                    </p>
+                    <ul>
+                        <li>Podmiotom œwiadcz¹cym us³ugi hostingowe</li>
+                        <li>Dostawcom us³ug IT</li>
+                        <li>Podmiotom wspó³pracuj¹cym w zakresie obs³ugi p³atnoœci (jeœli dotyczy)</li>
+                        <li>Organom uprawnionym na podstawie przepisów prawa</li>
+                    </ul>
+                    <div class="warning-box">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <p>
+                            <strong>Nie sprzedajemy</strong> Twoich danych osobowych osobom trzecim!
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- V. Prawa U¿ytkownika -->
+            <section class="legal-section">
+                <h2>
+                    <i class="bi bi-5-circle-fill"></i>
+                    V. Prawa U¿ytkownika
+                </h2>
+                <div class="section-content">
+                    <p>
+                        <strong>5.1</strong> U¿ytkownik ma prawo do:
+                    </p>
+                    <ul>
+                        <li><i class="bi bi-check-circle-fill" style="color: #48bb78;"></i> <strong>Dostêpu do danych</strong> - prawo do otrzymania informacji o przetwarzanych danych</li>
+                        <li><i class="bi bi-check-circle-fill" style="color: #48bb78;"></i> <strong>Sprostowania danych</strong> - prawo do poprawiania nieprawid³owych danych</li>
+                        <li><i class="bi bi-check-circle-fill" style="color: #48bb78;"></i> <strong>Usuniêcia danych</strong> - prawo do ¿¹dania usuniêcia danych ("prawo do bycia zapomnianym")</li>
+                        <li><i class="bi bi-check-circle-fill" style="color: #48bb78;"></i> <strong>Ograniczenia przetwarzania</strong> - prawo do ograniczenia przetwarzania danych</li>
+                        <li><i class="bi bi-check-circle-fill" style="color: #48bb78;"></i> <strong>Przenoszenia danych</strong> - prawo do otrzymania danych w ustrukturyzowanym formacie</li>
+                        <li><i class="bi bi-check-circle-fill" style="color: #48bb78;"></i> <strong>Sprzeciwu</strong> - prawo do wniesienia sprzeciwu wobec przetwarzania danych</li>
+                        <li><i class="bi bi-check-circle-fill" style="color: #48bb78;"></i> <strong>Cofniêcia zgody</strong> - prawo do cofniêcia zgody w dowolnym momencie</li>
+                    </ul>
+                    <p>
+                        <strong>5.2</strong> W celu realizacji swoich praw, nale¿y skontaktowaæ siê z Administratorem poprzez 
+                        <a href="/kontakt">formularz kontaktowy</a>.
+                    </p>
+                    <p>
+                        <strong>5.3</strong> U¿ytkownik ma prawo do wniesienia skargi do organu nadzorczego (UODO).
+                    </p>
+                </div>
+            </section>
+
+            <!-- VI. Pliki cookies -->
+            <section class="legal-section">
+                <h2>
+                    <i class="bi bi-6-circle-fill"></i>
+                    VI. Pliki cookies
+                </h2>
+                <div class="section-content">
+                    <p>
+                        <strong>6.1</strong> Serwis wykorzystuje pliki cookies w celu:
+                    </p>
+                    <ul>
+                        <li>Zapamiêtania preferencji U¿ytkownika</li>
+                        <li>Utrzymania sesji zalogowanego U¿ytkownika</li>
+                        <li>Prowadzenia statystyk</li>
+                        <li>Poprawy jakoœci œwiadczonych us³ug</li>
+                    </ul>
+                    <p>
+                        <strong>6.2</strong> Rodzaje stosowanych plików cookies:
+                    </p>
+                    <ul>
+                        <li><strong>Niezbêdne</strong> - wymagane do prawid³owego dzia³ania serwisu</li>
+                        <li><strong>Funkcjonalne</strong> - zapamiêtuj¹ce preferencje U¿ytkownika</li>
+                        <li><strong>Analityczne</strong> - s³u¿¹ce do analizy ruchu w serwisie</li>
+                    </ul>
+                    <p>
+                        <strong>6.3</strong> U¿ytkownik mo¿e w ka¿dej chwili zmieniæ ustawienia cookies w przegl¹darce.
+                    </p>
+                </div>
+            </section>
+
+            <!-- VII. Bezpieczeñstwo danych -->
+            <section class="legal-section">
+                <h2>
+                    <i class="bi bi-7-circle-fill"></i>
+                    VII. Bezpieczeñstwo danych
+                </h2>
+                <div class="section-content">
+                    <p>
+                        <strong>7.1</strong> Administrator stosuje odpowiednie œrodki techniczne i organizacyjne:
+                    </p>
+                    <ul>
+                        <li>Szyfrowanie po³¹czenia SSL/TLS</li>
+                        <li>Szyfrowanie hase³ w bazie danych</li>
+                        <li>Regularne kopie zapasowe</li>
+                        <li>Zabezpieczenia przed nieautoryzowanym dostêpem</li>
+                        <li>Regularne aktualizacje zabezpieczeñ</li>
+                    </ul>
+                    <div class="success-box">
+                        <i class="bi bi-shield-check"></i>
+                        <p>
+                            Twoje dane s¹ chronione najnowszymi standardami bezpieczeñstwa zgodnie z najlepszymi praktykami bran¿owymi.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIII. Okres przechowywania danych -->
+            <section class="legal-section">
+                <h2>
+                    <i class="bi bi-8-circle-fill"></i>
+                    VIII. Okres przechowywania danych
+                </h2>
+                <div class="section-content">
+                    <p>
+                        <strong>8.1</strong> Dane osobowe przechowywane s¹ przez okres:
+                    </p>
+                    <ul>
+                        <li>Niezbêdny do œwiadczenia us³ug</li>
+                        <li>Wymagany przepisami prawa</li>
+                        <li>Przez czas trwania konta U¿ytkownika</li>
+                    </ul>
+                    <p>
+                        <strong>8.2</strong> Po usuniêciu konta, dane s¹ usuwane w ci¹gu 30 dni, z wy³¹czeniem danych, 
+                        które musz¹ byæ przechowywane ze wzglêdów prawnych.
+                    </p>
+                </div>
+            </section>
+
+            <!-- IX. Zmiany Polityki Prywatnoœci -->
+            <section class="legal-section">
+                <h2>
+                    <i class="bi bi-9-circle-fill"></i>
+                    IX. Zmiany Polityki Prywatnoœci
+                </h2>
+                <div class="section-content">
+                    <p>
+                        <strong>9.1</strong> Administrator zastrzega sobie prawo do zmiany Polityki Prywatnoœci.
+                    </p>
+                    <p>
+                        <strong>9.2</strong> O zmianach U¿ytkownicy zostan¹ poinformowani poprzez komunikat w serwisie.
+                    </p>
+                    <p>
+                        <strong>9.3</strong> Aktualna wersja Polityki Prywatnoœci jest zawsze dostêpna na tej stronie.
+                    </p>
+                </div>
+            </section>
+
+            <!-- X. Kontakt -->
+            <section class="legal-section">
+                <h2>
+                    <i class="bi bi-0-circle-fill"></i>
+                    X. Kontakt
+                </h2>
+                <div class="section-content">
+                    <p>
+                        <strong>10.1</strong> W sprawach dotycz¹cych przetwarzania danych osobowych mo¿na skontaktowaæ siê:
+                    </p>
+                    <ul>
+                        <li>Poprzez <a href="/kontakt">formularz kontaktowy</a></li>
+                        <li>E-mail: 37652@wsei.pl</li>
+                        <li>Telefonicznie: +48 791 426 082</li>
+                    </ul>
+                    <div class="info-box">
+                        <i class="bi bi-envelope-fill"></i>
+                        <p>
+                            Odpowiadamy na wszystkie zapytania dotycz¹ce prywatnoœci w ci¹gu 72 godzin.
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="legal-footer">
+            <div class="footer-info">
+                <i class="bi bi-info-circle-fill"></i>
+                <p>
+                    Masz pytania dotycz¹ce przetwarzania danych osobowych? <a href="/kontakt">Skontaktuj siê z nami</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    // No code-behind needed
+}

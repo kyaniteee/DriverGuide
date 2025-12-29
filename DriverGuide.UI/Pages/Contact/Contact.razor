@@ -1,0 +1,254 @@
+@page "/kontakt"
+@using System.ComponentModel.DataAnnotations
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<PageTitle>Kontakt - DriverGuide</PageTitle>
+
+<div class="contact-page">
+    <div class="contact-container">
+        <!-- Hero Section -->
+        <div class="contact-hero">
+            <div class="hero-icon">
+                <i class="bi bi-envelope-heart-fill"></i>
+            </div>
+            <h1>
+                <i class="bi bi-chat-dots-fill"></i>
+                Skontaktuj siê z nami
+            </h1>
+            <p>Masz pytania lub sugestie? Jesteœmy tutaj, aby Ci pomóc!</p>
+        </div>
+
+        <div class="contact-content">
+            <!-- Contact Form -->
+            <div class="contact-form-section">
+                <div class="section-header">
+                    <i class="bi bi-send-fill"></i>
+                    <h2>Formularz kontaktowy</h2>
+                </div>
+
+                @if (showSuccess)
+                {
+                    <div class="alert-success">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <div>
+                            <strong>Wiadomoœæ wys³ana!</strong>
+                            <p>Dziêkujemy za kontakt. Odpowiemy najszybciej jak to mo¿liwe.</p>
+                        </div>
+                    </div>
+                }
+
+                @if (showError)
+                {
+                    <div class="alert-error">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <div>
+                            <strong>Wyst¹pi³ b³¹d</strong>
+                            <p>Nie uda³o siê wys³aæ wiadomoœci. Spróbuj ponownie póŸniej.</p>
+                        </div>
+                    </div>
+                }
+
+                <EditForm Model="contactForm" OnValidSubmit="HandleSubmit" class="contact-form">
+                    <DataAnnotationsValidator />
+
+                    <div class="form-group">
+                        <label for="name">
+                            <i class="bi bi-person-fill"></i>
+                            Imiê i nazwisko *
+                        </label>
+                        <InputText id="name" @bind-Value="contactForm.Name" class="form-control" placeholder="Jan Kowalski" />
+                        <ValidationMessage For="@(() => contactForm.Name)" class="validation-message" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">
+                            <i class="bi bi-envelope-fill"></i>
+                            Adres e-mail *
+                        </label>
+                        <InputText id="email" type="email" @bind-Value="contactForm.Email" class="form-control" placeholder="jan.kowalski@example.com" />
+                        <ValidationMessage For="@(() => contactForm.Email)" class="validation-message" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subject">
+                            <i class="bi bi-tag-fill"></i>
+                            Temat *
+                        </label>
+                        <InputSelect id="subject" @bind-Value="contactForm.Subject" class="form-control">
+                            <option value="">-- Wybierz temat --</option>
+                            <option value="Pytanie ogólne">Pytanie ogólne</option>
+                            <option value="Problem techniczny">Problem techniczny</option>
+                            <option value="Sugestia">Sugestia</option>
+                            <option value="Zg³oszenie b³êdu">Zg³oszenie b³êdu</option>
+                            <option value="Wspó³praca">Wspó³praca</option>
+                            <option value="Inne">Inne</option>
+                        </InputSelect>
+                        <ValidationMessage For="@(() => contactForm.Subject)" class="validation-message" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">
+                            <i class="bi bi-chat-text-fill"></i>
+                            Wiadomoœæ *
+                        </label>
+                        <InputTextArea id="message" @bind-Value="contactForm.Message" class="form-control" rows="6" placeholder="Napisz swoj¹ wiadomoœæ..." />
+                        <ValidationMessage For="@(() => contactForm.Message)" class="validation-message" />
+                        <div class="char-counter">
+                            @(contactForm.Message?.Length ?? 0) / 1000 znaków
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-submit" disabled="@isSubmitting">
+                            @if (isSubmitting)
+                            {
+                                <i class="bi bi-hourglass-split"></i>
+                                <span>Wysy³anie...</span>
+                            }
+                            else
+                            {
+                                <i class="bi bi-send-fill"></i>
+                                <span>Wyœlij wiadomoœæ</span>
+                            }
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="contact-info-section">
+                <div class="info-card">
+                    <div class="info-icon bg-blue">
+                        <i class="bi bi-envelope-fill"></i>
+                    </div>
+                    <h3>E-mail</h3>
+                    <p>37652@wsei.pl</p>
+                    <a href="mailto:kontakt@driverguide.pl" class="info-link">
+                        <i class="bi bi-arrow-right-circle"></i>
+                        Wyœlij e-mail
+                    </a>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon bg-green">
+                        <i class="bi bi-clock-fill"></i>
+                    </div>
+                    <h3>Godziny pracy</h3>
+                    <p>Pon - Pt: 9:00 - 17:00</p>
+                    <p>Sob - Niedz: Zamkniête</p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon bg-purple">
+                        <i class="bi bi-headset"></i>
+                    </div>
+                    <h3>Wsparcie</h3>
+                    <p>Odpowiadamy w ci¹gu 24h</p>
+                    <a href="/pytania" class="info-link">
+                        <i class="bi bi-arrow-right-circle"></i>
+                        Baza pytañ
+                    </a>
+                </div>
+
+                <div class="faq-card">
+                    <h3>
+                        <i class="bi bi-question-circle-fill"></i>
+                        Najczêstsze pytania
+                    </h3>
+                    <div class="faq-list">
+                        <div class="faq-item">
+                            <strong>Czy DriverGuide jest darmowy?</strong>
+                            <p>Tak, nasza platforma jest w pe³ni darmowa.</p>
+                        </div>
+                        <div class="faq-item">
+                            <strong>Czy pytania s¹ aktualne?</strong>
+                            <p>Tak, pytania pochodz¹ z oficjalnych Ÿróde³ WORD.</p>
+                        </div>
+                        <div class="faq-item">
+                            <strong>Jak d³ugo trwa odpowiedŸ?</strong>
+                            <p>Staramy siê odpowiadaæ w ci¹gu 24 godzin.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="social-card">
+                    <h3>
+                        <i class="bi bi-share-fill"></i>
+                        ZnajdŸ nas
+                    </h3>
+                    <div class="social-links">
+                        <a href="https://www.gov.pl/web/infrastruktura/prawo-jazdy" target="_blank" class="social-btn">
+                            <i class="bi bi-building"></i>
+                            <span>Ministerstwo</span>
+                        </a>
+                        <a href="https://www.cepik.gov.pl/" target="_blank" class="social-btn">
+                            <i class="bi bi-pc-display"></i>
+                            <span>CEPIK</span>
+                        </a>
+                        <a href="https://info-car.pl/" target="_blank" class="social-btn">
+                            <i class="bi bi-search"></i>
+                            <span>InfoCar</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private ContactFormModel contactForm = new();
+    private bool isSubmitting = false;
+    private bool showSuccess = false;
+    private bool showError = false;
+
+    private async Task HandleSubmit()
+    {
+        isSubmitting = true;
+        showSuccess = false;
+        showError = false;
+
+        try
+        {
+            // Simulate API call - replace with actual implementation
+            await Task.Delay(1500);
+
+            // TODO: Implement actual email sending logic
+            // await Http.PostAsJsonAsync("/api/contact", contactForm);
+
+            showSuccess = true;
+            contactForm = new(); // Reset form
+
+            // Scroll to success message
+            await JS.InvokeVoidAsync("window.scrollTo", new { top = 0, behavior = "smooth" });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error sending contact form: {ex.Message}");
+            showError = true;
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    public class ContactFormModel
+    {
+        [Required(ErrorMessage = "Imiê i nazwisko jest wymagane")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "Imiê i nazwisko musi mieæ od 2 do 100 znaków")]
+        public string Name { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Adres e-mail jest wymagany")]
+        [EmailAddress(ErrorMessage = "Nieprawid³owy format adresu e-mail")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Proszê wybraæ temat wiadomoœci")]
+        public string Subject { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Wiadomoœæ jest wymagana")]
+        [StringLength(1000, MinimumLength = 10, ErrorMessage = "Wiadomoœæ musi mieæ od 10 do 1000 znaków")]
+        public string Message { get; set; } = string.Empty;
+    }
+}
