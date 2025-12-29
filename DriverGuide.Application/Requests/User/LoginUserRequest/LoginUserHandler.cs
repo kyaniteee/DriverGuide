@@ -5,10 +5,28 @@ using System.Security.Claims;
 
 namespace DriverGuide.Application.Requests;
 
+/// <summary>
+/// Handler odpowiedzialny za obsługę procesu logowania użytkownika.
+/// Weryfikuje dane uwierzytelniające i generuje token JWT dla zalogowanego użytkownika.
+/// </summary>
+/// <param name="userRepository">Repozytorium użytkowników do pobierania danych i weryfikacji hasła.</param>
+/// <param name="jwtTokenGenerator">Generator tokenów JWT używany do tworzenia tokenu dostępu.</param>
 public class LoginUserHandler(
     IUserRepository userRepository,
     IJwtTokenGenerator jwtTokenGenerator) : IRequestHandler<LoginUserRequest, string>
 {
+    /// <summary>
+    /// Obsługuje żądanie logowania użytkownika.
+    /// Weryfikuje dane logowania, sprawdza hasło i generuje token JWT zawierający role i roszczenia użytkownika.
+    /// </summary>
+    /// <param name="request">Obiekt żądania zawierający login i hasło użytkownika.</param>
+    /// <param name="cancellationToken">Token anulowania operacji asynchronicznej.</param>
+    /// <returns>
+    /// Token JWT jako string, który może być używany do uwierzytelniania kolejnych żądań.
+    /// </returns>
+    /// <exception cref="UnauthorizedAccessException">
+    /// Rzucany gdy użytkownik nie zostanie znaleziony lub hasło jest nieprawidłowe.
+    /// </exception>
     public async Task<string> Handle(LoginUserRequest request, CancellationToken cancellationToken)
     {
         // Znajdź użytkownika po loginie lub e-mailu z rolami i roszczeniami

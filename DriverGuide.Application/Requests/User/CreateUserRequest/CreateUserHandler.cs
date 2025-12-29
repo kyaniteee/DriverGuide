@@ -5,8 +5,28 @@ using Microsoft.AspNetCore.Identity;
 
 namespace DriverGuide.Application.Requests;
 
+/// <summary>
+/// Handler odpowiedzialny za tworzenie nowego użytkownika w systemie.
+/// Hashuje hasło, tworzy domyślną rolę i zapisuje dane użytkownika wraz z claims.
+/// </summary>
+/// <param name="userRepository">Repozytorium użytkowników do zapisu danych.</param>
 public class CreateUserHandler(IUserRepository userRepository) : IRequestHandler<CreateUserRequest, Guid>
 {
+    /// <summary>
+    /// Obsługuje żądanie utworzenia nowego użytkownika.
+    /// Tworzy obiekt użytkownika, hashuje hasło, przypisuje rolę "User" 
+    /// oraz dodaje claims zawierające imię, nazwisko i datę urodzenia.
+    /// </summary>
+    /// <param name="request">Obiekt żądania zawierający dane nowego użytkownika.</param>
+    /// <param name="cancellationToken">Token anulowania operacji asynchronicznej.</param>
+    /// <returns>
+    /// GUID nowo utworzonego użytkownika.
+    /// </returns>
+    /// <remarks>
+    /// Hasło jest hashowane przy użyciu PasswordHasher z ASP.NET Core Identity.
+    /// Użytkownik domyślnie otrzymuje rolę "User".
+    /// Dane osobowe (imię, nazwisko, data urodzenia) są przechowywane jako claims.
+    /// </remarks>
     public async Task<Guid> Handle(CreateUserRequest request, CancellationToken cancellationToken)
     {
         var user = new User

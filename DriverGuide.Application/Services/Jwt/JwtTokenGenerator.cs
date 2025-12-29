@@ -6,8 +6,32 @@ using System.Text;
 
 namespace DriverGuide.Application.Services;
 
+/// <summary>
+/// Generator tokenów JWT (JSON Web Token) używanych do uwierzytelniania i autoryzacji użytkowników.
+/// Implementuje interfejs IJwtTokenGenerator.
+/// </summary>
+/// <param name="configuration">Konfiguracja aplikacji zawierająca ustawienia JWT.</param>
 public class JwtTokenGenerator(IConfiguration configuration) : IJwtTokenGenerator
 {
+    /// <summary>
+    /// Generuje token JWT dla zalogowanego użytkownika.
+    /// Token zawiera informacje o użytkowniku, jego role oraz dodatkowe roszczenia (claims).
+    /// </summary>
+    /// <param name="userId">Unikalny identyfikator użytkownika.</param>
+    /// <param name="userName">Nazwa użytkownika.</param>
+    /// <param name="email">Adres email użytkownika.</param>
+    /// <param name="roles">Lista ról przypisanych do użytkownika.</param>
+    /// <param name="additionalClaims">Dodatkowe roszczenia (claims) do umieszczenia w tokenie.</param>
+    /// <returns>
+    /// String reprezentujący zakodowany token JWT.
+    /// Token może być używany w nagłówku Authorization: Bearer {token}.
+    /// </returns>
+    /// <remarks>
+    /// Token jest podpisywany kluczem symetrycznym przy użyciu algorytmu HMAC SHA256.
+    /// Czas wygaśnięcia tokenu jest konfigurowalny poprzez ustawienie "JwtSettings:ExpiryMinutes".
+    /// Domyślne claims zawierają: Sub (subject), Jti (JWT ID), Email, NameIdentifier, Name.
+    /// Dodatkowo dodawane są wszystkie role jako ClaimTypes.Role.
+    /// </remarks>
     public string GenerateToken(
         string userId,
         string userName,
@@ -29,10 +53,8 @@ public class JwtTokenGenerator(IConfiguration configuration) : IJwtTokenGenerato
             new Claim(ClaimTypes.Name, userName)
         };
 
-        // Dodaj role
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
-        // Dodaj dodatkowe claims jeśli są
         if (additionalClaims != null && additionalClaims.Any())
         {
             claims.AddRange(additionalClaims);

@@ -2,8 +2,16 @@
 
 namespace DriverGuide.Application.Requests;
 
+/// <summary>
+/// Walidator dla żądania logowania użytkownika.
+/// Sprawdza poprawność danych wejściowych przed przetworzeniem żądania.
+/// </summary>
 public class LoginUserValidator : AbstractValidator<LoginUserRequest>
 {
+    /// <summary>
+    /// Inicjalizuje nową instancję walidatora LoginUserValidator.
+    /// Definiuje reguły walidacji dla loginu i hasła.
+    /// </summary>
     public LoginUserValidator()
     {
         RuleFor(x => x.Login)

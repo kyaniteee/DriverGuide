@@ -10,7 +10,18 @@ public class CreateQuestionFileValidator : AbstractValidator<CreateQuestionFileC
             .NotNull().WithMessage("Nieistniejący plik!");
 
         RuleFor(x => x.FileName)
-            .NotEmpty().WithMessage("Nazwa pliku jest pusta!")
-            .When(x => x.FileName?.Split('.').Count() < 2).WithMessage("Nazwa pliku nie zawiera rozszerzenia!");
+            .NotEmpty().WithMessage("Nazwa pliku jest pusta!");
+
+        RuleFor(x => x.FileName)
+            .Must(HasFileExtension).WithMessage("Nazwa pliku nie zawiera rozszerzenia!")
+            .When(x => !string.IsNullOrEmpty(x.FileName));
+    }
+
+    private bool HasFileExtension(string? fileName)
+    {
+        if (string.IsNullOrEmpty(fileName))
+            return false;
+
+        return fileName.Contains('.') && fileName.Split('.').Length >= 2;
     }
 }
