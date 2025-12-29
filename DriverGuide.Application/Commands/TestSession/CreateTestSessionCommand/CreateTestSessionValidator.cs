@@ -6,6 +6,5 @@ public class CreateTestSessionValidator : AbstractValidator<CreateTestSessionCom
 {
     public CreateTestSessionValidator()
     {
-        //RuleFor(x => x.UserId).NotEmpty();
     }
 }

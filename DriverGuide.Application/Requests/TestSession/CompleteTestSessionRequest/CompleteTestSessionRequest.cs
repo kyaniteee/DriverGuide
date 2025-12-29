@@ -1,6 +1,8 @@
-﻿namespace DriverGuide.Application.Requests;
+using MediatR;
 
-public class CompleteTestSessionRequest
+namespace DriverGuide.Application.Requests;
+
+public class CompleteTestSessionRequest : IRequest<Unit>
 {
     public string TestSessionId { get; set; } = string.Empty;
     public double Result { get; set; }

@@ -9,11 +9,6 @@ public class CreateQuestionFileHandler(IQuestionFileRepository questionFileRepos
 {
     public async Task<Guid> Handle(CreateQuestionFileCommand request, CancellationToken cancellationToken)
     {
-        //await using var stream = request.File?.OpenReadStream();
-        //using var memoryStream = new MemoryStream();
-        //await stream!.CopyToAsync(memoryStream);
-        //var fileArray = memoryStream?.ToArray();
-
         var file = new QuestionFile()
         {
             File = request.File,

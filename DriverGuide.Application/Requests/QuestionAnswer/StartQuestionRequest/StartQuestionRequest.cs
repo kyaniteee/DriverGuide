@@ -1,8 +1,9 @@
-﻿using DriverGuide.Domain.Enums;
+using MediatR;
+using DriverGuide.Domain.Enums;
 
 namespace DriverGuide.Application.Requests;
 
-public class StartQuestionRequest
+public class StartQuestionRequest : IRequest<Guid>
 {
     public string TestSessionId { get; set; } = string.Empty;
     public string QuestionId { get; set; } = string.Empty;

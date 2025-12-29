@@ -1,8 +1,9 @@
-﻿using DriverGuide.Domain.Enums;
+using MediatR;
+using DriverGuide.Domain.Enums;
 
 namespace DriverGuide.Application.Requests;
 
-public class CreateTestSessionRequest
+public class CreateTestSessionRequest : IRequest<Guid>
 {
     public DateTimeOffset StartDate { get; set; }
     public LicenseCategory Category { get; set; }
