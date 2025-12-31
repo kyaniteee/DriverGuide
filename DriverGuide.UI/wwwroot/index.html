@@ -1,16 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DriverGuide.UI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <meta name="description" content="DriverGuide - Najlepsza aplikacja do nauki na prawo jazdy. Oficjalne pytania egzaminacyjne, testy i statystyki." />
+    <meta name="keywords" content="prawo jazdy, egzamin, testy, pytania, nauka, WORD" />
+    <title>DriverGuide - Twoja droga do prawa jazdy</title>
     <base href="/" />
+    
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="css/app.css" />
+    <link rel="stylesheet" href="css/navbar-mobile.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <link href="DriverGuide.UI.styles.css" rel="stylesheet" />
+    
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
 </head>
 
 <body>
@@ -23,10 +30,15 @@
     </div>
 
     <div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="" class="reload">Reload</a>
+        Wystąpił nieoczekiwany błąd.
+        <a href="" class="reload">Przeładuj</a>
         <a class="dismiss">🗙</a>
     </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" 
+            integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" 
+            crossorigin="anonymous"></script>
+    <script src="js/navbarHelper.js"></script>
     <script src="js/videoUtils.js"></script>
     <script src="_framework/blazor.webassembly.js"></script>
 </body>

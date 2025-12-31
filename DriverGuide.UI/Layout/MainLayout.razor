@@ -2,8 +2,11 @@
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject INavbarService NavbarService
 @using DriverGuide.UI.Auth
+@using DriverGuide.UI.Services
 @using System.Security.Claims
+@implements IDisposable
 
 <ThemeManager />
 
@@ -12,27 +15,48 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container-fluid">
                 <a class="navbar-brand d-flex align-items-center" href="/">
-                    <img src="images/steering-wheel.svg" width="30" height="30" class="me-2" />
+                    <img src="images/steering-wheel.svg" width="30" height="30" class="me-2" alt="DriverGuide Logo" />
                     DriverGuide
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
                 <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                     <ul class="navbar-nav me-3">
-                        <li class="nav-item"><NavLink class="nav-link" href="">Strona g³ówna</NavLink></li>
-                        <li class="nav-item"><NavLink class="nav-link" href="test">Rozpocznij test</NavLink></li>
-                        <li class="nav-item"><NavLink class="nav-link" href="wyniki">Przegl¹daj wyniki testów</NavLink></li>
-                        <li class="nav-item"><NavLink class="nav-link" href="pytania">Baza pytañ egzaminacyjnych</NavLink></li>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="" Match="NavLinkMatch.All" @onclick="CloseNavbar">
+                                <i class="bi bi-house-door me-1"></i>
+                                Strona g³ówna
+                            </NavLink>
+                        </li>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="test" @onclick="CloseNavbar">
+                                <i class="bi bi-play-circle me-1"></i>
+                                Rozpocznij test
+                            </NavLink>
+                        </li>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="wyniki" @onclick="CloseNavbar">
+                                <i class="bi bi-clipboard-data me-1"></i>
+                                Przegl¹daj wyniki testów
+                            </NavLink>
+                        </li>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="pytania" @onclick="CloseNavbar">
+                                <i class="bi bi-question-circle me-1"></i>
+                                Baza pytañ egzaminacyjnych
+                            </NavLink>
+                        </li>
                     </ul>
                     
-                    <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center gap-3 navbar-actions">
                         <ThemeToggle />
                         
                         <AuthorizeView>
                             <Authorized>
-                                <div class="d-flex align-items-center gap-2">
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
                                     <button class="btn btn-outline-light" @onclick="NavigateToProfile">
                                         <i class="bi bi-person-circle me-1"></i>
                                         @context.User.Identity?.Name
@@ -44,9 +68,15 @@
                                 </div>
                             </Authorized>
                             <NotAuthorized>
-                                <div class="d-flex">
-                                    <NavLink class="btn btn-outline-light me-2" href="login">Zaloguj siê</NavLink>
-                                    <NavLink class="btn btn-warning" href="register">Zarejestruj siê</NavLink>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <NavLink class="btn btn-outline-light" href="login" @onclick="CloseNavbar">
+                                        <i class="bi bi-box-arrow-in-right me-1"></i>
+                                        Zaloguj siê
+                                    </NavLink>
+                                    <NavLink class="btn btn-warning" href="register" @onclick="CloseNavbar">
+                                        <i class="bi bi-person-plus me-1"></i>
+                                        Zarejestruj siê
+                                    </NavLink>
                                 </div>
                             </NotAuthorized>
                         </AuthorizeView>
@@ -64,16 +94,35 @@
 </div>
 
 @code {
-    private void NavigateToProfile()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender)
+        {
+            await NavbarService.InitNavbarAsync();
+        }
+    }
+
+    private async Task CloseNavbar()
+    {
+        await NavbarService.CloseNavbarAsync();
+    }
+
+    private async Task NavigateToProfile()
+    {
+        await CloseNavbar();
         Navigation.NavigateTo("/profile");
     }
 
     private async Task HandleLogout()
     {
+        await CloseNavbar();
         var authProvider = (ServerAuthenticationStateProvider)AuthStateProvider;
         await authProvider.NotifyUserLogout();
         Navigation.NavigateTo("/", true);
+    }
+
+    public void Dispose()
+    {
     }
 }
 
@@ -123,6 +172,7 @@
 
     header .navbar {
         background-color: var(--navbar-bg) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     main.container {
@@ -134,7 +184,6 @@
         padding-bottom: 2rem;
     }
 
-    /* Ensure footer is visible */
     .app-footer {
         flex-shrink: 0;
         position: relative;
@@ -162,14 +211,83 @@
         border-color: #bd2130;
     }
 
-    /* Smooth scrolling */
     html {
         scroll-behavior: smooth;
     }
 
-    /* Ensure body doesn't have margin */
     body {
         margin: 0;
         padding: 0;
+    }
+
+    .navbar-toggler {
+        border: none;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .navbar-toggler:focus {
+        box-shadow: none;
+        outline: 2px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .navbar-toggler-icon {
+        width: 1.5em;
+        height: 1.5em;
+    }
+
+    @@media (max-width: 991.98px) {
+        .navbar-collapse {
+            background-color: var(--navbar-bg);
+            padding: 1rem;
+            margin-top: 0.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .navbar-actions {
+            margin-top: 1rem;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .navbar-actions > div {
+            width: 100%;
+        }
+
+        .navbar-actions .d-flex {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .navbar-actions button,
+        .navbar-actions a {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .navbar-nav {
+            margin-bottom: 1rem;
+        }
+
+        .navbar-nav .nav-link {
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 0.25rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .navbar-nav .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .navbar-nav .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+    }
+
+    @@media (min-width: 992px) {
+        .navbar-nav .nav-link {
+            padding: 0.5rem 1rem;
+        }
     }
 </style>

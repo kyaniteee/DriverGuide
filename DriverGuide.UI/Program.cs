@@ -17,5 +17,6 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
 builder.Services.AddScoped<IThemeService, ThemeService>();
+builder.Services.AddScoped<INavbarService, NavbarService>();
 
 await builder.Build().RunAsync();

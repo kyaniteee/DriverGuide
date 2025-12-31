@@ -1,0 +1,182 @@
+/* Mobile Navigation Enhancements */
+@media (max-width: 991.98px) {
+    .navbar-toggler {
+        position: relative;
+        width: 40px;
+        height: 40px;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        border-radius: 6px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-toggler:hover {
+        border-color: rgba(255, 255, 255, 0.8);
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .navbar-toggler:focus {
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
+    }
+
+    .navbar-toggler[aria-expanded="true"] {
+        background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        width: 24px;
+        height: 24px;
+    }
+
+    .navbar-collapse {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: rgba(33, 37, 41, 0.98);
+        backdrop-filter: blur(10px);
+        padding: 1rem;
+        margin-top: 0.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        max-height: calc(100vh - 80px);
+        overflow-y: auto;
+    }
+
+    .navbar-collapse.show {
+        animation: slideDown 0.3s ease-out;
+    }
+
+    .navbar-collapse.collapsing {
+        transition: height 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .navbar-nav .nav-item {
+        margin-bottom: 0.5rem;
+    }
+
+    .navbar-nav .nav-link {
+        padding: 1rem 1.25rem;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.9) !important;
+        transition: all 0.2s ease;
+    }
+
+    .navbar-nav .nav-link i {
+        font-size: 1.25rem;
+    }
+
+    .navbar-nav .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: #fff !important;
+        transform: translateX(5px);
+    }
+
+    .navbar-nav .nav-link.active {
+        background: linear-gradient(135deg, rgba(45, 108, 223, 0.8), rgba(27, 65, 122, 0.8));
+        color: #fff !important;
+        box-shadow: 0 2px 8px rgba(45, 108, 223, 0.4);
+    }
+
+    .navbar-actions {
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .navbar-actions .btn {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-actions .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* Tablet responsive */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .navbar-collapse {
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+/* Touch optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .navbar-nav .nav-link {
+        min-height: 48px;
+    }
+
+    .navbar-actions .btn {
+        min-height: 48px;
+    }
+
+    .navbar-toggler {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+/* Prevent scroll when navbar is open on mobile */
+body.navbar-open {
+    overflow: hidden;
+}
+
+/* Smooth transitions */
+.navbar-collapse,
+.navbar-nav .nav-link,
+.navbar-actions .btn,
+.navbar-toggler {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Accessibility improvements */
+.navbar-nav .nav-link:focus-visible,
+.navbar-actions .btn:focus-visible,
+.navbar-toggler:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+/* Dark mode specific adjustments */
+@media (prefers-color-scheme: dark) {
+    .navbar-collapse {
+        background-color: rgba(28, 28, 30, 0.98);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .navbar-collapse.show,
+    .navbar-nav .nav-link,
+    .navbar-actions .btn,
+    .navbar-toggler {
+        animation: none;
+        transition: none;
+    }
+}
