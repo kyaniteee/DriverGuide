@@ -11,6 +11,16 @@ namespace DriverGuide.Service.Controllers
     [Route("[controller]")]
     public class QuestionFileController(IMediator mediator, IQuestionFileRepository questionFileRepository, ILogger<QuestionFileController> logger) : ControllerBase
     {
+        [HttpPost(nameof(UploadQuestionFile))]
+        public async Task<ActionResult<QuestionFile>> UploadQuestionFile([FromForm] CreateQuestionFileCommand command)
+        {
+            var result = await mediator.Send(command);
+            if (result == null)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
         [HttpGet(nameof(GetQuestionFile), Name = nameof(GetQuestionFile))]
         public async Task<ActionResult<QuestionFile>> GetQuestionFile([Required] int questionFileId)
         {
@@ -53,16 +63,5 @@ namespace DriverGuide.Service.Controllers
 
             return Ok(result);
         }
-
-        [HttpPost(nameof(UploadQuestionFile))]
-        public async Task<ActionResult<QuestionFile>> UploadQuestionFile([FromForm] CreateQuestionFileCommand command)
-        {
-            var result = await mediator.Send(command);
-            if (result == null)
-                return BadRequest(result);
-
-            return Ok(result);
-        }
-
     }
 }

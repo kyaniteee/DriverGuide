@@ -2,7 +2,6 @@ using DriverGuide.Application.Requests;
 using DriverGuide.Domain.Interfaces;
 using DriverGuide.Domain.Models;
 using FluentAssertions;
-using MediatR;
 using NSubstitute;
 
 namespace DriverGuide.Tests.Application.Requests.TestSession;
@@ -41,14 +40,14 @@ public class CompleteTestSessionHandlerTests
 
         var result = await _handler.Handle(request, CancellationToken.None);
 
-        result.Should().Be(Unit.Value);
+        result.Should().BeTrue();
         existingSession.EndDate.Should().NotBeNull();
         existingSession.Result.Should().Be(85.5);
         await _testSessionRepository.Received(1).UpdateAsync(existingSession);
     }
 
     [Fact]
-    public async Task Handle_TestSessionNotFound_ShouldThrowException()
+    public async Task Handle_TestSessionNotFound_ShouldReturnFalse()
     {
         var request = new CompleteTestSessionRequest
         {
@@ -59,8 +58,10 @@ public class CompleteTestSessionHandlerTests
         _testSessionRepository.GetAsync(Arg.Any<System.Linq.Expressions.Expression<Func<DriverGuide.Domain.Models.TestSession, bool>>>())
             .Returns(Task.FromResult<DriverGuide.Domain.Models.TestSession?>(null));
 
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _handler.Handle(request, CancellationToken.None));
+        var result = await _handler.Handle(request, CancellationToken.None);
+
+        result.Should().BeFalse();
+        await _testSessionRepository.DidNotReceive().UpdateAsync(Arg.Any<DriverGuide.Domain.Models.TestSession>());
     }
 
     [Fact]
@@ -86,7 +87,7 @@ public class CompleteTestSessionHandlerTests
 
         var result = await _handler.Handle(request, CancellationToken.None);
 
-        result.Should().Be(Unit.Value);
+        result.Should().BeTrue();
         existingSession.Result.Should().Be(0);
     }
 }

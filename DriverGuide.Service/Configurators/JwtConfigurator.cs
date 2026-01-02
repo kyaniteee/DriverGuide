@@ -6,11 +6,6 @@ namespace DriverGuide.Configurators;
 
 public static class JwtConfigurator
 {
-    /// <summary>
-    /// Rejestracja Authentication z JWT
-    /// </summary>
-    /// <param name="services"></param>
-    /// <returns></returns>
     public static IServiceCollection AddJwt(this IServiceCollection services, IConfiguration configuration)
     {
         var jwtSettings = configuration.GetSection("JwtSettings");
