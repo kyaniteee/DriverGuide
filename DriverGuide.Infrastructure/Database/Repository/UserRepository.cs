@@ -11,7 +11,6 @@ public class UserRepository : RepositoryBase<User>, IUserRepository
 
     public async Task<bool> VerifyPasswordAsync(User user, string password)
     {
-        // Example using ASP.NET Core Identity's PasswordHasher
         var passwordHasher = new PasswordHasher<User>();
         var verificationResult = passwordHasher.VerifyHashedPassword(user, user.PasswordHash!, password);
         return await Task.FromResult(verificationResult == PasswordVerificationResult.Success);
@@ -19,16 +18,8 @@ public class UserRepository : RepositoryBase<User>, IUserRepository
 
     public async Task<bool> VerifyTwoFactorCodeAsync(User user, string twoFactorCode)
     {
-        // Replace with your actual 2FA provider logic (e.g., using Microsoft.AspNetCore.Identity.UserManager)
-        // This is a placeholder for demonstration purposes.
         if (string.IsNullOrWhiteSpace(twoFactorCode))
             return false;
-
-        // Example: Use a TOTP provider or similar
-        // bool isValid = await _twoFactorProvider.ValidateAsync(user, twoFactorCode);
-        // return isValid;
-
-        // For now, just return false to indicate not implemented
         return false;
     }
 
@@ -37,7 +28,6 @@ public class UserRepository : RepositoryBase<User>, IUserRepository
         if (user == null || string.IsNullOrWhiteSpace(recoveryCode))
             return false;
 
-        // Example: assuming user.Tokens contains recovery codes as tokens (adapt as needed)
         var normalizedCode = recoveryCode.Trim().Replace(" ", string.Empty);
 
         var recoveryToken = user.Tokens?
@@ -45,10 +35,7 @@ public class UserRepository : RepositoryBase<User>, IUserRepository
 
         if (recoveryToken != null)
         {
-            // Optionally: remove the used recovery code to prevent reuse
             user.Tokens.Remove(recoveryToken);
-            // Save changes to DB if using EF Core, e.g.:
-            // await _dbContext.SaveChangesAsync();
             return true;
         }
 
