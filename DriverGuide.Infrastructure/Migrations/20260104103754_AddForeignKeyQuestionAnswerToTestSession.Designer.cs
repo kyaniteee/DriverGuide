@@ -4,6 +4,7 @@ using DriverGuide.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DriverGuide.Infrastructure.Migrations
 {
     [DbContext(typeof(DriverGuideDbContext))]
-    partial class DriverGuideDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260104103754_AddForeignKeyQuestionAnswerToTestSession")]
+    partial class AddForeignKeyQuestionAnswerToTestSession
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -233,7 +236,7 @@ namespace DriverGuide.Infrastructure.Migrations
                     b.Property<DateOnly>("UploadDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("date")
-                        .HasDefaultValue(DateOnly.FromDateTime(DateTime.Now))
+                        .HasDefaultValue(new DateOnly(2026, 1, 4))
                         .HasColumnName("UploadDate");
 
                     b.HasKey("QuestionFileId");

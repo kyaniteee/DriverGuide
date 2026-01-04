@@ -22,6 +22,11 @@ public class QuestionAnswer
     public string? TestSessionId { get; set; }
 
     /// <summary>
+    /// Nawigacja do sesji testowej, do której należy ta odpowiedź.
+    /// </summary>
+    public TestSession? TestSession { get; set; }
+
+    /// <summary>
     /// Identyfikator pytania egzaminacyjnego.
     /// Odniesienie do tabeli Questions (QuestionId).
     /// </summary>

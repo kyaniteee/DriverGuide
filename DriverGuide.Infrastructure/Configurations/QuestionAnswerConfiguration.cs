@@ -10,11 +10,13 @@ public class QuestionAnswerConfiguration : IEntityTypeConfiguration<QuestionAnsw
     {
         builder.ToTable("QuestionAnswers");
         builder.HasKey(a => a.QuestionAnswerId);
+        
         builder.Property(qa => qa.QuestionAnswerId)
-                    .HasColumnName(nameof(QuestionAnswer.QuestionAnswerId));
+            .HasColumnName(nameof(QuestionAnswer.QuestionAnswerId));
 
         builder.Property(qa => qa.TestSessionId)
-            .HasColumnName(nameof(QuestionAnswer.TestSessionId));
+            .HasColumnName(nameof(QuestionAnswer.TestSessionId))
+            .IsRequired(false);
 
         builder.Property(qa => qa.QuestionId)
             .HasColumnName(nameof(QuestionAnswer.QuestionId));
@@ -41,9 +43,15 @@ public class QuestionAnswerConfiguration : IEntityTypeConfiguration<QuestionAnsw
             .IsRequired(false)
             .HasColumnName(nameof(QuestionAnswer.EndDate));
 
-        builder.Property(qa => qa.QuestionLanguage) // Konfiguracja dla enum Language
-               .HasColumnName(nameof(QuestionAnswer.QuestionLanguage))
-               .HasConversion<string>() 
-               .HasMaxLength(3);       
+        builder.Property(qa => qa.QuestionLanguage)
+            .HasColumnName(nameof(QuestionAnswer.QuestionLanguage))
+            .HasConversion<string>() 
+            .HasMaxLength(3);
+
+        builder.HasOne(qa => qa.TestSession)
+            .WithMany(ts => ts.QuestionAnswers)
+            .HasForeignKey(qa => qa.TestSessionId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .HasConstraintName("FK_QuestionAnswers_TestSessions");
     }
 }
