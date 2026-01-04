@@ -19,7 +19,7 @@ public class StartQuestionValidatorTests
         var request = new StartQuestionRequest
         {
             TestSessionId = Guid.NewGuid().ToString(),
-            QuestionId = "123",
+            QuestionId = 123,
             Question = "Test question?",
             QuestionCategory = LicenseCategory.B,
             QuestionLanguage = Language.PL,
@@ -37,7 +37,7 @@ public class StartQuestionValidatorTests
         var request = new StartQuestionRequest
         {
             TestSessionId = string.Empty,
-            QuestionId = "123",
+            QuestionId = 123,
             Question = "Test question?",
             QuestionCategory = LicenseCategory.B,
             StartDate = DateTimeOffset.Now
@@ -55,7 +55,7 @@ public class StartQuestionValidatorTests
         var request = new StartQuestionRequest
         {
             TestSessionId = Guid.NewGuid().ToString(),
-            QuestionId = string.Empty,
+            QuestionId = 0,
             Question = "Test question?",
             QuestionCategory = LicenseCategory.B,
             StartDate = DateTimeOffset.Now
@@ -64,7 +64,7 @@ public class StartQuestionValidatorTests
         var result = await _validator.TestValidateAsync(request);
 
         result.ShouldHaveValidationErrorFor(x => x.QuestionId)
-            .WithErrorMessage("QuestionId jest wymagane");
+            .WithErrorMessage("QuestionId musi byæ wiêksze od 0");
     }
 
     [Fact]
@@ -73,7 +73,7 @@ public class StartQuestionValidatorTests
         var request = new StartQuestionRequest
         {
             TestSessionId = Guid.NewGuid().ToString(),
-            QuestionId = "123",
+            QuestionId = 123,
             Question = string.Empty,
             QuestionCategory = LicenseCategory.B,
             StartDate = DateTimeOffset.Now
@@ -91,7 +91,7 @@ public class StartQuestionValidatorTests
         var request = new StartQuestionRequest
         {
             TestSessionId = Guid.NewGuid().ToString(),
-            QuestionId = "123",
+            QuestionId = 123,
             Question = "Test question?",
             QuestionCategory = LicenseCategory.B,
             StartDate = DateTimeOffset.Now.AddHours(2)

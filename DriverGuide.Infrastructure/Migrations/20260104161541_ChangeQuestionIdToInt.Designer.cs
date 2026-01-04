@@ -4,6 +4,7 @@ using DriverGuide.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DriverGuide.Infrastructure.Migrations
 {
     [DbContext(typeof(DriverGuideDbContext))]
-    partial class DriverGuideDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260104161541_ChangeQuestionIdToInt")]
+    partial class ChangeQuestionIdToInt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -207,11 +210,9 @@ namespace DriverGuide.Infrastructure.Migrations
 
                     b.HasKey("QuestionAnswerId");
 
-                    b.HasIndex("QuestionId")
-                        .HasDatabaseName("IX_QuestionAnswers_QuestionId");
+                    b.HasIndex("QuestionId");
 
-                    b.HasIndex("TestSessionId")
-                        .HasDatabaseName("IX_QuestionAnswers_TestSessionId");
+                    b.HasIndex("TestSessionId");
 
                     b.ToTable("QuestionAnswers", (string)null);
                 });
@@ -523,27 +524,33 @@ namespace DriverGuide.Infrastructure.Migrations
 
             modelBuilder.Entity("DriverGuide.Domain.Models.QuestionAnswer", b =>
                 {
-                    b.HasOne("DriverGuide.Domain.Models.Question", null)
+                    b.HasOne("DriverGuide.Domain.Models.Question", "Question")
                         .WithMany()
                         .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_QuestionAnswers_Questions");
 
-                    b.HasOne("DriverGuide.Domain.Models.TestSession", null)
-                        .WithMany()
+                    b.HasOne("DriverGuide.Domain.Models.TestSession", "TestSession")
+                        .WithMany("QuestionAnswers")
                         .HasForeignKey("TestSessionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("FK_QuestionAnswers_TestSessions");
+
+                    b.Navigation("Question");
+
+                    b.Navigation("TestSession");
                 });
 
             modelBuilder.Entity("DriverGuide.Domain.Models.TestSession", b =>
                 {
-                    b.HasOne("DriverGuide.Domain.Models.User", null)
-                        .WithMany()
+                    b.HasOne("DriverGuide.Domain.Models.User", "User")
+                        .WithMany("TestSessions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("FK_TestSessions_AspNetUsers");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DriverGuide.Domain.Models.UserRole", b =>
@@ -606,11 +613,18 @@ namespace DriverGuide.Infrastructure.Migrations
                     b.Navigation("UserRoles");
                 });
 
+            modelBuilder.Entity("DriverGuide.Domain.Models.TestSession", b =>
+                {
+                    b.Navigation("QuestionAnswers");
+                });
+
             modelBuilder.Entity("DriverGuide.Domain.Models.User", b =>
                 {
                     b.Navigation("Claims");
 
                     b.Navigation("Logins");
+
+                    b.Navigation("TestSessions");
 
                     b.Navigation("Tokens");
 

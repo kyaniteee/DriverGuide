@@ -12,7 +12,7 @@ public class BulkAnswerItem
     /// Identyfikator pytania egzaminacyjnego.
     /// Odniesienie do tabeli Questions.
     /// </summary>
-    public string QuestionId { get; set; } = string.Empty;
+    public int QuestionId { get; set; }
 
     /// <summary>
     /// Kategoria prawa jazdy, której dotyczy pytanie.

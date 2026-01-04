@@ -105,10 +105,10 @@
                         </div>
                     </div>
 
-                    <p class="question-text">@answer.Question</p>
+                    <p class="question-text">@answer.QuestionText</p>
 
                     <div class="answers-list">
-                        @if (_questions.TryGetValue(answer.QuestionId ?? "", out var question))
+                        @if (_questions.TryGetValue(answer.QuestionId.ToString(), out var question))
                         {
                             @foreach (var answerOption in GetAnswerOptions(question))
                             {
@@ -147,7 +147,7 @@
 
                     <div class="answer-meta">
                         <span class="answer-time">Czas odpowiedzi: @GetAnswerTime(answer)</span>
-                        <span class="answer-points">Punkty: @GetQuestionPoints(answer.QuestionId)</span>
+                        <span class="answer-points">Punkty: @GetQuestionPoints(answer.QuestionId.ToString())</span>
                     </div>
                 </div>
             }

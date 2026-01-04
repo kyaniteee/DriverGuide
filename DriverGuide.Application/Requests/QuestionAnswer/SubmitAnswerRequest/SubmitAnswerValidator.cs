@@ -10,7 +10,7 @@ public class SubmitAnswerValidator : AbstractValidator<SubmitAnswerRequest>
             .NotEmpty().WithMessage("TestSessionId jest wymagane");
 
         RuleFor(x => x.QuestionId)
-            .NotEmpty().WithMessage("QuestionId jest wymagane");
+            .GreaterThan(0).WithMessage("QuestionId jest wymagana");
 
         RuleFor(x => x.UserAnswer)
             .NotEmpty().WithMessage("Odpowiedü uøytkownika jest wymagana");

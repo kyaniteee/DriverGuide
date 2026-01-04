@@ -19,15 +19,16 @@ public class QuestionAnswerConfiguration : IEntityTypeConfiguration<QuestionAnsw
             .IsRequired(false);
 
         builder.Property(qa => qa.QuestionId)
-            .HasColumnName(nameof(QuestionAnswer.QuestionId));
+            .HasColumnName(nameof(QuestionAnswer.QuestionId))
+            .IsRequired();
 
         builder.Property(qa => qa.QuestionCategory) 
             .HasColumnName(nameof(QuestionAnswer.QuestionCategory))
             .IsRequired()
             .HasConversion<int>();
 
-        builder.Property(qa => qa.Question)
-            .HasColumnName(nameof(QuestionAnswer.Question));
+        builder.Property(qa => qa.QuestionText)
+            .HasColumnName("Question");
 
         builder.Property(qa => qa.CorrectQuestionAnswer)
             .HasColumnName(nameof(QuestionAnswer.CorrectQuestionAnswer));
@@ -48,8 +49,20 @@ public class QuestionAnswerConfiguration : IEntityTypeConfiguration<QuestionAnsw
             .HasConversion<string>() 
             .HasMaxLength(3);
 
-        builder.HasOne(qa => qa.TestSession)
-            .WithMany(ts => ts.QuestionAnswers)
+        builder.HasIndex(qa => qa.QuestionId)
+            .HasDatabaseName("IX_QuestionAnswers_QuestionId");
+
+        builder.HasIndex(qa => qa.TestSessionId)
+            .HasDatabaseName("IX_QuestionAnswers_TestSessionId");
+
+        builder.HasOne<Question>()
+            .WithMany()
+            .HasForeignKey(qa => qa.QuestionId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_QuestionAnswers_Questions");
+
+        builder.HasOne<TestSession>()
+            .WithMany()
             .HasForeignKey(qa => qa.TestSessionId)
             .OnDelete(DeleteBehavior.Cascade)
             .HasConstraintName("FK_QuestionAnswers_TestSessions");

@@ -10,7 +10,7 @@ public class StartQuestionValidator : AbstractValidator<StartQuestionRequest>
             .NotEmpty().WithMessage("TestSessionId jest wymagane");
 
         RuleFor(x => x.QuestionId)
-            .NotEmpty().WithMessage("QuestionId jest wymagane");
+            .GreaterThan(0).WithMessage("QuestionId musi byæ wiêksze od 0");
 
         RuleFor(x => x.Question)
             .NotEmpty().WithMessage("Treœæ pytania jest wymagana");

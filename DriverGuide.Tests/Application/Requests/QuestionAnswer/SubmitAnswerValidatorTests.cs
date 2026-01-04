@@ -18,7 +18,7 @@ public class SubmitAnswerValidatorTests
         var request = new SubmitAnswerRequest
         {
             TestSessionId = Guid.NewGuid().ToString(),
-            QuestionId = "123",
+            QuestionId = 123,
             UserAnswer = "A"
         };
 
@@ -33,7 +33,7 @@ public class SubmitAnswerValidatorTests
         var request = new SubmitAnswerRequest
         {
             TestSessionId = string.Empty,
-            QuestionId = "123",
+            QuestionId = 123,
             UserAnswer = "A"
         };
 
@@ -49,7 +49,7 @@ public class SubmitAnswerValidatorTests
         var request = new SubmitAnswerRequest
         {
             TestSessionId = Guid.NewGuid().ToString(),
-            QuestionId = string.Empty,
+            QuestionId = 0,
             UserAnswer = "A"
         };
 
@@ -65,7 +65,7 @@ public class SubmitAnswerValidatorTests
         var request = new SubmitAnswerRequest
         {
             TestSessionId = Guid.NewGuid().ToString(),
-            QuestionId = "123",
+            QuestionId = 123,
             UserAnswer = string.Empty
         };
 

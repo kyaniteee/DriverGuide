@@ -24,7 +24,7 @@ public class BulkAnswersValidatorTests
             {
                 new BulkAnswerItem
                 {
-                    QuestionId = "1",
+                    QuestionId = 1,
                     UserQuestionAnswer = "A",
                     EndDate = DateTimeOffset.Now
                 }
@@ -91,7 +91,7 @@ public class BulkAnswersValidatorTests
             {
                 new BulkAnswerItem
                 {
-                    QuestionId = string.Empty,
+                    QuestionId = 0,
                     UserQuestionAnswer = "A"
                 }
             }
@@ -112,7 +112,7 @@ public class BulkAnswersValidatorTests
             {
                 new BulkAnswerItem
                 {
-                    QuestionId = "1",
+                    QuestionId = 1,
                     UserQuestionAnswer = string.Empty
                 }
             }

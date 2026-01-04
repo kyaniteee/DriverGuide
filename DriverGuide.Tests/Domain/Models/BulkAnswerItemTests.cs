@@ -11,7 +11,7 @@ public class BulkAnswerItemTests
     {
         var bulkAnswer = new BulkAnswerItem();
 
-        bulkAnswer.QuestionId.Should().Be(string.Empty);
+        bulkAnswer.QuestionId.Should().Be(0);
         bulkAnswer.Question.Should().Be(string.Empty);
         bulkAnswer.CorrectQuestionAnswer.Should().Be(string.Empty);
         bulkAnswer.UserQuestionAnswer.Should().Be(string.Empty);
@@ -25,7 +25,7 @@ public class BulkAnswerItemTests
         
         var bulkAnswer = new BulkAnswerItem
         {
-            QuestionId = "123",
+            QuestionId = 123,
             QuestionCategory = LicenseCategory.B,
             Question = "Test pytanie?",
             CorrectQuestionAnswer = "A",
@@ -35,7 +35,7 @@ public class BulkAnswerItemTests
             QuestionLanguage = Language.PL
         };
 
-        bulkAnswer.QuestionId.Should().Be("123");
+        bulkAnswer.QuestionId.Should().Be(123);
         bulkAnswer.QuestionCategory.Should().Be(LicenseCategory.B);
         bulkAnswer.Question.Should().Be("Test pytanie?");
         bulkAnswer.CorrectQuestionAnswer.Should().Be("A");

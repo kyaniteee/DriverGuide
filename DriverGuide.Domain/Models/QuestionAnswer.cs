@@ -22,15 +22,10 @@ public class QuestionAnswer
     public string? TestSessionId { get; set; }
 
     /// <summary>
-    /// Nawigacja do sesji testowej, do której należy ta odpowiedź.
-    /// </summary>
-    public TestSession? TestSession { get; set; }
-
-    /// <summary>
     /// Identyfikator pytania egzaminacyjnego.
     /// Odniesienie do tabeli Questions (QuestionId).
     /// </summary>
-    public string? QuestionId { get; set; }
+    public int QuestionId { get; set; }
 
     /// <summary>
     /// Kategoria prawa jazdy, której dotyczy pytanie.
@@ -42,7 +37,7 @@ public class QuestionAnswer
     /// Treść pytania w wybranym języku.
     /// Przechowywana dla łatwego dostępu bez konieczności ponownego pobierania z tabeli Questions.
     /// </summary>
-    public string? Question { get; set; }
+    public string? QuestionText { get; set; }
 
     /// <summary>
     /// Poprawna odpowiedź na pytanie (A, B, C lub Tak/Nie).

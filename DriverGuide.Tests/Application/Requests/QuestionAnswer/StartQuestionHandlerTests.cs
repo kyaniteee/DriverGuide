@@ -24,7 +24,7 @@ public class StartQuestionHandlerTests
         var request = new StartQuestionRequest
         {
             TestSessionId = Guid.NewGuid().ToString(),
-            QuestionId = "123",
+            QuestionId = 123,
             QuestionCategory = LicenseCategory.B,
             Question = "Test question?",
             CorrectQuestionAnswer = "A",
@@ -43,7 +43,7 @@ public class StartQuestionHandlerTests
                 qa.TestSessionId == request.TestSessionId &&
                 qa.QuestionId == request.QuestionId &&
                 qa.QuestionCategory == request.QuestionCategory &&
-                qa.Question == request.Question &&
+                qa.QuestionText == request.Question &&
                 qa.CorrectQuestionAnswer == request.CorrectQuestionAnswer &&
                 qa.QuestionLanguage == request.QuestionLanguage));
     }
@@ -54,7 +54,7 @@ public class StartQuestionHandlerTests
         var request = new StartQuestionRequest
         {
             TestSessionId = Guid.NewGuid().ToString(),
-            QuestionId = "123",
+            QuestionId = 123,
             QuestionCategory = LicenseCategory.B,
             Question = "Test question?",
             CorrectQuestionAnswer = null,

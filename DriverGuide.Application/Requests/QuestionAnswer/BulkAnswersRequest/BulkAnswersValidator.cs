@@ -16,7 +16,7 @@ public class BulkAnswersValidator : AbstractValidator<BulkAnswersRequest>
         RuleForEach(x => x.Answers).ChildRules(answer =>
         {
             answer.RuleFor(x => x.QuestionId)
-                .NotEmpty().WithMessage("QuestionId jest wymagane");
+                .GreaterThan(0).WithMessage("QuestionId musi byÊ wiÍksze od 0");
 
             answer.RuleFor(x => x.UserQuestionAnswer)
                 .NotEmpty().WithMessage("Odpowiedü uøytkownika jest wymagana");

@@ -34,7 +34,7 @@ public class GetTestSummaryHandler : IRequestHandler<GetTestSummaryQuery, TestSu
 
         foreach (var qa in questionAnswers)
         {
-            var question = await _questionRepository.GetByIdAsync(int.Parse(qa.QuestionId ?? "0"));
+            var question = await _questionRepository.GetByIdAsync(qa.QuestionId);
             if (question == null) continue;
 
             var availableAnswers = new List<string>();
@@ -51,8 +51,8 @@ public class GetTestSummaryHandler : IRequestHandler<GetTestSummaryQuery, TestSu
 
             questions.Add(new QuestionSummaryDto
             {
-                QuestionId = qa.QuestionId ?? "",
-                QuestionText = qa.Question ?? "",
+                QuestionId = qa.QuestionId.ToString(),
+                QuestionText = qa.QuestionText ?? "",
                 MediaFileName = question.Media,
                 CorrectAnswer = qa.CorrectQuestionAnswer ?? "",
                 UserAnswer = qa.UserQuestionAnswer,

@@ -27,13 +27,13 @@ public class BulkAnswersHandlerTests
         {
             new BulkAnswerItem
             {
-                QuestionId = "1",
+                QuestionId = 1,
                 UserQuestionAnswer = "A",
                 EndDate = DateTimeOffset.Now
             },
             new BulkAnswerItem
             {
-                QuestionId = "2",
+                QuestionId = 2,
                 UserQuestionAnswer = "B",
                 EndDate = DateTimeOffset.Now
             }
@@ -49,14 +49,14 @@ public class BulkAnswersHandlerTests
         {
             QuestionAnswerId = Guid.NewGuid().ToString(),
             TestSessionId = testSessionId,
-            QuestionId = "1"
+            QuestionId = 1
         };
 
         var existingAnswer2 = new DriverGuide.Domain.Models.QuestionAnswer
         {
             QuestionAnswerId = Guid.NewGuid().ToString(),
             TestSessionId = testSessionId,
-            QuestionId = "2"
+            QuestionId = 2
         };
 
         _questionAnswerRepository.GetAsync(Arg.Any<System.Linq.Expressions.Expression<Func<DriverGuide.Domain.Models.QuestionAnswer, bool>>>())
@@ -77,7 +77,7 @@ public class BulkAnswersHandlerTests
         {
             new BulkAnswerItem
             {
-                QuestionId = "999",
+                QuestionId = 999,
                 UserQuestionAnswer = "A",
                 EndDate = DateTimeOffset.Now
             }

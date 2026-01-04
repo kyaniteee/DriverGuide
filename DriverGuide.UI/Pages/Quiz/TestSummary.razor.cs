@@ -45,16 +45,13 @@ namespace DriverGuide.UI.Pages.Quiz
                 {
                     foreach (var answer in _questionAnswers)
                     {
-                        if (!string.IsNullOrEmpty(answer.QuestionId) && int.TryParse(answer.QuestionId, out int questionId))
+                        var questionResponse = await Http.GetAsync($"/Question/{answer.QuestionId}");
+                        if (questionResponse.IsSuccessStatusCode)
                         {
-                            var questionResponse = await Http.GetAsync($"/Question/{questionId}");
-                            if (questionResponse.IsSuccessStatusCode)
+                            var question = await questionResponse.Content.ReadFromJsonAsync<Question>();
+                            if (question != null)
                             {
-                                var question = await questionResponse.Content.ReadFromJsonAsync<Question>();
-                                if (question != null)
-                                {
-                                    _questions[answer.QuestionId] = question;
-                                }
+                                _questions[answer.QuestionId.ToString()] = question;
                             }
                         }
                     }

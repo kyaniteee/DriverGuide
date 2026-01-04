@@ -1,4 +1,4 @@
-Ôªøusing DriverGuide.Domain.Enums;
+using DriverGuide.Domain.Enums;
 using DriverGuide.Domain.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -57,7 +57,7 @@ namespace DriverGuide.UI.Pages.Quiz
 
             try
             {
-                // Spr√≥buj sprawdziƒá stan uwierzytelnienia
+                // SprÛbuj sprawdziÊ stan uwierzytelnienia
                 var authState = await AuthStateProvider.GetAuthenticationStateAsync();
                 var user = authState.User;
                 isUserAuthenticated = user.Identity?.IsAuthenticated ?? false;
@@ -68,10 +68,10 @@ namespace DriverGuide.UI.Pages.Quiz
                 isUserAuthenticated = false;
             }
 
-            // Zapisz czas rozpoczƒôcia testu
+            // Zapisz czas rozpoczÍcia testu
             testStartTime = DateTimeOffset.Now;
 
-            // Sprawd≈∫ czy kontynuujemy test czy rozpoczynamy nowy
+            // Sprawdü czy kontynuujemy test czy rozpoczynamy nowy
             bool isNewTest = string.IsNullOrEmpty(TestSessionId);
             
             if (!isNewTest)
@@ -80,23 +80,23 @@ namespace DriverGuide.UI.Pages.Quiz
                 testSessionId = TestSessionId;
                 Console.WriteLine($"Continuing test session: {testSessionId}");
                 
-                // Dla kontynuacji: najpierw za≈Çaduj odpowiedzi, potem pytania w oryginalnej kolejno≈õci
+                // Dla kontynuacji: najpierw za≥aduj odpowiedzi, potem pytania w oryginalnej kolejnoúci
                 await LoadExistingTestSession();
                 await LoadQuestionsForContinuation();
             }
             else
             {
-                // Dla nowego testu: za≈Çaduj losowe pytania
+                // Dla nowego testu: za≥aduj losowe pytania
                 await LoadRandomQuestions();
                 
-                // Dla zalogowanego u≈ºytkownika - utw√≥rz sesjƒô testu w bazie
+                // Dla zalogowanego uøytkownika - utwÛrz sesjÍ testu w bazie
                 if (isUserAuthenticated)
                 {
                     await InitializeTestSessionInDatabase();
                 }
             }
 
-            // Za≈Çaduj pierwsze pytanie
+            // Za≥aduj pierwsze pytanie
             await LoadQuestionAsync();
         }
 
@@ -135,11 +135,11 @@ namespace DriverGuide.UI.Pages.Quiz
                 }
 
                 questions!.AddRange(questionsResponse);
-                Console.WriteLine($"‚úì Loaded {questions.Count} random questions for category {Category}");
+                Console.WriteLine($"? Loaded {questions.Count} random questions for category {Category}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"‚úó Fetch questions threw: {ex}");
+                Console.WriteLine($"? Fetch questions threw: {ex}");
             }
             
             Console.WriteLine("=== LoadRandomQuestions END ===");
@@ -151,12 +151,11 @@ namespace DriverGuide.UI.Pages.Quiz
             
             try
             {
-                // 1. Pobierz wszystkie pytania z bazy dla tej kategorii
                 using var allQuestionsResponse = await Http.GetAsync($"/Question/GetQuizQuestions?category={Category}");
                 
                 if (!allQuestionsResponse.IsSuccessStatusCode)
                 {
-                    Console.WriteLine($"‚úó Failed to load questions: {allQuestionsResponse.StatusCode}");
+                    Console.WriteLine($"? Failed to load questions: {allQuestionsResponse.StatusCode}");
                     return;
                 }
 
@@ -165,18 +164,17 @@ namespace DriverGuide.UI.Pages.Quiz
 
                 if (allQuestions is null || allQuestions.Count == 0)
                 {
-                    Console.WriteLine("‚úó No questions available");
+                    Console.WriteLine("? No questions available");
                     return;
                 }
 
                 Console.WriteLine($"Available questions in database: {allQuestions.Count}");
 
-                // 2. Pobierz odpowiedzi posortowane po StartDate (oryginalna kolejno≈õƒá)
                 var answersResponse = await Http.GetAsync($"/QuestionAnswer/GetByTestSession/{testSessionId}");
                 
                 if (!answersResponse.IsSuccessStatusCode)
                 {
-                    Console.WriteLine("‚úó Failed to load session answers");
+                    Console.WriteLine("? Failed to load session answers");
                     return;
                 }
 
@@ -184,17 +182,15 @@ namespace DriverGuide.UI.Pages.Quiz
                 
                 if (sessionAnswers is null || !sessionAnswers.Any())
                 {
-                    Console.WriteLine("‚ö† No answers in session, loading random questions");
+                    Console.WriteLine("? No answers in session, loading random questions");
                     await LoadRandomQuestions();
                     return;
                 }
 
-                // Sortuj odpowiedzi wed≈Çug daty rozpoczƒôcia (oryginalna kolejno≈õƒá)
                 var orderedAnswers = sessionAnswers.OrderBy(a => a.StartDate).ToList();
                 Console.WriteLine($"Session has {orderedAnswers.Count} questions (in original order)");
 
-                // 3. Odtw√≥rz listƒô pyta≈Ñ w oryginalnej kolejno≈õci
-                var questionIds = orderedAnswers.Select(a => int.Parse(a.QuestionId!)).ToList();
+                var questionIds = orderedAnswers.Select(a => a.QuestionId).ToList();
                 var sessionQuestions = new List<Question>();
 
                 foreach (var questionId in questionIds)
@@ -203,21 +199,19 @@ namespace DriverGuide.UI.Pages.Quiz
                     if (question != null)
                     {
                         sessionQuestions.Add(question);
-                        Console.WriteLine($"  ‚úì Added question ID {questionId} to position {sessionQuestions.Count}");
+                        Console.WriteLine($"  ? Added question ID {questionId} to position {sessionQuestions.Count}");
                     }
                     else
                     {
-                        Console.WriteLine($"  ‚ö† Question ID {questionId} not found in database!");
+                        Console.WriteLine($"  ? Question ID {questionId} not found in database!");
                     }
                 }
 
-                // 4. Dodaj pozosta≈Çe losowe pytania do pe≈Çnego zestawu 32
                 var usedQuestionIds = questionIds.ToHashSet();
                 var remainingQuestions = allQuestions
                     .Where(q => !usedQuestionIds.Contains(q.QuestionId))
                     .ToList();
 
-                // Losuj pozosta≈Çe pytania
                 var random = new Random();
                 var questionsNeeded = 32 - sessionQuestions.Count;
                 
@@ -229,22 +223,19 @@ namespace DriverGuide.UI.Pages.Quiz
                         .ToList();
                     
                     sessionQuestions.AddRange(additionalQuestions);
-                    Console.WriteLine($"‚úì Added {additionalQuestions.Count} random questions to complete the test");
+                    Console.WriteLine($"? Added {additionalQuestions.Count} random questions to complete the test");
                 }
 
-                // 5. Ustaw pytania i znajd≈∫ pierwsze bez odpowiedzi
                 questions!.AddRange(sessionQuestions);
-                Console.WriteLine($"‚úì Total questions loaded: {questions.Count}");
+                Console.WriteLine($"? Total questions loaded: {questions.Count}");
 
-                // Znajd≈∫ pierwsze pytanie bez odpowiedzi
                 FindNextUnansweredQuestion();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"‚úó Error loading questions for continuation: {ex.Message}");
+                Console.WriteLine($"? Error loading questions for continuation: {ex.Message}");
                 Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 
-                // Fallback: za≈Çaduj losowe pytania
                 await LoadRandomQuestions();
             }
             
@@ -270,25 +261,25 @@ namespace DriverGuide.UI.Pages.Quiz
 
                     if (answers != null && answers.Any())
                     {
-                        // Zapisz ID pyta≈Ñ, kt√≥re ju≈º majƒÖ odpowied≈∫
+                        // Zapisz ID pytaÒ, ktÛre juø majπ odpowiedü
                         answeredQuestionIds = answers
                             .Where(a => !string.IsNullOrEmpty(a.UserQuestionAnswer))
-                            .Select(a => a.QuestionId!)
+                            .Select(a => a.QuestionId.ToString())
                             .ToHashSet();
 
-                        Console.WriteLine($"‚úì Loaded {answeredQuestionIds.Count} answered questions from session {testSessionId}");
+                        Console.WriteLine($"? Loaded {answeredQuestionIds.Count} answered questions from session {testSessionId}");
                         
-                        // Wy≈õwietl szczeg√≥≈Çy odpowiedzianych pyta≈Ñ
+                        // Wyúwietl szczegÛ≥y odpowiedzianych pytaÒ
                         foreach (var answer in answers.Where(a => !string.IsNullOrEmpty(a.UserQuestionAnswer)))
                         {
                             Console.WriteLine($"  - QuestionId: {answer.QuestionId}, Answer: {answer.UserQuestionAnswer}");
                         }
                         
-                        // Wy≈õwietl pytania bez odpowiedzi (je≈õli sƒÖ)
+                        // Wyúwietl pytania bez odpowiedzi (jeúli sπ)
                         var unanswered = answers.Where(a => string.IsNullOrEmpty(a.UserQuestionAnswer)).ToList();
                         if (unanswered.Any())
                         {
-                            Console.WriteLine($"‚ö† Found {unanswered.Count} questions WITHOUT answers (started but not answered):");
+                            Console.WriteLine($"? Found {unanswered.Count} questions WITHOUT answers (started but not answered):");
                             foreach (var answer in unanswered)
                             {
                                 Console.WriteLine($"  - QuestionId: {answer.QuestionId}");
@@ -297,17 +288,17 @@ namespace DriverGuide.UI.Pages.Quiz
                     }
                     else
                     {
-                        Console.WriteLine("‚ö† No answers found for this session");
+                        Console.WriteLine("? No answers found for this session");
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"‚úó Failed to load answers: {answersResponse.StatusCode}");
+                    Console.WriteLine($"? Failed to load answers: {answersResponse.StatusCode}");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"‚úó Error loading existing test session: {ex.Message}");
+                Console.WriteLine($"? Error loading existing test session: {ex.Message}");
                 Console.WriteLine($"Stack trace: {ex.StackTrace}");
             }
             
@@ -321,7 +312,7 @@ namespace DriverGuide.UI.Pages.Quiz
             Console.WriteLine($"Answered questions count: {answeredQuestionIds.Count}");
             Console.WriteLine($"Answered question IDs: {string.Join(", ", answeredQuestionIds)}");
             
-            // Znajd≈∫ pierwsze pytanie bez odpowiedzi
+            // Znajdü pierwsze pytanie bez odpowiedzi
             for (int i = 0; i < questions!.Count; i++)
             {
                 var questionId = questions[i].QuestionId.ToString();
@@ -332,15 +323,15 @@ namespace DriverGuide.UI.Pages.Quiz
                 if (!isAnswered)
                 {
                     currentIndex = i;
-                    Console.WriteLine($"‚úì Found unanswered question at index {currentIndex} (question {currentIndex + 1})");
+                    Console.WriteLine($"? Found unanswered question at index {currentIndex} (question {currentIndex + 1})");
                     Console.WriteLine($"=== FindNextUnansweredQuestion END ===");
                     return;
                 }
             }
 
-            // Je≈õli wszystkie pytania majƒÖ odpowiedzi, u≈ºytkownik powinien byƒá przekierowany przy ≈Çadowaniu
-            Console.WriteLine($"‚ö† All {answeredQuestionIds.Count} questions have been answered");
-            currentIndex = questions.Count; // Ustawienie poza zakresem aby nie pokazywaƒá pyta≈Ñ
+            // Jeúli wszystkie pytania majπ odpowiedzi, uøytkownik powinien byÊ przekierowany przy ≥adowaniu
+            Console.WriteLine($"? All {answeredQuestionIds.Count} questions have been answered");
+            currentIndex = questions.Count; // Ustawienie poza zakresem aby nie pokazywaÊ pytaÒ
             Console.WriteLine($"=== FindNextUnansweredQuestion END ===");
         }
 
@@ -357,7 +348,7 @@ namespace DriverGuide.UI.Pages.Quiz
                 if (response.IsSuccessStatusCode)
                 {
                     testSessionId = await response.Content.ReadAsStringAsync();
-                    // Usu≈Ñ cudzys≈Çowy z ID je≈õli istniejƒÖ
+                    // UsuÒ cudzys≥owy z ID jeúli istniejπ
                     testSessionId = testSessionId?.Trim('"');
                     Console.WriteLine($"Created test session: {testSessionId}");
                 }
@@ -403,13 +394,13 @@ namespace DriverGuide.UI.Pages.Quiz
 
             Console.WriteLine($"Loading question {currentIndex + 1}/{questions.Count}: {currentQuestion.QuestionId}");
 
-            // Dla zalogowanego u≈ºytkownika rozpoczynajƒÖcego nowy test - zacznij ≈õledziƒá pytanie w bazie
+            // Dla zalogowanego uøytkownika rozpoczynajπcego nowy test - zacznij úledziÊ pytanie w bazie
             if (isUserAuthenticated && !string.IsNullOrEmpty(testSessionId) && !isContinuingTest)
             {
                 await RegisterQuestionStartInDatabase();
             }
 
-            // Dla kontynuowanego testu - zarejestruj pytanie je≈õli jeszcze nie by≈Ço
+            // Dla kontynuowanego testu - zarejestruj pytanie jeúli jeszcze nie by≥o
             if (isContinuingTest && isUserAuthenticated && !string.IsNullOrEmpty(testSessionId))
             {
                 var questionId = currentQuestion.QuestionId.ToString();
@@ -419,15 +410,15 @@ namespace DriverGuide.UI.Pages.Quiz
                 }
             }
 
-            // Wyczy≈õƒá poprzedni URL bloba
+            // WyczyúÊ poprzedni URL bloba
             if (!string.IsNullOrWhiteSpace(fileBlobUrl))
             {
                 try { await JS.InvokeVoidAsync("revokeObjectURL", fileBlobUrl); }
-                catch { /* Ignoruj b≈Çƒôdy przy czyszczeniu */ }
+                catch { /* Ignoruj b≥Ídy przy czyszczeniu */ }
                 fileBlobUrl = null;
             }
 
-            // Za≈Çaduj media dla pytania, je≈õli istnieje
+            // Za≥aduj media dla pytania, jeúli istnieje
             if (!string.IsNullOrWhiteSpace(currentQuestion.Media))
             {
                 await LoadMediaForCurrentQuestion();
@@ -477,7 +468,6 @@ namespace DriverGuide.UI.Pages.Quiz
             if (currentQuestion == null)
                 return;
 
-            // Oznacz pytanie jako odpowiedziane (brak odpowiedzi = niepoprawna)
             var questionId = currentQuestion.QuestionId.ToString();
             answeredQuestionIds.Add(questionId);
 
@@ -485,7 +475,7 @@ namespace DriverGuide.UI.Pages.Quiz
 
             if (isUserAuthenticated && !string.IsNullOrEmpty(testSessionId))
             {
-                // Zapisz pustƒÖ odpowied≈∫ (niepoprawnƒÖ) do bazy
+                // Zapisz pustπ odpowiedü (niepoprawnπ) do bazy
                 await RegisterTimeoutAnswerInDatabase();
 
                 var allQuestionsAnswered = answeredQuestionIds.Count >= questions!.Count;
@@ -503,7 +493,7 @@ namespace DriverGuide.UI.Pages.Quiz
             }
             else
             {
-                // Dla niezalogowanego - zapisz lokalnie pustƒÖ odpowied≈∫
+                // Dla niezalogowanego - zapisz lokalnie pustπ odpowiedü
                 StoreTimeoutAnswerLocally();
 
                 if (isLastQuestion)
@@ -525,13 +515,13 @@ namespace DriverGuide.UI.Pages.Quiz
 
             try
             {
-                // Zapisz pustƒÖ odpowied≈∫ jako timeout
+                // Zapisz pustπ odpowiedü jako timeout
                 await Http.PostAsJsonAsync("/QuestionAnswer/SubmitAnswer",
                     new
                     {
                         TestSessionId = testSessionId,
-                        QuestionId = currentQuestion.QuestionId.ToString(),
-                        UserAnswer = "", // Pusta odpowied≈∫ oznacza timeout
+                        QuestionId = currentQuestion.QuestionId,
+                        UserAnswer = "", // Pusta odpowiedü oznacza timeout
                         EndDate = DateTimeOffset.Now,
                         StartDate = testStartTime,
                     });
@@ -549,11 +539,11 @@ namespace DriverGuide.UI.Pages.Quiz
 
             storedAnswers.Add(new StoredQuestionAnswer
             {
-                QuestionId = currentQuestion.QuestionId.ToString(),
+                QuestionId = currentQuestion.QuestionId,
                 QuestionCategory = Enum.Parse<LicenseCategory>(Category ?? "B"),
                 Question = currentQuestion.Pytanie ?? string.Empty,
                 CorrectQuestionAnswer = currentQuestion.PoprawnaOdp ?? string.Empty,
-                UserQuestionAnswer = "", // Pusta odpowied≈∫
+                UserQuestionAnswer = "", // Pusta odpowiedü
                 StartDate = DateTimeOffset.Now.AddSeconds(-currentQuestion.TimeToAnswerSeconds),
                 EndDate = DateTimeOffset.Now,
                 QuestionLanguage = Language.PL
@@ -573,7 +563,7 @@ namespace DriverGuide.UI.Pages.Quiz
                     new
                     {
                         TestSessionId = testSessionId,
-                        QuestionId = currentQuestion.QuestionId.ToString(),
+                        QuestionId = currentQuestion.QuestionId,
                         QuestionCategory = categoryEnum,
                         Question = currentQuestion.Pytanie,
                         CorrectQuestionAnswer = currentQuestion.PoprawnaOdp,
@@ -675,10 +665,10 @@ namespace DriverGuide.UI.Pages.Quiz
 
             if (isUserAuthenticated)
             {
-                // Zalogowany u≈ºytkownik - zapisz odpowied≈∫ natychmiast
+                // Zalogowany uøytkownik - zapisz odpowiedü natychmiast
                 await RegisterAnswerInDatabase();
 
-                // Sprawd≈∫ czy to by≈Ço ostatnie pytanie lub wszystkie pytania sƒÖ odpowiedziane
+                // Sprawdü czy to by≥o ostatnie pytanie lub wszystkie pytania sπ odpowiedziane
                 var allQuestionsAnswered = answeredQuestionIds.Count >= questions!.Count;
                 
                 if (isLastQuestion || allQuestionsAnswered)
@@ -694,12 +684,12 @@ namespace DriverGuide.UI.Pages.Quiz
             }
             else
             {
-                // Niezalogowany u≈ºytkownik - przechowuj odpowied≈∫ lokalnie
+                // Niezalogowany uøytkownik - przechowuj odpowiedü lokalnie
                 StoreAnswerLocally();
 
                 if (isLastQuestion)
                 {
-                    // Ostatnie pytanie - zapisz ca≈Çy test do bazy
+                    // Ostatnie pytanie - zapisz ca≥y test do bazy
                     await SaveEntireTestToDatabase();
                     NavigateToSummary();
                 }
@@ -721,7 +711,7 @@ namespace DriverGuide.UI.Pages.Quiz
                     new
                     {
                         TestSessionId = testSessionId,
-                        QuestionId = currentQuestion.QuestionId.ToString(),
+                        QuestionId = currentQuestion.QuestionId,
                         UserAnswer = selectedAnswer,
                         EndDate = DateTimeOffset.Now,
                         StartDate = testStartTime,
@@ -738,15 +728,15 @@ namespace DriverGuide.UI.Pages.Quiz
             if (currentQuestion == null || string.IsNullOrEmpty(selectedAnswer))
                 return;
 
-            // Przechowuj odpowied≈∫ lokalnie
+            // Przechowuj odpowiedü lokalnie
             storedAnswers.Add(new StoredQuestionAnswer
             {
-                QuestionId = currentQuestion.QuestionId.ToString(),
+                QuestionId = currentQuestion.QuestionId,
                 QuestionCategory = Enum.Parse<LicenseCategory>(Category ?? "B"),
                 Question = currentQuestion.Pytanie ?? string.Empty,
                 CorrectQuestionAnswer = currentQuestion.PoprawnaOdp ?? string.Empty,
                 UserQuestionAnswer = selectedAnswer,
-                StartDate = DateTimeOffset.Now.AddSeconds(-5), // Przybli≈ºony czas rozpoczƒôcia
+                StartDate = DateTimeOffset.Now.AddSeconds(-5), // Przybliøony czas rozpoczÍcia
                 EndDate = DateTimeOffset.Now,
                 QuestionLanguage = Language.PL
             });
@@ -793,7 +783,7 @@ namespace DriverGuide.UI.Pages.Quiz
         {
             try
             {
-                // 1. Utw√≥rz sesjƒô testu
+                // 1. UtwÛrz sesjÍ testu
                 var categoryEnum = Enum.Parse<LicenseCategory>(Category ?? "B");
                 var createResponse = await Http.PostAsJsonAsync("/TestSession/Create", new 
                 { 
@@ -827,7 +817,7 @@ namespace DriverGuide.UI.Pages.Quiz
                         }).ToList()
                     });
 
-                // 3. Zako≈Ñcz test z wynikiem
+                // 3. ZakoÒcz test z wynikiem
                 double correctAnswersCount = storedAnswers.Count(a => a.UserQuestionAnswer == a.CorrectQuestionAnswer);
                 double result = (correctAnswersCount / questions!.Count) * 100;
 
@@ -856,7 +846,7 @@ namespace DriverGuide.UI.Pages.Quiz
         {
             currentIndex++;
             
-            // Je≈õli kontynuujemy test, przeskocz ju≈º odpowiedziane pytania
+            // Jeúli kontynuujemy test, przeskocz juø odpowiedziane pytania
             if (isContinuingTest)
             {
                 while (currentIndex < questions!.Count && 
@@ -866,7 +856,7 @@ namespace DriverGuide.UI.Pages.Quiz
                     currentIndex++;
                 }
 
-                // Je≈õli dotarli≈õmy do ko≈Ñca, sprawd≈∫ czy wszystkie pytania majƒÖ odpowiedzi
+                // Jeúli dotarliúmy do koÒca, sprawdü czy wszystkie pytania majπ odpowiedzi
                 if (currentIndex >= questions.Count)
                 {
                     if (answeredQuestionIds.Count >= questions.Count)
@@ -878,7 +868,7 @@ namespace DriverGuide.UI.Pages.Quiz
                     }
                     else
                     {
-                        // Nie powinno siƒô zdarzyƒá, ale dla bezpiecze≈Ñstwa
+                        // Nie powinno siÍ zdarzyÊ, ale dla bezpieczeÒstwa
                         Console.WriteLine($"Reached end but not all questions answered: {answeredQuestionIds.Count}/{questions.Count}");
                         await CompleteTestInDatabase();
                         NavigateToSummary();
@@ -929,10 +919,9 @@ namespace DriverGuide.UI.Pages.Quiz
         }
     }
 
-    // Klasa do przechowywania odpowiedzi lokalnie
     public class StoredQuestionAnswer
     {
-        public string QuestionId { get; set; } = string.Empty;
+        public int QuestionId { get; set; }
         public LicenseCategory QuestionCategory { get; set; }
         public string Question { get; set; } = string.Empty;
         public string CorrectQuestionAnswer { get; set; } = string.Empty;

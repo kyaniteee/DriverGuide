@@ -22,11 +22,10 @@ public class SubmitAnswerHandlerTests
     public async Task Handle_ValidRequest_ShouldUpdateQuestionAnswer()
     {
         var testSessionId = Guid.NewGuid().ToString();
-        var questionId = "123";
         var request = new SubmitAnswerRequest
         {
             TestSessionId = testSessionId,
-            QuestionId = questionId,
+            QuestionId = 123,
             UserAnswer = "A",
             EndDate = DateTimeOffset.Now
         };
@@ -35,7 +34,7 @@ public class SubmitAnswerHandlerTests
         {
             QuestionAnswerId = Guid.NewGuid().ToString(),
             TestSessionId = testSessionId,
-            QuestionId = questionId,
+            QuestionId = 123,
             UserQuestionAnswer = null,
             EndDate = null
         };
@@ -57,7 +56,7 @@ public class SubmitAnswerHandlerTests
         var request = new SubmitAnswerRequest
         {
             TestSessionId = Guid.NewGuid().ToString(),
-            QuestionId = "123",
+            QuestionId = 123,
             UserAnswer = "A"
         };
 
@@ -72,11 +71,10 @@ public class SubmitAnswerHandlerTests
     public async Task Handle_NullEndDate_ShouldUseCurrentTime()
     {
         var testSessionId = Guid.NewGuid().ToString();
-        var questionId = "123";
         var request = new SubmitAnswerRequest
         {
             TestSessionId = testSessionId,
-            QuestionId = questionId,
+            QuestionId = 123,
             UserAnswer = "B",
             EndDate = null
         };
@@ -85,7 +83,7 @@ public class SubmitAnswerHandlerTests
         {
             QuestionAnswerId = Guid.NewGuid().ToString(),
             TestSessionId = testSessionId,
-            QuestionId = questionId,
+            QuestionId = 123,
             UserQuestionAnswer = null,
             EndDate = null
         };

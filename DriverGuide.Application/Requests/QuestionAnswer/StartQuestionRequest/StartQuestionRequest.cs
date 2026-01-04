@@ -6,7 +6,7 @@ namespace DriverGuide.Application.Requests;
 public class StartQuestionRequest : IRequest<Guid>
 {
     public string TestSessionId { get; set; } = string.Empty;
-    public string QuestionId { get; set; } = string.Empty;
+    public int QuestionId { get; set; }
     public LicenseCategory QuestionCategory { get; set; }
     public string Question { get; set; } = string.Empty;
     public string? CorrectQuestionAnswer { get; set; }

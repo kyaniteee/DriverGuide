@@ -13,7 +13,7 @@ public class QuestionAnswerTests
 
         questionAnswer.QuestionAnswerId.Should().BeNull();
         questionAnswer.TestSessionId.Should().BeNull();
-        questionAnswer.QuestionId.Should().BeNull();
+        questionAnswer.QuestionId.Should().Be(0);
         questionAnswer.UserQuestionAnswer.Should().BeNull();
         questionAnswer.EndDate.Should().BeNull();
     }
@@ -28,9 +28,9 @@ public class QuestionAnswerTests
         {
             QuestionAnswerId = Guid.NewGuid().ToString(),
             TestSessionId = Guid.NewGuid().ToString(),
-            QuestionId = "123",
+            QuestionId = 123,
             QuestionCategory = LicenseCategory.B,
-            Question = "Test pytanie?",
+            QuestionText = "Test pytanie?",
             CorrectQuestionAnswer = "A",
             UserQuestionAnswer = "A",
             StartDate = startDate,
@@ -40,9 +40,9 @@ public class QuestionAnswerTests
 
         questionAnswer.QuestionAnswerId.Should().NotBeNullOrEmpty();
         questionAnswer.TestSessionId.Should().NotBeNullOrEmpty();
-        questionAnswer.QuestionId.Should().Be("123");
+        questionAnswer.QuestionId.Should().Be(123);
         questionAnswer.QuestionCategory.Should().Be(LicenseCategory.B);
-        questionAnswer.Question.Should().Be("Test pytanie?");
+        questionAnswer.QuestionText.Should().Be("Test pytanie?");
         questionAnswer.CorrectQuestionAnswer.Should().Be("A");
         questionAnswer.UserQuestionAnswer.Should().Be("A");
         questionAnswer.StartDate.Should().Be(startDate);

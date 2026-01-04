@@ -37,14 +37,4 @@ public class TestSession
     /// Obliczany jako (liczba poprawnych odpowiedzi / liczba wszystkich pytań) * 100.
     /// </summary>
     public double? Result { get; set; }
-
-    /// <summary>
-    /// Kolekcja odpowiedzi na pytania w ramach sesji testowej.
-    /// </summary>
-    public ICollection<QuestionAnswer>? QuestionAnswers { get; set; }
-
-    /// <summary>
-    /// Nawigacyjna właściwość użytkownika dla relacji z AspNetUsers.
-    /// </summary>
-    public User? User { get; set; }
 }

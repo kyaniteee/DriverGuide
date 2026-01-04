@@ -48,10 +48,9 @@ public class QuestionAnswerRepository : RepositoryBase<QuestionAnswer>, IQuestio
 
         foreach (var answer in answers)
         {
-            if (answer.UserQuestionAnswer == answer.CorrectQuestionAnswer &&
-                int.TryParse(answer.QuestionId, out int questionId))
+            if (answer.UserQuestionAnswer == answer.CorrectQuestionAnswer)
             {
-                var question = await Context.Questions!.FindAsync(questionId);
+                var question = await Context.Questions!.FindAsync(answer.QuestionId);
                 if (question != null)
                 {
                     totalPoints += question.Points;

@@ -14,7 +14,7 @@ public class StartQuestionHandler(IQuestionAnswerRepository questionAnswerReposi
             TestSessionId = request.TestSessionId,
             QuestionId = request.QuestionId,
             QuestionCategory = request.QuestionCategory,
-            Question = request.Question,
+            QuestionText = request.Question,
             CorrectQuestionAnswer = request.CorrectQuestionAnswer,
             StartDate = request.StartDate,
             QuestionLanguage = request.QuestionLanguage,
