@@ -124,5 +124,8 @@ public class QuestionConfiguration : IEntityTypeConfiguration<Question>
         builder.Property(q => q.OdpowiedzCUA)
             .IsRequired(false)
             .HasColumnName(nameof(Question.OdpowiedzCUA));
+
+        builder.HasIndex(q => q.Media)
+            .HasDatabaseName("IX_Questions_Media");
     }
 }

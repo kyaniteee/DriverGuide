@@ -28,5 +28,9 @@ public class QuestionFileConfiguration : IEntityTypeConfiguration<QuestionFile>
         builder.Property(t => t.File)
             .IsRequired(true)
             .HasColumnName(nameof(QuestionFile.File));
+
+        builder.HasIndex(t => t.Name)
+            .IsUnique()
+            .HasDatabaseName("IX_QuestionFiles_Name");
     }
 }
