@@ -54,4 +54,10 @@ public class User : IdentityUser<Guid>
     /// Dziedziczone z IdentityUser.
     /// </summary>
     public ICollection<IdentityUserToken<Guid>>? Tokens { get; set; }
+
+    /// <summary>
+    /// Kolekcja sesji testowych powiązanych z użytkownikiem.
+    /// Używana do przechowywania informacji o sesjach testowych dla danego użytkownika.
+    /// </summary>
+    public ICollection<TestSession>? TestSessions { get; set; }
 }

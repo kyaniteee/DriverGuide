@@ -31,7 +31,15 @@ public class TestSessionConfiguration : IEntityTypeConfiguration<TestSession>
             .IsRequired(false)
             .HasColumnName(nameof(TestSession.Result));
 
+        builder.HasOne(t => t.User)
+            .WithMany(u => u.TestSessions)
+            .HasForeignKey(t => t.UserId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.SetNull)
+            .HasConstraintName("FK_TestSessions_AspNetUsers");
+
         builder.HasIndex(t => t.UserId)
-               .IsUnique(false);
+            .IsUnique(false)
+            .HasDatabaseName("IX_TestSessions_UserId");
     }
 }

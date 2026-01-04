@@ -62,4 +62,42 @@ public class CreateTestSessionHandlerTests
         await Assert.ThrowsAsync<Exception>(
             () => _handler.Handle(request, CancellationToken.None));
     }
+
+    [Fact]
+    public async Task Handle_NullUserId_ShouldCreateAnonymousTestSession()
+    {
+        var request = new CreateTestSessionCommand
+        {
+            UserId = null
+        };
+
+        _testSessionRepository.CreateAsync(Arg.Any<DriverGuide.Domain.Models.TestSession>())
+            .Returns(Task.FromResult(new DriverGuide.Domain.Models.TestSession()));
+
+        var result = await _handler.Handle(request, CancellationToken.None);
+
+        result.Should().NotBeEmpty();
+        await _testSessionRepository.Received(1).CreateAsync(Arg.Is<DriverGuide.Domain.Models.TestSession>(
+            ts => ts.UserId == null));
+        await _userRepository.DidNotReceive().GetByGuidAsync(Arg.Any<Guid>());
+    }
+
+    [Fact]
+    public async Task Handle_EmptyUserId_ShouldCreateAnonymousTestSession()
+    {
+        var request = new CreateTestSessionCommand
+        {
+            UserId = string.Empty
+        };
+
+        _testSessionRepository.CreateAsync(Arg.Any<DriverGuide.Domain.Models.TestSession>())
+            .Returns(Task.FromResult(new DriverGuide.Domain.Models.TestSession()));
+
+        var result = await _handler.Handle(request, CancellationToken.None);
+
+        result.Should().NotBeEmpty();
+        await _testSessionRepository.Received(1).CreateAsync(Arg.Is<DriverGuide.Domain.Models.TestSession>(
+            ts => ts.UserId == null));
+        await _userRepository.DidNotReceive().GetByGuidAsync(Arg.Any<Guid>());
+    }
 }

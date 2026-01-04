@@ -42,4 +42,9 @@ public class TestSession
     /// Kolekcja odpowiedzi na pytania w ramach sesji testowej.
     /// </summary>
     public ICollection<QuestionAnswer>? QuestionAnswers { get; set; }
+
+    /// <summary>
+    /// Nawigacyjna właściwość użytkownika dla relacji z AspNetUsers.
+    /// </summary>
+    public User? User { get; set; }
 }
