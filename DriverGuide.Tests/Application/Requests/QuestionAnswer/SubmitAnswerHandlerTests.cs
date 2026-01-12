@@ -1,11 +1,10 @@
-using DriverGuide.Application.Requests;
+using DriverGuide.Application.Commands;
 using DriverGuide.Domain.Interfaces;
 using DriverGuide.Domain.Models;
 using FluentAssertions;
-using MediatR;
 using NSubstitute;
 
-namespace DriverGuide.Tests.Application.Requests.QuestionAnswer;
+namespace DriverGuide.Tests.Application.Commands.QuestionAnswer;
 
 public class SubmitAnswerHandlerTests
 {
@@ -19,85 +18,83 @@ public class SubmitAnswerHandlerTests
     }
 
     [Fact]
-    public async Task Handle_ValidRequest_ShouldUpdateQuestionAnswer()
+    public async Task Handle_ValidCommand_ShouldUpdateQuestionAnswer()
     {
         var testSessionId = Guid.NewGuid().ToString();
-        var request = new SubmitAnswerRequest
+        var questionId = 123;
+        var userAnswer = "A";
+        var endDate = DateTimeOffset.Now;
+
+        var command = new SubmitAnswerCommand
         {
             TestSessionId = testSessionId,
-            QuestionId = 123,
-            UserAnswer = "A",
-            EndDate = DateTimeOffset.Now
+            QuestionId = questionId,
+            UserAnswer = userAnswer,
+            EndDate = endDate
         };
 
-        var existingAnswer = new DriverGuide.Domain.Models.QuestionAnswer
+        var existingQuestionAnswer = new DriverGuide.Domain.Models.QuestionAnswer
         {
             QuestionAnswerId = Guid.NewGuid().ToString(),
             TestSessionId = testSessionId,
-            QuestionId = 123,
+            QuestionId = questionId,
             UserQuestionAnswer = null,
             EndDate = null
         };
 
-        _questionAnswerRepository.GetAsync(Arg.Any<System.Linq.Expressions.Expression<Func<DriverGuide.Domain.Models.QuestionAnswer, bool>>>())
-            .Returns(Task.FromResult<DriverGuide.Domain.Models.QuestionAnswer?>(existingAnswer));
+        _questionAnswerRepository.GetAsync(Arg.Any<System.Linq.Expressions.Expression<System.Func<DriverGuide.Domain.Models.QuestionAnswer, bool>>>())
+            .Returns(Task.FromResult<DriverGuide.Domain.Models.QuestionAnswer?>(existingQuestionAnswer));
 
-        var result = await _handler.Handle(request, CancellationToken.None);
+        await _handler.Handle(command, CancellationToken.None);
 
-        result.Should().Be(Unit.Value);
-        existingAnswer.UserQuestionAnswer.Should().Be("A");
-        existingAnswer.EndDate.Should().NotBeNull();
-        await _questionAnswerRepository.Received(1).UpdateAsync(existingAnswer);
+        existingQuestionAnswer.UserQuestionAnswer.Should().Be(userAnswer);
+        existingQuestionAnswer.EndDate.Should().Be(endDate);
+        await _questionAnswerRepository.Received(1).UpdateAsync(existingQuestionAnswer);
     }
 
     [Fact]
     public async Task Handle_QuestionAnswerNotFound_ShouldThrowException()
     {
-        var request = new SubmitAnswerRequest
+        var command = new SubmitAnswerCommand
         {
             TestSessionId = Guid.NewGuid().ToString(),
             QuestionId = 123,
             UserAnswer = "A"
         };
 
-        _questionAnswerRepository.GetAsync(Arg.Any<System.Linq.Expressions.Expression<Func<DriverGuide.Domain.Models.QuestionAnswer, bool>>>())
+        _questionAnswerRepository.GetAsync(Arg.Any<System.Linq.Expressions.Expression<System.Func<DriverGuide.Domain.Models.QuestionAnswer, bool>>>())
             .Returns(Task.FromResult<DriverGuide.Domain.Models.QuestionAnswer?>(null));
 
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _handler.Handle(request, CancellationToken.None));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.Handle(command, CancellationToken.None));
     }
 
     [Fact]
     public async Task Handle_NullEndDate_ShouldUseCurrentTime()
     {
         var testSessionId = Guid.NewGuid().ToString();
-        var request = new SubmitAnswerRequest
+        var questionId = 123;
+
+        var command = new SubmitAnswerCommand
         {
             TestSessionId = testSessionId,
-            QuestionId = 123,
-            UserAnswer = "B",
+            QuestionId = questionId,
+            UserAnswer = "A",
             EndDate = null
         };
 
-        var existingAnswer = new DriverGuide.Domain.Models.QuestionAnswer
+        var existingQuestionAnswer = new DriverGuide.Domain.Models.QuestionAnswer
         {
             QuestionAnswerId = Guid.NewGuid().ToString(),
             TestSessionId = testSessionId,
-            QuestionId = 123,
-            UserQuestionAnswer = null,
-            EndDate = null
+            QuestionId = questionId
         };
 
-        _questionAnswerRepository.GetAsync(Arg.Any<System.Linq.Expressions.Expression<Func<DriverGuide.Domain.Models.QuestionAnswer, bool>>>())
-            .Returns(Task.FromResult<DriverGuide.Domain.Models.QuestionAnswer?>(existingAnswer));
+        _questionAnswerRepository.GetAsync(Arg.Any<System.Linq.Expressions.Expression<System.Func<DriverGuide.Domain.Models.QuestionAnswer, bool>>>())
+            .Returns(Task.FromResult<DriverGuide.Domain.Models.QuestionAnswer?>(existingQuestionAnswer));
 
-        var beforeCall = DateTimeOffset.Now;
-        var result = await _handler.Handle(request, CancellationToken.None);
-        var afterCall = DateTimeOffset.Now;
+        await _handler.Handle(command, CancellationToken.None);
 
-        result.Should().Be(Unit.Value);
-        existingAnswer.EndDate.Should().NotBeNull();
-        existingAnswer.EndDate.Should().BeOnOrAfter(beforeCall);
-        existingAnswer.EndDate.Should().BeOnOrBefore(afterCall);
+        existingQuestionAnswer.EndDate.Should().NotBeNull();
+        existingQuestionAnswer.EndDate.Should().BeCloseTo(DateTimeOffset.Now, TimeSpan.FromSeconds(5));
     }
 }

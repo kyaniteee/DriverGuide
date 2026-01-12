@@ -1,28 +1,28 @@
-using DriverGuide.Application.Requests;
+using DriverGuide.Application.Commands;
 using DriverGuide.Domain.Enums;
 using DriverGuide.Domain.Interfaces;
 using DriverGuide.Domain.Models;
 using FluentAssertions;
 using NSubstitute;
 
-namespace DriverGuide.Tests.Application.Requests.TestSession;
+namespace DriverGuide.Tests.Application.Commands.TestSession;
 
-public class CreateTestSessionRequestHandlerTests
+public class CreateTestSessionHandlerTests
 {
     private readonly ITestSessionRepository _testSessionRepository;
-    private readonly CreateTestSessionRequestHandler _handler;
+    private readonly CreateTestSessionHandler _handler;
 
-    public CreateTestSessionRequestHandlerTests()
+    public CreateTestSessionHandlerTests()
     {
         _testSessionRepository = Substitute.For<ITestSessionRepository>();
-        _handler = new CreateTestSessionRequestHandler(_testSessionRepository);
+        _handler = new CreateTestSessionHandler(_testSessionRepository);
     }
 
     [Fact]
-    public async Task Handle_ValidRequest_ShouldCreateTestSessionAndReturnGuid()
+    public async Task Handle_ValidCommand_ShouldCreateTestSessionAndReturnGuid()
     {
         var userId = Guid.NewGuid();
-        var request = new CreateTestSessionRequest
+        var command = new CreateTestSessionCommand
         {
             StartDate = DateTimeOffset.Now,
             Category = LicenseCategory.B,
@@ -32,19 +32,19 @@ public class CreateTestSessionRequestHandlerTests
         _testSessionRepository.CreateAsync(Arg.Any<DriverGuide.Domain.Models.TestSession>())
             .Returns(Task.FromResult(new DriverGuide.Domain.Models.TestSession()));
 
-        var result = await _handler.Handle(request, CancellationToken.None);
+        var result = await _handler.Handle(command, CancellationToken.None);
 
         result.Should().NotBeEmpty();
         await _testSessionRepository.Received(1).CreateAsync(
             Arg.Is<DriverGuide.Domain.Models.TestSession>(s =>
-                s.StartDate == request.StartDate &&
+                s.StartDate == command.StartDate &&
                 s.UserId == userId));
     }
 
     [Fact]
     public async Task Handle_AnonymousUser_ShouldCreateSessionWithNullUserId()
     {
-        var request = new CreateTestSessionRequest
+        var command = new CreateTestSessionCommand
         {
             StartDate = DateTimeOffset.Now,
             Category = LicenseCategory.A,
@@ -54,7 +54,7 @@ public class CreateTestSessionRequestHandlerTests
         _testSessionRepository.CreateAsync(Arg.Any<DriverGuide.Domain.Models.TestSession>())
             .Returns(Task.FromResult(new DriverGuide.Domain.Models.TestSession()));
 
-        var result = await _handler.Handle(request, CancellationToken.None);
+        var result = await _handler.Handle(command, CancellationToken.None);
 
         result.Should().NotBeEmpty();
         await _testSessionRepository.Received(1).CreateAsync(
@@ -67,7 +67,7 @@ public class CreateTestSessionRequestHandlerTests
     [InlineData(LicenseCategory.D)]
     public async Task Handle_DifferentCategories_ShouldCreateSessionForEachCategory(LicenseCategory category)
     {
-        var request = new CreateTestSessionRequest
+        var command = new CreateTestSessionCommand
         {
             StartDate = DateTimeOffset.Now,
             Category = category,
@@ -77,7 +77,7 @@ public class CreateTestSessionRequestHandlerTests
         _testSessionRepository.CreateAsync(Arg.Any<DriverGuide.Domain.Models.TestSession>())
             .Returns(Task.FromResult(new DriverGuide.Domain.Models.TestSession()));
 
-        var result = await _handler.Handle(request, CancellationToken.None);
+        var result = await _handler.Handle(command, CancellationToken.None);
 
         result.Should().NotBeEmpty();
     }

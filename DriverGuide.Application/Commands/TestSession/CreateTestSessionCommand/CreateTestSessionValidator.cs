@@ -1,18 +1,17 @@
-Ôªøusing FluentValidation;
+using FluentValidation;
 
 namespace DriverGuide.Application.Commands;
 
-/// <summary>
-/// Walidator dla command CreateTestSessionCommand.
-/// Obecnie nie zawiera aktywnych regu≈Ç walidacji, ale mo≈ºe byƒá rozszerzony w przysz≈Ço≈õci.
-/// </summary>
 public class CreateTestSessionValidator : AbstractValidator<CreateTestSessionCommand>
 {
-    /// <summary>
-    /// Inicjalizuje nowƒÖ instancjƒô walidatora CreateTestSessionValidator.
-    /// Aktualnie nie definiuje ≈ºadnych regu≈Ç walidacji dla UserId.
-    /// </summary>
     public CreateTestSessionValidator()
     {
+        RuleFor(x => x.StartDate)
+            .NotEmpty().WithMessage("Data rozpoczÍcia jest wymagana")
+            .LessThanOrEqualTo(DateTimeOffset.Now.AddMinutes(5))
+            .WithMessage("Data rozpoczÍcia nie moøe byÊ w przysz≥oúci");
+
+        RuleFor(x => x.Category)
+            .IsInEnum().WithMessage("Nieprawid≥owa kategoria prawa jazdy");
     }
 }

@@ -1,29 +1,29 @@
-using DriverGuide.Application.Requests;
+using DriverGuide.Application.Commands;
 using DriverGuide.Domain.Enums;
 using FluentValidation.TestHelper;
 
-namespace DriverGuide.Tests.Application.Requests.TestSession;
+namespace DriverGuide.Tests.Application.Commands.TestSession;
 
-public class CreateTestSessionRequestValidatorTests
+public class CreateTestSessionValidatorTests
 {
-    private readonly CreateTestSessionRequestValidator _validator;
+    private readonly CreateTestSessionValidator _validator;
 
-    public CreateTestSessionRequestValidatorTests()
+    public CreateTestSessionValidatorTests()
     {
-        _validator = new CreateTestSessionRequestValidator();
+        _validator = new CreateTestSessionValidator();
     }
 
     [Fact]
-    public async Task Validate_ValidRequest_ShouldNotHaveValidationError()
+    public async Task Validate_ValidCommand_ShouldNotHaveValidationError()
     {
-        var request = new CreateTestSessionRequest
+        var command = new CreateTestSessionCommand
         {
             StartDate = DateTimeOffset.Now,
             Category = LicenseCategory.B,
             UserId = Guid.NewGuid()
         };
 
-        var result = await _validator.TestValidateAsync(request);
+        var result = await _validator.TestValidateAsync(command);
 
         result.ShouldNotHaveAnyValidationErrors();
     }
@@ -31,14 +31,14 @@ public class CreateTestSessionRequestValidatorTests
     [Fact]
     public async Task Validate_FutureStartDate_ShouldHaveValidationError()
     {
-        var request = new CreateTestSessionRequest
+        var command = new CreateTestSessionCommand
         {
             StartDate = DateTimeOffset.Now.AddHours(2),
             Category = LicenseCategory.B,
             UserId = Guid.NewGuid()
         };
 
-        var result = await _validator.TestValidateAsync(request);
+        var result = await _validator.TestValidateAsync(command);
 
         result.ShouldHaveValidationErrorFor(x => x.StartDate)
             .WithErrorMessage("Data rozpoczêcia nie mo¿e byæ w przysz³oœci");
@@ -51,14 +51,14 @@ public class CreateTestSessionRequestValidatorTests
     [InlineData(LicenseCategory.D)]
     public async Task Validate_AllCategories_ShouldBeValid(LicenseCategory category)
     {
-        var request = new CreateTestSessionRequest
+        var command = new CreateTestSessionCommand
         {
             StartDate = DateTimeOffset.Now,
             Category = category,
             UserId = Guid.NewGuid()
         };
 
-        var result = await _validator.TestValidateAsync(request);
+        var result = await _validator.TestValidateAsync(command);
 
         result.ShouldNotHaveValidationErrorFor(x => x.Category);
     }
@@ -66,14 +66,14 @@ public class CreateTestSessionRequestValidatorTests
     [Fact]
     public async Task Validate_NullUserId_ShouldBeValid()
     {
-        var request = new CreateTestSessionRequest
+        var command = new CreateTestSessionCommand
         {
             StartDate = DateTimeOffset.Now,
             Category = LicenseCategory.B,
             UserId = null
         };
 
-        var result = await _validator.TestValidateAsync(request);
+        var result = await _validator.TestValidateAsync(command);
 
         result.ShouldNotHaveAnyValidationErrors();
     }

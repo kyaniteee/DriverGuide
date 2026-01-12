@@ -1,10 +1,10 @@
-using DriverGuide.Application.Requests;
+using DriverGuide.Application.Commands;
 using DriverGuide.Domain.Interfaces;
 using DriverGuide.Domain.Models;
 using FluentAssertions;
 using NSubstitute;
 
-namespace DriverGuide.Tests.Application.Requests.User;
+namespace DriverGuide.Tests.Application.Commands.User;
 
 /// <summary>
 /// Klasa testowa dla CreateUserHandler.
@@ -40,9 +40,9 @@ public class CreateUserHandlerTests
     /// Assert - Weryfikacja wyniku i wywo³añ metod
     /// </remarks>
     [Fact]
-    public async Task Handle_ValidRequest_ShouldCreateUserAndReturnGuid()
+    public async Task Handle_ValidCommand_ShouldCreateUserAndReturnGuid()
     {
-        var request = new CreateUserRequest
+        var command = new CreateUserCommand
         {
             Login = "testuser",
             FirstName = "Test",
@@ -56,14 +56,14 @@ public class CreateUserHandlerTests
         var createdUser = new DriverGuide.Domain.Models.User
         {
             Id = userId,
-            UserName = request.Login,
-            Email = request.Email
+            UserName = command.Login,
+            Email = command.Email
         };
 
         _userRepository.CreateAsync(Arg.Any<DriverGuide.Domain.Models.User>())
             .Returns(Task.FromResult(createdUser));
 
-        var result = await _handler.Handle(request, CancellationToken.None);
+        var result = await _handler.Handle(command, CancellationToken.None);
 
         result.Should().Be(userId);
         await _userRepository.Received(1).CreateAsync(Arg.Any<DriverGuide.Domain.Models.User>());
@@ -81,7 +81,7 @@ public class CreateUserHandlerTests
     [Fact]
     public async Task Handle_CreateUserFails_ShouldThrowException()
     {
-        var request = new CreateUserRequest
+        var command = new CreateUserCommand
         {
             Login = "testuser",
             FirstName = "Test",
@@ -94,6 +94,6 @@ public class CreateUserHandlerTests
         _userRepository.CreateAsync(Arg.Any<DriverGuide.Domain.Models.User>())
             .Returns(Task.FromException<DriverGuide.Domain.Models.User>(new Exception("Database error")));
 
-        await Assert.ThrowsAsync<Exception>(() => _handler.Handle(request, CancellationToken.None));
+        await Assert.ThrowsAsync<Exception>(() => _handler.Handle(command, CancellationToken.None));
     }
 }

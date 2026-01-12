@@ -30,4 +30,8 @@
     <ProjectReference Include="..\DriverGuide.Infrastructure\DriverGuide.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Application\Commands\TestSession\" />
+  </ItemGroup>
+
 </Project>

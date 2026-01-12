@@ -1,11 +1,11 @@
-using DriverGuide.Application.Requests;
+using DriverGuide.Application.Queries;
 using DriverGuide.Application.Services;
 using DriverGuide.Domain.Interfaces;
 using DriverGuide.Domain.Models;
 using FluentAssertions;
 using NSubstitute;
 
-namespace DriverGuide.Tests.Application.Requests.User;
+namespace DriverGuide.Tests.Application.Queries.User;
 
 /// <summary>
 /// Klasa testowa dla LoginUserHandler.
@@ -42,7 +42,7 @@ public class LoginUserHandlerTests
     [Fact]
     public async Task Handle_ValidCredentials_ShouldReturnToken()
     {
-        var request = new LoginUserRequest
+        var query = new LoginUserQuery
         {
             Login = "testuser",
             Password = "Password123!"
@@ -58,10 +58,10 @@ public class LoginUserHandlerTests
 
         var expectedToken = "generated-jwt-token";
 
-        _userRepository.GetWithRolesAndClaimsAsync(request.Login)
+        _userRepository.GetWithRolesAndClaimsAsync(query.Login)
             .Returns(Task.FromResult<DriverGuide.Domain.Models.User?>(user));
 
-        _userRepository.VerifyPasswordAsync(user, request.Password)
+        _userRepository.VerifyPasswordAsync(user, query.Password)
             .Returns(Task.FromResult(true));
 
         _jwtTokenGenerator.GenerateToken(
@@ -72,11 +72,11 @@ public class LoginUserHandlerTests
             Arg.Any<List<System.Security.Claims.Claim>>())
             .Returns(expectedToken);
 
-        var result = await _handler.Handle(request, CancellationToken.None);
+        var result = await _handler.Handle(query, CancellationToken.None);
 
         result.Should().Be(expectedToken);
-        await _userRepository.Received(1).GetWithRolesAndClaimsAsync(request.Login);
-        await _userRepository.Received(1).VerifyPasswordAsync(user, request.Password);
+        await _userRepository.Received(1).GetWithRolesAndClaimsAsync(query.Login);
+        await _userRepository.Received(1).VerifyPasswordAsync(user, query.Password);
     }
 
     /// <summary>
@@ -90,17 +90,17 @@ public class LoginUserHandlerTests
     [Fact]
     public async Task Handle_UserNotFound_ShouldThrowUnauthorizedException()
     {
-        var request = new LoginUserRequest
+        var query = new LoginUserQuery
         {
             Login = "nonexistent",
             Password = "Password123!"
         };
 
-        _userRepository.GetWithRolesAndClaimsAsync(request.Login)
+        _userRepository.GetWithRolesAndClaimsAsync(query.Login)
             .Returns(Task.FromResult<DriverGuide.Domain.Models.User?>(null));
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _handler.Handle(request, CancellationToken.None));
+            () => _handler.Handle(query, CancellationToken.None));
     }
 
     /// <summary>
@@ -114,7 +114,7 @@ public class LoginUserHandlerTests
     [Fact]
     public async Task Handle_InvalidPassword_ShouldThrowUnauthorizedException()
     {
-        var request = new LoginUserRequest
+        var query = new LoginUserQuery
         {
             Login = "testuser",
             Password = "WrongPassword!"
@@ -127,13 +127,13 @@ public class LoginUserHandlerTests
             Email = "test@example.com"
         };
 
-        _userRepository.GetWithRolesAndClaimsAsync(request.Login)
+        _userRepository.GetWithRolesAndClaimsAsync(query.Login)
             .Returns(Task.FromResult<DriverGuide.Domain.Models.User?>(user));
 
-        _userRepository.VerifyPasswordAsync(user, request.Password)
+        _userRepository.VerifyPasswordAsync(user, query.Password)
             .Returns(Task.FromResult(false));
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _handler.Handle(request, CancellationToken.None));
+            () => _handler.Handle(query, CancellationToken.None));
     }
 }

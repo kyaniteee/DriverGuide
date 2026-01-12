@@ -1,5 +1,5 @@
-﻿using DriverGuide.Application.Queries;
-using DriverGuide.Application.Requests;
+﻿using DriverGuide.Application.Commands;
+using DriverGuide.Application.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,11 +10,11 @@ namespace DriverGuide.Service.Controllers;
 public class QuestionAnswerController(IMediator mediator, ILogger<QuestionAnswerController> logger) : ControllerBase
 {
     [HttpPost("StartQuestion")]
-    public async Task<IActionResult> StartQuestion([FromBody] StartQuestionRequest request)
+    public async Task<IActionResult> StartQuestion([FromBody] StartQuestionCommand command)
     {
         try
         {
-            var questionAnswerId = await mediator.Send(request);
+            var questionAnswerId = await mediator.Send(command);
             return Ok(questionAnswerId);
         }
         catch (Exception ex)
@@ -25,11 +25,11 @@ public class QuestionAnswerController(IMediator mediator, ILogger<QuestionAnswer
     }
 
     [HttpPost("SubmitAnswer")]
-    public async Task<IActionResult> SubmitAnswer([FromBody] SubmitAnswerRequest request)
+    public async Task<IActionResult> SubmitAnswer([FromBody] SubmitAnswerCommand command)
     {
         try
         {
-            await mediator.Send(request);
+            await mediator.Send(command);
             return Ok();
         }
         catch (InvalidOperationException ex)
@@ -54,11 +54,11 @@ public class QuestionAnswerController(IMediator mediator, ILogger<QuestionAnswer
     }
 
     [HttpPost("BulkSubmitAnswers")]
-    public async Task<IActionResult> BulkSubmitAnswers([FromBody] BulkAnswersRequest request)
+    public async Task<IActionResult> BulkSubmitAnswers([FromBody] BulkAnswersCommand command)
     {
         try
         {
-            await mediator.Send(request);
+            await mediator.Send(command);
             return Ok();
         }
         catch (ArgumentException ex)

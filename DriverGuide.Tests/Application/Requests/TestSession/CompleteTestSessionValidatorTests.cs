@@ -1,7 +1,7 @@
-using DriverGuide.Application.Requests;
+using DriverGuide.Application.Commands;
 using FluentValidation.TestHelper;
 
-namespace DriverGuide.Tests.Application.Requests.TestSession;
+namespace DriverGuide.Tests.Application.Commands.TestSession;
 
 public class CompleteTestSessionValidatorTests
 {
@@ -13,15 +13,15 @@ public class CompleteTestSessionValidatorTests
     }
 
     [Fact]
-    public async Task Validate_ValidRequest_ShouldNotHaveValidationError()
+    public async Task Validate_ValidCommand_ShouldNotHaveValidationError()
     {
-        var request = new CompleteTestSessionRequest
+        var command = new CompleteTestSessionCommand
         {
             TestSessionId = Guid.NewGuid().ToString(),
             Result = 75.5
         };
 
-        var result = await _validator.TestValidateAsync(request);
+        var result = await _validator.TestValidateAsync(command);
 
         result.ShouldNotHaveAnyValidationErrors();
     }
@@ -29,16 +29,16 @@ public class CompleteTestSessionValidatorTests
     [Fact]
     public async Task Validate_EmptyTestSessionId_ShouldHaveValidationError()
     {
-        var request = new CompleteTestSessionRequest
+        var command = new CompleteTestSessionCommand
         {
             TestSessionId = string.Empty,
             Result = 75.5
         };
 
-        var result = await _validator.TestValidateAsync(request);
+        var result = await _validator.TestValidateAsync(command);
 
         result.ShouldHaveValidationErrorFor(x => x.TestSessionId)
-            .WithErrorMessage("TestSessionId jest wymagane");
+            .WithErrorMessage("ID sesji testowej jest wymagane");
     }
 
     [Theory]
@@ -46,13 +46,13 @@ public class CompleteTestSessionValidatorTests
     [InlineData(-50)]
     public async Task Validate_NegativeResult_ShouldHaveValidationError(double resultValue)
     {
-        var request = new CompleteTestSessionRequest
+        var command = new CompleteTestSessionCommand
         {
             TestSessionId = Guid.NewGuid().ToString(),
             Result = resultValue
         };
 
-        var result = await _validator.TestValidateAsync(request);
+        var result = await _validator.TestValidateAsync(command);
 
         result.ShouldHaveValidationErrorFor(x => x.Result)
             .WithErrorMessage("Wynik nie mo¿e byæ ujemny");
@@ -63,16 +63,16 @@ public class CompleteTestSessionValidatorTests
     [InlineData(150)]
     public async Task Validate_ResultAbove100_ShouldHaveValidationError(double resultValue)
     {
-        var request = new CompleteTestSessionRequest
+        var command = new CompleteTestSessionCommand
         {
             TestSessionId = Guid.NewGuid().ToString(),
             Result = resultValue
         };
 
-        var result = await _validator.TestValidateAsync(request);
+        var result = await _validator.TestValidateAsync(command);
 
         result.ShouldHaveValidationErrorFor(x => x.Result)
-            .WithErrorMessage("Wynik nie mo¿e przekraczaæ 100%");
+            .WithErrorMessage("Wynik nie mo¿e przekraczaæ 100");
     }
 
     [Theory]
@@ -81,13 +81,13 @@ public class CompleteTestSessionValidatorTests
     [InlineData(50.5)]
     public async Task Validate_ValidResultBoundaries_ShouldNotHaveValidationError(double resultValue)
     {
-        var request = new CompleteTestSessionRequest
+        var command = new CompleteTestSessionCommand
         {
             TestSessionId = Guid.NewGuid().ToString(),
             Result = resultValue
         };
 
-        var result = await _validator.TestValidateAsync(request);
+        var result = await _validator.TestValidateAsync(command);
 
         result.ShouldNotHaveValidationErrorFor(x => x.Result);
     }

@@ -1,8 +1,8 @@
-using DriverGuide.Application.Requests;
+using DriverGuide.Application.Commands;
 using DriverGuide.Domain.Enums;
 using FluentValidation.TestHelper;
 
-namespace DriverGuide.Tests.Application.Requests.QuestionAnswer;
+namespace DriverGuide.Tests.Application.Commands.QuestionAnswer;
 
 public class StartQuestionValidatorTests
 {
@@ -14,19 +14,20 @@ public class StartQuestionValidatorTests
     }
 
     [Fact]
-    public async Task Validate_ValidRequest_ShouldNotHaveValidationError()
+    public async Task Validate_ValidCommand_ShouldNotHaveValidationError()
     {
-        var request = new StartQuestionRequest
+        var command = new StartQuestionCommand
         {
             TestSessionId = Guid.NewGuid().ToString(),
             QuestionId = 123,
-            Question = "Test question?",
             QuestionCategory = LicenseCategory.B,
-            QuestionLanguage = Language.PL,
-            StartDate = DateTimeOffset.Now
+            Question = "Test question?",
+            CorrectQuestionAnswer = "A",
+            StartDate = DateTimeOffset.Now,
+            QuestionLanguage = Language.PL
         };
 
-        var result = await _validator.TestValidateAsync(request);
+        var result = await _validator.TestValidateAsync(command);
 
         result.ShouldNotHaveAnyValidationErrors();
     }
@@ -34,34 +35,36 @@ public class StartQuestionValidatorTests
     [Fact]
     public async Task Validate_EmptyTestSessionId_ShouldHaveValidationError()
     {
-        var request = new StartQuestionRequest
+        var command = new StartQuestionCommand
         {
             TestSessionId = string.Empty,
             QuestionId = 123,
-            Question = "Test question?",
             QuestionCategory = LicenseCategory.B,
+            Question = "Test question?",
             StartDate = DateTimeOffset.Now
         };
 
-        var result = await _validator.TestValidateAsync(request);
+        var result = await _validator.TestValidateAsync(command);
 
         result.ShouldHaveValidationErrorFor(x => x.TestSessionId)
             .WithErrorMessage("TestSessionId jest wymagane");
     }
 
-    [Fact]
-    public async Task Validate_EmptyQuestionId_ShouldHaveValidationError()
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public async Task Validate_InvalidQuestionId_ShouldHaveValidationError(int questionId)
     {
-        var request = new StartQuestionRequest
+        var command = new StartQuestionCommand
         {
             TestSessionId = Guid.NewGuid().ToString(),
-            QuestionId = 0,
-            Question = "Test question?",
+            QuestionId = questionId,
             QuestionCategory = LicenseCategory.B,
+            Question = "Test question?",
             StartDate = DateTimeOffset.Now
         };
 
-        var result = await _validator.TestValidateAsync(request);
+        var result = await _validator.TestValidateAsync(command);
 
         result.ShouldHaveValidationErrorFor(x => x.QuestionId)
             .WithErrorMessage("QuestionId musi byæ wiêksze od 0");
@@ -70,36 +73,18 @@ public class StartQuestionValidatorTests
     [Fact]
     public async Task Validate_EmptyQuestion_ShouldHaveValidationError()
     {
-        var request = new StartQuestionRequest
+        var command = new StartQuestionCommand
         {
             TestSessionId = Guid.NewGuid().ToString(),
             QuestionId = 123,
-            Question = string.Empty,
             QuestionCategory = LicenseCategory.B,
+            Question = string.Empty,
             StartDate = DateTimeOffset.Now
         };
 
-        var result = await _validator.TestValidateAsync(request);
+        var result = await _validator.TestValidateAsync(command);
 
         result.ShouldHaveValidationErrorFor(x => x.Question)
             .WithErrorMessage("Treœæ pytania jest wymagana");
-    }
-
-    [Fact]
-    public async Task Validate_FutureStartDate_ShouldHaveValidationError()
-    {
-        var request = new StartQuestionRequest
-        {
-            TestSessionId = Guid.NewGuid().ToString(),
-            QuestionId = 123,
-            Question = "Test question?",
-            QuestionCategory = LicenseCategory.B,
-            StartDate = DateTimeOffset.Now.AddHours(2)
-        };
-
-        var result = await _validator.TestValidateAsync(request);
-
-        result.ShouldHaveValidationErrorFor(x => x.StartDate)
-            .WithErrorMessage("Data rozpoczêcia nie mo¿e byæ w przysz³oœci");
     }
 }

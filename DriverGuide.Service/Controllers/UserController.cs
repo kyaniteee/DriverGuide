@@ -1,5 +1,6 @@
-﻿using DriverGuide.Application.Models;
-using DriverGuide.Application.Requests;
+﻿using DriverGuide.Application.Commands;
+using DriverGuide.Application.Queries;
+using DriverGuide.Application.Models;
 using DriverGuide.Domain.Interfaces;
 using DriverGuide.Domain.Models;
 using MediatR;
@@ -26,14 +27,14 @@ public class UserController(IMediator mediator, IUserRepository userReposiotory,
     }
 
     [HttpPost(nameof(Register))]
-    public async Task<IActionResult> Register(CreateUserRequest request)
+    public async Task<IActionResult> Register(CreateUserCommand command)
     {
-        if (request == null)
+        if (command == null)
             return BadRequest("Request cannot be null.");
 
         try
         {
-            var result = await mediator.Send(request);
+            var result = await mediator.Send(command);
             return Ok(new { userId = result, message = "Rejestracja zakończona sukcesem" });
         }
         catch (FluentValidation.ValidationException ex)
@@ -61,14 +62,14 @@ public class UserController(IMediator mediator, IUserRepository userReposiotory,
     }
 
     [HttpPost(nameof(Login))]
-    public async Task<IActionResult> Login(LoginUserRequest request)
+    public async Task<IActionResult> Login(LoginUserQuery query)
     {
-        if (request == null)
+        if (query == null)
             return BadRequest("Request cannot be null.");
 
         try
         {
-            var result = await mediator.Send(request);
+            var result = await mediator.Send(query);
             return Ok(new { token = result });
         }
         catch (Exception ex)

@@ -1,12 +1,10 @@
-using DriverGuide.Application.Requests;
-using DriverGuide.Domain.Enums;
+using DriverGuide.Application.Commands;
 using DriverGuide.Domain.Interfaces;
 using DriverGuide.Domain.Models;
 using FluentAssertions;
-using MediatR;
 using NSubstitute;
 
-namespace DriverGuide.Tests.Application.Requests.QuestionAnswer;
+namespace DriverGuide.Tests.Application.Commands.QuestionAnswer;
 
 public class BulkAnswersHandlerTests
 {
@@ -20,96 +18,97 @@ public class BulkAnswersHandlerTests
     }
 
     [Fact]
-    public async Task Handle_ValidRequest_ShouldUpdateAllAnswers()
+    public async Task Handle_ValidCommand_ShouldUpdateAllAnswers()
     {
         var testSessionId = Guid.NewGuid().ToString();
         var answers = new List<BulkAnswerItem>
         {
-            new BulkAnswerItem
-            {
-                QuestionId = 1,
-                UserQuestionAnswer = "A",
-                EndDate = DateTimeOffset.Now
-            },
-            new BulkAnswerItem
-            {
-                QuestionId = 2,
-                UserQuestionAnswer = "B",
-                EndDate = DateTimeOffset.Now
-            }
+            new BulkAnswerItem { QuestionId = 1, UserQuestionAnswer = "A", EndDate = DateTimeOffset.Now },
+            new BulkAnswerItem { QuestionId = 2, UserQuestionAnswer = "B", EndDate = DateTimeOffset.Now }
         };
 
-        var request = new BulkAnswersRequest
+        var command = new BulkAnswersCommand
         {
             TestSessionId = testSessionId,
             Answers = answers
         };
 
-        var existingAnswer1 = new DriverGuide.Domain.Models.QuestionAnswer
+        var questionAnswer1 = new DriverGuide.Domain.Models.QuestionAnswer
         {
             QuestionAnswerId = Guid.NewGuid().ToString(),
             TestSessionId = testSessionId,
             QuestionId = 1
         };
 
-        var existingAnswer2 = new DriverGuide.Domain.Models.QuestionAnswer
+        var questionAnswer2 = new DriverGuide.Domain.Models.QuestionAnswer
         {
             QuestionAnswerId = Guid.NewGuid().ToString(),
             TestSessionId = testSessionId,
             QuestionId = 2
         };
 
-        _questionAnswerRepository.GetAsync(Arg.Any<System.Linq.Expressions.Expression<Func<DriverGuide.Domain.Models.QuestionAnswer, bool>>>())
-            .Returns(Task.FromResult<DriverGuide.Domain.Models.QuestionAnswer?>(existingAnswer1),
-                     Task.FromResult<DriverGuide.Domain.Models.QuestionAnswer?>(existingAnswer2));
+        _questionAnswerRepository.GetAsync(
+            Arg.Is<System.Linq.Expressions.Expression<System.Func<DriverGuide.Domain.Models.QuestionAnswer, bool>>>(
+                expr => expr.Compile()(questionAnswer1)))
+            .Returns(Task.FromResult<DriverGuide.Domain.Models.QuestionAnswer?>(questionAnswer1));
 
-        var result = await _handler.Handle(request, CancellationToken.None);
+        _questionAnswerRepository.GetAsync(
+            Arg.Is<System.Linq.Expressions.Expression<System.Func<DriverGuide.Domain.Models.QuestionAnswer, bool>>>(
+                expr => expr.Compile()(questionAnswer2)))
+            .Returns(Task.FromResult<DriverGuide.Domain.Models.QuestionAnswer?>(questionAnswer2));
 
-        result.Should().Be(Unit.Value);
+        await _handler.Handle(command, CancellationToken.None);
+
+        questionAnswer1.UserQuestionAnswer.Should().Be("A");
+        questionAnswer2.UserQuestionAnswer.Should().Be("B");
         await _questionAnswerRepository.Received(2).UpdateAsync(Arg.Any<DriverGuide.Domain.Models.QuestionAnswer>());
     }
 
     [Fact]
-    public async Task Handle_AnswerNotFound_ShouldSkipUpdate()
+    public async Task Handle_AnswerNotFound_ShouldSkipThatAnswer()
     {
         var testSessionId = Guid.NewGuid().ToString();
         var answers = new List<BulkAnswerItem>
         {
-            new BulkAnswerItem
-            {
-                QuestionId = 999,
-                UserQuestionAnswer = "A",
-                EndDate = DateTimeOffset.Now
-            }
+            new BulkAnswerItem { QuestionId = 1, UserQuestionAnswer = "A", EndDate = DateTimeOffset.Now },
+            new BulkAnswerItem { QuestionId = 999, UserQuestionAnswer = "B", EndDate = DateTimeOffset.Now }
         };
 
-        var request = new BulkAnswersRequest
+        var command = new BulkAnswersCommand
         {
             TestSessionId = testSessionId,
             Answers = answers
         };
 
-        _questionAnswerRepository.GetAsync(Arg.Any<System.Linq.Expressions.Expression<Func<DriverGuide.Domain.Models.QuestionAnswer, bool>>>())
-            .Returns(Task.FromResult<DriverGuide.Domain.Models.QuestionAnswer?>(null));
+        var questionAnswer1 = new DriverGuide.Domain.Models.QuestionAnswer
+        {
+            QuestionAnswerId = Guid.NewGuid().ToString(),
+            TestSessionId = testSessionId,
+            QuestionId = 1
+        };
 
-        var result = await _handler.Handle(request, CancellationToken.None);
+        _questionAnswerRepository.GetAsync(Arg.Any<System.Linq.Expressions.Expression<System.Func<DriverGuide.Domain.Models.QuestionAnswer, bool>>>())
+            .Returns(
+                callInfo => Task.FromResult<DriverGuide.Domain.Models.QuestionAnswer?>(questionAnswer1),
+                callInfo => Task.FromResult<DriverGuide.Domain.Models.QuestionAnswer?>(null)
+            );
 
-        result.Should().Be(Unit.Value);
-        await _questionAnswerRepository.DidNotReceive().UpdateAsync(Arg.Any<DriverGuide.Domain.Models.QuestionAnswer>());
+        await _handler.Handle(command, CancellationToken.None);
+
+        await _questionAnswerRepository.Received(1).UpdateAsync(Arg.Any<DriverGuide.Domain.Models.QuestionAnswer>());
     }
 
     [Fact]
-    public async Task Handle_EmptyAnswersList_ShouldCompleteSuccessfully()
+    public async Task Handle_EmptyAnswersList_ShouldNotUpdateAnything()
     {
-        var request = new BulkAnswersRequest
+        var command = new BulkAnswersCommand
         {
             TestSessionId = Guid.NewGuid().ToString(),
             Answers = new List<BulkAnswerItem>()
         };
 
-        var result = await _handler.Handle(request, CancellationToken.None);
+        await _handler.Handle(command, CancellationToken.None);
 
-        result.Should().Be(Unit.Value);
         await _questionAnswerRepository.DidNotReceive().UpdateAsync(Arg.Any<DriverGuide.Domain.Models.QuestionAnswer>());
     }
 }

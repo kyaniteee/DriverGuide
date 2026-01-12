@@ -1,11 +1,11 @@
-using DriverGuide.Application.Requests;
+using DriverGuide.Application.Commands;
 using DriverGuide.Domain.Enums;
 using DriverGuide.Domain.Interfaces;
 using DriverGuide.Domain.Models;
 using FluentAssertions;
 using NSubstitute;
 
-namespace DriverGuide.Tests.Application.Requests.QuestionAnswer;
+namespace DriverGuide.Tests.Application.Commands.QuestionAnswer;
 
 public class StartQuestionHandlerTests
 {
@@ -19,9 +19,9 @@ public class StartQuestionHandlerTests
     }
 
     [Fact]
-    public async Task Handle_ValidRequest_ShouldCreateQuestionAnswerAndReturnGuid()
+    public async Task Handle_ValidCommand_ShouldCreateQuestionAnswerAndReturnGuid()
     {
-        var request = new StartQuestionRequest
+        var command = new StartQuestionCommand
         {
             TestSessionId = Guid.NewGuid().ToString(),
             QuestionId = 123,
@@ -35,23 +35,23 @@ public class StartQuestionHandlerTests
         _questionAnswerRepository.CreateAsync(Arg.Any<DriverGuide.Domain.Models.QuestionAnswer>())
             .Returns(Task.FromResult(new DriverGuide.Domain.Models.QuestionAnswer()));
 
-        var result = await _handler.Handle(request, CancellationToken.None);
+        var result = await _handler.Handle(command, CancellationToken.None);
 
         result.Should().NotBeEmpty();
         await _questionAnswerRepository.Received(1).CreateAsync(
             Arg.Is<DriverGuide.Domain.Models.QuestionAnswer>(qa => 
-                qa.TestSessionId == request.TestSessionId &&
-                qa.QuestionId == request.QuestionId &&
-                qa.QuestionCategory == request.QuestionCategory &&
-                qa.QuestionText == request.Question &&
-                qa.CorrectQuestionAnswer == request.CorrectQuestionAnswer &&
-                qa.QuestionLanguage == request.QuestionLanguage));
+                qa.TestSessionId == command.TestSessionId &&
+                qa.QuestionId == command.QuestionId &&
+                qa.QuestionCategory == command.QuestionCategory &&
+                qa.QuestionText == command.Question &&
+                qa.CorrectQuestionAnswer == command.CorrectQuestionAnswer &&
+                qa.QuestionLanguage == command.QuestionLanguage));
     }
 
     [Fact]
     public async Task Handle_NullCorrectAnswer_ShouldCreateWithNullCorrectAnswer()
     {
-        var request = new StartQuestionRequest
+        var command = new StartQuestionCommand
         {
             TestSessionId = Guid.NewGuid().ToString(),
             QuestionId = 123,
@@ -65,7 +65,7 @@ public class StartQuestionHandlerTests
         _questionAnswerRepository.CreateAsync(Arg.Any<DriverGuide.Domain.Models.QuestionAnswer>())
             .Returns(Task.FromResult(new DriverGuide.Domain.Models.QuestionAnswer()));
 
-        var result = await _handler.Handle(request, CancellationToken.None);
+        var result = await _handler.Handle(command, CancellationToken.None);
 
         result.Should().NotBeEmpty();
         await _questionAnswerRepository.Received(1).CreateAsync(

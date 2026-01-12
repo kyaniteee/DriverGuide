@@ -1,9 +1,0 @@
-using MediatR;
-
-namespace DriverGuide.Application.Requests;
-
-public class CompleteTestSessionRequest : IRequest<bool>
-{
-    public string TestSessionId { get; set; } = string.Empty;
-    public double Result { get; set; }
-}

@@ -1,10 +1,10 @@
-using DriverGuide.Application.Requests;
+using DriverGuide.Application.Commands;
 using DriverGuide.Domain.Interfaces;
 using DriverGuide.Domain.Models;
 using FluentAssertions;
 using NSubstitute;
 
-namespace DriverGuide.Tests.Application.Requests.TestSession;
+namespace DriverGuide.Tests.Application.Commands.TestSession;
 
 public class CompleteTestSessionHandlerTests
 {
@@ -18,10 +18,10 @@ public class CompleteTestSessionHandlerTests
     }
 
     [Fact]
-    public async Task Handle_ValidRequest_ShouldCompleteTestSession()
+    public async Task Handle_ValidCommand_ShouldCompleteTestSession()
     {
         var testSessionId = Guid.NewGuid().ToString();
-        var request = new CompleteTestSessionRequest
+        var command = new CompleteTestSessionCommand
         {
             TestSessionId = testSessionId,
             Result = 85.5
@@ -38,7 +38,7 @@ public class CompleteTestSessionHandlerTests
         _testSessionRepository.GetAsync(Arg.Any<System.Linq.Expressions.Expression<Func<DriverGuide.Domain.Models.TestSession, bool>>>())
             .Returns(Task.FromResult<DriverGuide.Domain.Models.TestSession?>(existingSession));
 
-        var result = await _handler.Handle(request, CancellationToken.None);
+        var result = await _handler.Handle(command, CancellationToken.None);
 
         result.Should().BeTrue();
         existingSession.EndDate.Should().NotBeNull();
@@ -49,7 +49,7 @@ public class CompleteTestSessionHandlerTests
     [Fact]
     public async Task Handle_TestSessionNotFound_ShouldReturnFalse()
     {
-        var request = new CompleteTestSessionRequest
+        var command = new CompleteTestSessionCommand
         {
             TestSessionId = Guid.NewGuid().ToString(),
             Result = 85.5
@@ -58,7 +58,7 @@ public class CompleteTestSessionHandlerTests
         _testSessionRepository.GetAsync(Arg.Any<System.Linq.Expressions.Expression<Func<DriverGuide.Domain.Models.TestSession, bool>>>())
             .Returns(Task.FromResult<DriverGuide.Domain.Models.TestSession?>(null));
 
-        var result = await _handler.Handle(request, CancellationToken.None);
+        var result = await _handler.Handle(command, CancellationToken.None);
 
         result.Should().BeFalse();
         await _testSessionRepository.DidNotReceive().UpdateAsync(Arg.Any<DriverGuide.Domain.Models.TestSession>());
@@ -68,7 +68,7 @@ public class CompleteTestSessionHandlerTests
     public async Task Handle_ResultIsZero_ShouldCompleteWithZeroResult()
     {
         var testSessionId = Guid.NewGuid().ToString();
-        var request = new CompleteTestSessionRequest
+        var command = new CompleteTestSessionCommand
         {
             TestSessionId = testSessionId,
             Result = 0
@@ -85,7 +85,7 @@ public class CompleteTestSessionHandlerTests
         _testSessionRepository.GetAsync(Arg.Any<System.Linq.Expressions.Expression<Func<DriverGuide.Domain.Models.TestSession, bool>>>())
             .Returns(Task.FromResult<DriverGuide.Domain.Models.TestSession?>(existingSession));
 
-        var result = await _handler.Handle(request, CancellationToken.None);
+        var result = await _handler.Handle(command, CancellationToken.None);
 
         result.Should().BeTrue();
         existingSession.Result.Should().Be(0);

@@ -1,7 +1,7 @@
-using DriverGuide.Application.Requests;
+using DriverGuide.Application.Queries;
 using FluentValidation.TestHelper;
 
-namespace DriverGuide.Tests.Application.Requests.User;
+namespace DriverGuide.Tests.Application.Queries.User;
 
 /// <summary>
 /// Klasa testowa dla LoginUserValidator.
@@ -30,15 +30,15 @@ public class LoginUserValidatorTests
     /// U¿ywa danych testowych spe³niaj¹cych wszystkie regu³y (min. d³ugoœæ).
     /// </remarks>
     [Fact]
-    public async Task Validate_ValidRequest_ShouldNotHaveValidationError()
+    public async Task Validate_ValidQuery_ShouldNotHaveValidationError()
     {
-        var request = new LoginUserRequest
+        var query = new LoginUserQuery
         {
             Login = "validuser",
             Password = "ValidPassword123"
         };
 
-        var result = await _validator.TestValidateAsync(request);
+        var result = await _validator.TestValidateAsync(query);
 
         result.ShouldNotHaveAnyValidationErrors();
     }
@@ -60,13 +60,13 @@ public class LoginUserValidatorTests
     [InlineData("ab", "Login musi mieæ co najmniej 3 znaki")]
     public async Task Validate_InvalidLogin_ShouldHaveValidationError(string login, string expectedError)
     {
-        var request = new LoginUserRequest
+        var query = new LoginUserQuery
         {
             Login = login,
             Password = "ValidPassword"
         };
 
-        var result = await _validator.TestValidateAsync(request);
+        var result = await _validator.TestValidateAsync(query);
 
         result.ShouldHaveValidationErrorFor(x => x.Login)
             .WithErrorMessage(expectedError);
@@ -89,13 +89,13 @@ public class LoginUserValidatorTests
     [InlineData("short", "Has³o musi mieæ co najmniej 6 znaków")]
     public async Task Validate_InvalidPassword_ShouldHaveValidationError(string password, string expectedError)
     {
-        var request = new LoginUserRequest
+        var query = new LoginUserQuery
         {
             Login = "validuser",
             Password = password
         };
 
-        var result = await _validator.TestValidateAsync(request);
+        var result = await _validator.TestValidateAsync(query);
 
         result.ShouldHaveValidationErrorFor(x => x.Password)
             .WithErrorMessage(expectedError);

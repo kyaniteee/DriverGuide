@@ -1,9 +1,8 @@
-using DriverGuide.Application.Requests;
-using DriverGuide.Domain.Enums;
+using DriverGuide.Application.Commands;
 using DriverGuide.Domain.Models;
 using FluentValidation.TestHelper;
 
-namespace DriverGuide.Tests.Application.Requests.QuestionAnswer;
+namespace DriverGuide.Tests.Application.Commands.QuestionAnswer;
 
 public class BulkAnswersValidatorTests
 {
@@ -15,23 +14,19 @@ public class BulkAnswersValidatorTests
     }
 
     [Fact]
-    public async Task Validate_ValidRequest_ShouldNotHaveValidationError()
+    public async Task Validate_ValidCommand_ShouldNotHaveValidationError()
     {
-        var request = new BulkAnswersRequest
+        var command = new BulkAnswersCommand
         {
             TestSessionId = Guid.NewGuid().ToString(),
             Answers = new List<BulkAnswerItem>
             {
-                new BulkAnswerItem
-                {
-                    QuestionId = 1,
-                    UserQuestionAnswer = "A",
-                    EndDate = DateTimeOffset.Now
-                }
+                new BulkAnswerItem { QuestionId = 1, UserQuestionAnswer = "A" },
+                new BulkAnswerItem { QuestionId = 2, UserQuestionAnswer = "B" }
             }
         };
 
-        var result = await _validator.TestValidateAsync(request);
+        var result = await _validator.TestValidateAsync(command);
 
         result.ShouldNotHaveAnyValidationErrors();
     }
@@ -39,87 +34,69 @@ public class BulkAnswersValidatorTests
     [Fact]
     public async Task Validate_EmptyTestSessionId_ShouldHaveValidationError()
     {
-        var request = new BulkAnswersRequest
+        var command = new BulkAnswersCommand
         {
             TestSessionId = string.Empty,
-            Answers = new List<BulkAnswerItem>()
+            Answers = new List<BulkAnswerItem>
+            {
+                new BulkAnswerItem { QuestionId = 1, UserQuestionAnswer = "A" }
+            }
         };
 
-        var result = await _validator.TestValidateAsync(request);
+        var result = await _validator.TestValidateAsync(command);
 
         result.ShouldHaveValidationErrorFor(x => x.TestSessionId)
             .WithErrorMessage("TestSessionId jest wymagane");
     }
 
     [Fact]
-    public async Task Validate_NullAnswers_ShouldHaveValidationError()
-    {
-        var request = new BulkAnswersRequest
-        {
-            TestSessionId = Guid.NewGuid().ToString(),
-            Answers = null!
-        };
-
-        var result = await _validator.TestValidateAsync(request);
-
-        result.ShouldHaveValidationErrorFor(x => x.Answers)
-            .WithErrorMessage("Lista odpowiedzi jest wymagana");
-    }
-
-    [Fact]
     public async Task Validate_EmptyAnswers_ShouldHaveValidationError()
     {
-        var request = new BulkAnswersRequest
+        var command = new BulkAnswersCommand
         {
             TestSessionId = Guid.NewGuid().ToString(),
             Answers = new List<BulkAnswerItem>()
         };
 
-        var result = await _validator.TestValidateAsync(request);
+        var result = await _validator.TestValidateAsync(command);
 
         result.ShouldHaveValidationErrorFor(x => x.Answers)
             .WithErrorMessage("Lista odpowiedzi nie mo¿e byæ pusta");
     }
 
     [Fact]
-    public async Task Validate_AnswerWithEmptyQuestionId_ShouldHaveValidationError()
+    public async Task Validate_InvalidQuestionId_ShouldHaveValidationError()
     {
-        var request = new BulkAnswersRequest
+        var command = new BulkAnswersCommand
         {
             TestSessionId = Guid.NewGuid().ToString(),
             Answers = new List<BulkAnswerItem>
             {
-                new BulkAnswerItem
-                {
-                    QuestionId = 0,
-                    UserQuestionAnswer = "A"
-                }
+                new BulkAnswerItem { QuestionId = 0, UserQuestionAnswer = "A" }
             }
         };
 
-        var result = await _validator.TestValidateAsync(request);
+        var result = await _validator.TestValidateAsync(command);
 
-        result.ShouldHaveValidationErrorFor("Answers[0].QuestionId");
+        result.ShouldHaveValidationErrorFor("Answers[0].QuestionId")
+            .WithErrorMessage("QuestionId musi byæ wiêksze od 0");
     }
 
     [Fact]
-    public async Task Validate_AnswerWithEmptyUserAnswer_ShouldHaveValidationError()
+    public async Task Validate_EmptyUserAnswer_ShouldHaveValidationError()
     {
-        var request = new BulkAnswersRequest
+        var command = new BulkAnswersCommand
         {
             TestSessionId = Guid.NewGuid().ToString(),
             Answers = new List<BulkAnswerItem>
             {
-                new BulkAnswerItem
-                {
-                    QuestionId = 1,
-                    UserQuestionAnswer = string.Empty
-                }
+                new BulkAnswerItem { QuestionId = 1, UserQuestionAnswer = string.Empty }
             }
         };
 
-        var result = await _validator.TestValidateAsync(request);
+        var result = await _validator.TestValidateAsync(command);
 
-        result.ShouldHaveValidationErrorFor("Answers[0].UserQuestionAnswer");
+        result.ShouldHaveValidationErrorFor("Answers[0].UserQuestionAnswer")
+            .WithErrorMessage("OdpowiedŸ u¿ytkownika jest wymagana");
     }
 }

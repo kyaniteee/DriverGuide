@@ -1,5 +1,5 @@
-﻿using DriverGuide.Application.Queries;
-using DriverGuide.Application.Requests;
+﻿using DriverGuide.Application.Commands;
+using DriverGuide.Application.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,16 +10,16 @@ namespace DriverGuide.Service.Controllers;
 public class TestSessionController(IMediator mediator) : ControllerBase
 {
     [HttpPost("Create")]
-    public async Task<IActionResult> CreateTestSession([FromBody] CreateTestSessionRequest request)
+    public async Task<IActionResult> CreateTestSession([FromBody] CreateTestSessionCommand command)
     {
-        var sessionId = await mediator.Send(request);
+        var sessionId = await mediator.Send(command);
         return Ok(sessionId);
     }
 
     [HttpPost("Complete")]
-    public async Task<IActionResult> CompleteTestSession([FromBody] CompleteTestSessionRequest request)
+    public async Task<IActionResult> CompleteTestSession([FromBody] CompleteTestSessionCommand command)
     {
-        var result = await mediator.Send(request);
+        var result = await mediator.Send(command);
         return result ? Ok() : NotFound("Test session not found");
     }
 

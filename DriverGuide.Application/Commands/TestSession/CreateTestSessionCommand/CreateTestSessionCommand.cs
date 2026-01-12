@@ -1,16 +1,11 @@
-﻿using MediatR;
+using MediatR;
+using DriverGuide.Domain.Enums;
 
 namespace DriverGuide.Application.Commands;
 
-/// <summary>
-/// Command tworzenia nowej sesji testowej dla użytkownika.
-/// Reprezentuje intencję rozpoczęcia testu egzaminacyjnego.
-/// </summary>
 public class CreateTestSessionCommand : IRequest<Guid>
 {
-    /// <summary>
-    /// Identyfikator użytkownika rozpoczynającego sesję testową.
-    /// Może być null dla użytkowników niezalogowanych (tryb gościa).
-    /// </summary>
-    public string? UserId { get; set; }
+    public DateTimeOffset StartDate { get; set; }
+    public LicenseCategory Category { get; set; }
+    public Guid? UserId { get; set; }
 }
